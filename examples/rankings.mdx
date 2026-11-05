@@ -1,0 +1,25 @@
+---
+title: Rankings
+sidebar_position: 7
+description: A standings table that replays three rounds, one Next at a time, moving each row to its new place.
+---
+
+import OGrafExample from '@site/src/components/OGrafExample';
+
+<OGrafExample slug="rankings" />
+
+A leaderboard for sport and elections. Press **Next step** and the package moves to its next round:
+every row keeps its identity and slides to its new position.
+
+## How it's built
+
+- **Runtime collection:** one row is designed once, then repeated for each entry in the `standings`
+  array. Rows are keyed by `id` and sorted by `points`.
+- **Steps:** the graphic has three steps, so a controller's Next button walks through them.
+- **Rules:** each step fires a rule that sets the round's standings inside the graphic.
+- **Fields:** the title and the full standings array, which a data feed can replace at any time.
+
+## Make it yours
+
+- Replace the rounds in the **Table panel** layer's rules, or drive `standings` from your own feed.
+- Change `sortPath` to rank by another value, or set `pageSize` to page through a longer table.

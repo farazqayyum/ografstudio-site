@@ -1,0 +1,32 @@
+---
+title: Scoreboard
+sidebar_position: 3
+description: Goal buttons, a match clock and a leader highlight that all run inside the graphic.
+---
+
+import OGrafExample from '@site/src/components/OGrafExample';
+
+<OGrafExample slug="scoreboard" />
+
+A compact two-team score bug for live sport. Change a score in the form and the graphic updates
+while it stays on air.
+
+## Try it
+
+Above the canvas, open **+ Recipe…** and choose **Scoreboard**.
+
+## What you get
+
+- **Layers:** a striped shader panel, the team names, both scores and a divider, all ordinary
+  editable layers.
+- **Actions:** Home +1 and Away +1 change the score inside the graphic; the match clock has its own
+  Start, Pause, Reset and Restart.
+- **Rules:** the leading score turns gold by comparing the two score fields.
+- **Fields:** team names, scores, team colours and period.
+- **Motion:** an entrance and an exit you can retime on the timeline.
+
+## Make it yours
+
+- Add a **Color** field per team and bind each side of the panel to it.
+- Add a **Clock / Timer** recipe for match time.
+- Test your longest team names with **Run broadcast QA** in **Preview & Export** before match day.

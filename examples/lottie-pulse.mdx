@@ -1,0 +1,27 @@
+---
+title: Lottie pulse
+sidebar_position: 9
+description: A small looping Lottie animation for checking your playout environment.
+---
+
+import OGrafExample from '@site/src/components/OGrafExample';
+
+<OGrafExample slug="lottie-pulse" />
+
+A blue circle that grows and shrinks every two seconds, using only features Studio supports. Use it
+to check that Lottie layers play in your renderer before you bring in bigger animations.
+
+## Try it
+
+1. Download [pulse.json](pathname:///downloads/pulse.json).
+2. Choose **+ Lottie JSON** above the canvas and pick the file.
+3. Preview it in **Preview & Export**, then export and play it in your renderer.
+
+## What to check
+
+- It loops continuously while on air. Change its speed in **Properties**.
+- Seeking in non-realtime preview always lands on the same frame.
+- Export Lottie files from a current Bodymovin or LottieFiles version. Very old files whose keyframes
+  have no easing handles can render as a solid block instead of the animation.
+- Your own Lottie files should embed images as data URIs and use alpha mattes; expressions, luma
+  mattes and external files aren't supported. See the [user guide](/docs/user-guide#lottie-animations).

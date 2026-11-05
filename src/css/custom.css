@@ -1,0 +1,183 @@
+/* Site-wide theme. Infima variables drive Docusaurus; --site-* tokens are this site's own. */
+
+/* The type of ograf.ebu.io: Plus Jakarta Sans throughout, Space Mono for labels and code. */
+@import '@fontsource/plus-jakarta-sans/latin-400.css';
+@import '@fontsource/plus-jakarta-sans/latin-500.css';
+@import '@fontsource/plus-jakarta-sans/latin-600.css';
+@import '@fontsource/plus-jakarta-sans/latin-700.css';
+@import '@fontsource/plus-jakarta-sans/latin-800.css';
+@import '@fontsource/space-mono/latin-400.css';
+@import '@fontsource/space-mono/latin-700.css';
+
+:root {
+  --site-font-display: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --site-font-mono: 'Space Mono', 'Courier New', monospace;
+  /* OGraf blue, from the OGraf wordmark. */
+  --ifm-color-primary: #2352c3;
+  --ifm-color-primary-dark: #1f4ab0;
+  --ifm-color-primary-darker: #1e46a6;
+  --ifm-color-primary-darkest: #183a89;
+  --ifm-color-primary-light: #2f5fd8;
+  --ifm-color-primary-lighter: #3a67da;
+  --ifm-color-primary-lightest: #5a80e0;
+  --ifm-code-font-size: 92%;
+  --ifm-font-family-base: var(--site-font-display);
+  --ifm-font-family-monospace: var(--site-font-mono);
+  --ifm-heading-font-family: var(--site-font-display);
+  --ifm-heading-font-weight: 700;
+  --ifm-background-color: #fff;
+  --ifm-background-surface-color: #fff;
+  --ifm-line-height-base: 1.6;
+  --ifm-navbar-height: 3.75rem;
+  --docusaurus-highlighted-code-line-bg: rgb(0 0 0 / 10%);
+
+  --site-border: #e3e7ef;
+  --site-surface: #f6f8fc;
+  --site-muted: #5b6478;
+  --site-chip: #e8eefb;
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #6f97ff;
+  --ifm-color-primary-dark: #4f80ff;
+  --ifm-color-primary-darker: #3f74ff;
+  --ifm-color-primary-darkest: #0f52ff;
+  --ifm-color-primary-light: #8fadff;
+  --ifm-color-primary-lighter: #9fb9ff;
+  --ifm-color-primary-lightest: #cfdcff;
+  --ifm-background-color: #080c18;
+  --ifm-background-surface-color: #0b101e;
+  --ifm-footer-background-color: #060913;
+  --docusaurus-highlighted-code-line-bg: rgb(0 0 0 / 30%);
+
+  --site-border: #1d2538;
+  --site-surface: #0f1524;
+  --site-muted: #9aa5bd;
+  --site-chip: #18213a;
+}
+
+/* Plus Jakarta Sans has narrow word spaces, and tight tracking narrows them further. */
+body {
+  word-spacing: 0.04em;
+}
+
+h1,
+h2,
+h3 {
+  word-spacing: 0.07em;
+}
+
+.footer--dark {
+  --ifm-footer-background-color: #060913;
+}
+
+.footer__copyright {
+  max-width: 52rem;
+  margin: 0 auto;
+  color: #8f9ab3;
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.footer__copyright a {
+  color: #b9c8ee;
+}
+
+/* Navbar: the OGraf wordmark carries the brand, "Studio" follows it. */
+.navbar--dark {
+  --ifm-navbar-background-color: rgb(6 9 19 / 94%);
+  --ifm-navbar-shadow: none;
+}
+
+.navbar {
+  border-bottom: 1px solid rgb(255 255 255 / 10%);
+}
+
+.navbar__title {
+  font-family: var(--site-font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.navbar__link {
+  font-size: 0.94rem;
+  font-weight: 500;
+}
+
+/* Docs and posts share the display type, set tight the way ograf.ebu.io sets it. */
+.markdown h1,
+.markdown h2,
+.markdown h3,
+.hero__title {
+  letter-spacing: -0.02em;
+}
+
+.markdown > h1 {
+  --ifm-h1-font-size: 2.6rem;
+  line-height: 1.12;
+}
+
+.markdown > h2 {
+  --ifm-h2-font-size: 1.75rem;
+}
+
+.markdown > h3 {
+  --ifm-h3-font-size: 1.3rem;
+}
+
+.navbar__logo {
+  margin-right: 0.4rem;
+}
+
+.navbar-download {
+  margin-right: 0.35rem;
+  padding: 0.2rem 0.85rem;
+  border-radius: 3px;
+  background: #fff;
+  color: #070c1c !important;
+  font-family: var(--site-font-display);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.navbar-download:hover {
+  background: #6f97ff;
+}
+
+/* The external-link arrow doesn't suit a button. */
+.navbar-download svg {
+  display: none;
+}
+
+.header-github-link {
+  display: flex;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-github-link::before {
+  width: 22px;
+  height: 22px;
+  background-color: currentColor;
+  content: '';
+  mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12'/%3E%3C/svg%3E")
+    no-repeat center / contain;
+}
+
+.header-github-link:hover {
+  opacity: 0.7;
+}
+
+/* Example and guide screenshots. */
+.markdown img {
+  border: 1px solid var(--site-border);
+  border-radius: 6px;
+}
+
+.navbar {
+  backdrop-filter: blur(10px);
+}

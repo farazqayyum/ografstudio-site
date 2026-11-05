@@ -1,0 +1,32 @@
+---
+title: Countdown
+sidebar_position: 5
+description: Start, Pause, Reset and Restart buttons, overtime, and an alarm the graphic fires itself.
+---
+
+import OGrafExample from '@site/src/components/OGrafExample';
+
+<OGrafExample slug="countdown" />
+
+A countdown for quiz rounds, breaks and live events. It starts when the graphic is taken in, warns
+in the last five seconds and shows when time is up. Use **Replay** to run it again.
+
+## Try it
+
+Above the canvas, open **+ Recipe…** and choose **Countdown**.
+
+## What you get
+
+- **Layers:** a panel, a label, the timer, and the five-second warning and time-up messages.
+- **Timer:** a Clock / Timer element counting down from 30 seconds in `mm:ss`. It starts
+  automatically when the graphic goes on air and pauses while it's off air.
+- **Alarms:** visual rules switch to the warning at five seconds and to the time-up state at zero.
+- **Actions:** Start, Pause, Reset and Restart, published in the manifest for any controller.
+- **Alarms:** a rule fires at five seconds and another at zero, with no controller involved.
+- **Fields:** title, duration, overtime, warning on or off, and warning colour.
+
+## Make it yours
+
+- Change the start time and format in **Properties → Clock / Timer**.
+- Edit or add alarms there too; **Edit rule** opens each alarm's rule in **Rules**.
+- Switch the source to **Manual** to drive the remaining time from a data field instead.

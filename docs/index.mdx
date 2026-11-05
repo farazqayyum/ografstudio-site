@@ -1,0 +1,31 @@
+---
+title: Documentation
+sidebar_label: Overview
+sidebar_position: 1
+slug: /
+description: Reference documentation for OGraf Studio, the open-source editor for EBU OGraf broadcast graphics.
+---
+
+import info from '@site/src/data/importInfo.json';
+
+OGraf Studio is an open-source, browser-based editor for EBU OGraf-compatible HTML5 graphics:
+lower thirds, scoreboards, tickers, full-screen graphics and reusable templates.
+
+New to Studio? Start with the [how-to guides](/guides). They walk through installing Studio,
+building a first graphic and exporting it for playout. The pages below are the full reference.
+
+| Page | What it covers |
+| --- | --- |
+| [User guide](/docs/user-guide) | File types, images, SVG and Lottie, patterns, effects, shader fills, editing and preview |
+| [AI authoring](/docs/ai-authoring) | The built-in AI Assistant, external MCP clients and the `ograf-authoring` skill |
+| [Development](/docs/development) | Running from source, the MCP server, standalone executables and verification |
+| [Third-party credits](/docs/third-party) | Licences for the OGraf logo and other bundled assets |
+
+:::note[Where these pages come from]
+
+The reference pages are imported from the <a href={info.repository}>OGraf Studio repository</a> (<code>{info.ref}</code>,
+commit <a href={`${info.repository}/commit/${info.commit}`}><code>{info.commit.slice(0, 7)}</code></a>),
+so they always describe the latest stable release, OGraf Studio {info.latestRelease}. To suggest a
+change, edit the source document on GitHub using the link at the bottom of each page.
+
+:::

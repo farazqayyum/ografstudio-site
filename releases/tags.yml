@@ -1,0 +1,6 @@
+release:
+  label: Release
+  description: Stable OGraf Studio releases.
+release-candidate:
+  label: Release candidate
+  description: Pre-release builds for testing before a stable release.

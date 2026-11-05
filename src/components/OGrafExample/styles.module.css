@@ -1,0 +1,216 @@
+.example {
+  margin: 0 0 2rem;
+  overflow: hidden;
+  border: 1px solid var(--site-border);
+  border-radius: 6px;
+  background: var(--site-surface);
+}
+
+/* Graphics are transparent. PlayerBackdrop sets what shows through; this is the first paint. */
+.frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: conic-gradient(#1d2028 25%, #2a2d36 0 50%, #1d2028 0 75%, #2a2d36 0) 0 0 / 24px 24px;
+}
+
+.viewport {
+  position: absolute;
+  inset: 0;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+/* A plate keeps messages readable on any background the visitor picks. */
+.overlay p {
+  max-width: 32rem;
+  margin: 0;
+  padding: 0.45rem 0.85rem;
+  border-radius: 4px;
+  background: rgb(5 7 13 / 85%);
+  color: #e6ebf7;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--site-border);
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.buttons :global(.button) {
+  border-radius: 3px;
+  font-family: var(--site-font-display);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.status {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+  color: var(--site-muted);
+  font-family: var(--site-font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.status::before {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 2px;
+  background: var(--site-muted);
+  content: '';
+}
+
+.status[data-status='on-air']::before {
+  background: #ff4238;
+  box-shadow: 0 0 10px rgb(255 66 56 / 80%);
+}
+
+.status[data-status='error']::before {
+  background: #f0a020;
+}
+
+/* The form sits on top of its invisible sizer, so the sizer alone can set the height. */
+.dataStack {
+  display: grid;
+}
+
+.dataStack > .data {
+  grid-area: 1 / 1;
+  min-width: 0;
+  align-content: start;
+}
+
+.dataSizer {
+  visibility: hidden;
+}
+
+.noData {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--site-muted);
+  font-size: 0.9rem;
+}
+
+.data {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--example-field-width, 220px), 1fr));
+  gap: 0.75rem 1.25rem;
+  margin: 0;
+  padding: 0.9rem 1rem 1.1rem;
+  border: 0;
+  border-top: 1px solid var(--site-border);
+}
+
+.data:disabled {
+  opacity: 0.55;
+}
+
+.data legend {
+  grid-column: 1 / -1;
+  float: left;
+  width: 100%;
+  margin-bottom: 0.25rem;
+  padding: 0;
+  color: var(--site-muted);
+  font-family: var(--site-font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* One row of the form, whatever the column count. */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  grid-column: 1 / -1;
+  gap: 0.5rem;
+}
+
+.actions :global(.button) {
+  border-radius: 3px;
+  font-family: var(--site-font-display);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.field label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.field input[type='text'],
+.field input[type='number'],
+.field select {
+  width: 100%;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid var(--site-border);
+  border-radius: 3px;
+  background: var(--ifm-background-color);
+  color: var(--ifm-font-color-base);
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.field input[type='color'] {
+  width: 3rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid var(--site-border);
+  border-radius: 3px;
+  background: none;
+}
+
+.field input[type='checkbox'] {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.range {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.range input[type='range'] {
+  flex: 1;
+  min-width: 0;
+}
+
+.range input[type='number'] {
+  width: 5.5rem;
+}
+
+.caption {
+  padding: 0.65rem 1rem;
+  border-top: 1px solid var(--site-border);
+  color: var(--site-muted);
+  font-size: 0.82rem;
+}

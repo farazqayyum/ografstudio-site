@@ -1,0 +1,12 @@
+announcement:
+  label: Announcement
+  description: News about the OGraf Studio project.
+release:
+  label: Release
+  description: Posts about new OGraf Studio versions.
+awards:
+  label: Awards
+  description: Recognition for OGraf Studio.
+website:
+  label: Website
+  description: News about ografstudio.org.

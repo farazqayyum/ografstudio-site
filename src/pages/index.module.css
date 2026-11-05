@@ -1,0 +1,625 @@
+/* Homepage: a dark control-room stage in both colour modes. */
+
+.home {
+  --home-bg: #060913;
+  --home-raised: #0a0f1f;
+  --home-line: rgb(255 255 255 / 11%);
+  --home-text: #dfe6f7;
+  --home-muted: #93a1c1;
+  --home-accent: #6f97ff;
+  --home-tally: #ff4238;
+  background: var(--home-bg);
+  color: var(--home-text);
+}
+
+.container {
+  width: 100%;
+  max-width: 1560px;
+  margin: 0 auto;
+  padding: 0 2.5rem;
+}
+
+/* Hero: the headline row, then the reel, all inside the first screen. */
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: 1.25rem 0 1.75rem;
+  background:
+    radial-gradient(1100px 620px at 78% 62%, rgb(38 88 220 / 24%), transparent 70%),
+    var(--home-bg);
+}
+
+/* The stage's height sets the hero's width (16:9 stage, 19.5rem rundown, gap and gutters), so the
+   headline, the reel and the bar under it fit in the window. That's 520px on a 1080p screen. */
+.heroInner {
+  --stage-height: max(21.5rem, min(max(32.5rem, 48vh), 100vh - 22rem));
+  position: relative;
+  width: 100%;
+  max-width: calc(var(--stage-height) * 16 / 9 + 19.5rem + 0.75rem + 5rem);
+  margin: 0 auto;
+  padding: 0 2.5rem;
+  container-type: inline-size;
+}
+
+.heroHead {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 23rem);
+  gap: 1.5rem 2.5rem;
+  align-items: end;
+  margin-bottom: 1.1rem;
+}
+
+.eyebrow,
+.sectionLabel {
+  margin: 0 0 0.5rem;
+  color: var(--home-accent);
+  font-family: var(--site-font-mono);
+  font-size: 0.76rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.heroTitle {
+  margin: 0;
+  color: #fff;
+  font-family: var(--site-font-display);
+  /* Sized so the longer line, about 13em wide, fills the column beside the 23rem lead. */
+  font-size: clamp(2.2rem, calc((100cqi - 25.5rem) / 13), 4.1rem);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.08;
+  text-wrap: balance;
+}
+
+.heroLead {
+  margin: 0 0 1rem;
+  color: #c4cee4;
+  font-size: 1.04rem;
+  line-height: 1.5;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.buttonPrimary,
+.buttonGhost {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1.15rem;
+  border: 1px solid #fff;
+  border-radius: 3px;
+  font-family: var(--site-font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.4;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.buttonPrimary {
+  background: #fff;
+  color: #070c1c;
+}
+
+.buttonPrimary:hover {
+  border-color: var(--home-accent);
+  background: var(--home-accent);
+  color: #070c1c;
+  text-decoration: none;
+}
+
+.buttonGhost {
+  border-color: rgb(255 255 255 / 34%);
+  background: transparent;
+  color: #fff;
+}
+
+.buttonGhost:hover {
+  border-color: #fff;
+  background: rgb(255 255 255 / 8%);
+  color: #fff;
+  text-decoration: none;
+}
+
+/* Proof strip: four facts between hairlines. */
+.proof {
+  border-top: 1px solid var(--home-line);
+  border-bottom: 1px solid var(--home-line);
+  background: var(--home-raised);
+}
+
+.proofInner {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr 1fr 1.15fr;
+  max-width: 1560px;
+  margin: 0 auto;
+  padding: 0 2.5rem;
+}
+
+.proofInner > * {
+  margin: 0;
+  padding: 1rem 1.5rem;
+  border-left: 1px solid var(--home-line);
+  color: var(--home-muted);
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+
+.proofInner > *:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.proofInner strong {
+  display: block;
+  color: #fff;
+  font-family: var(--site-font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.proofAward {
+  display: flex;
+  gap: 0.9rem;
+  align-items: center;
+}
+
+.proofAward:hover {
+  color: #fff;
+  text-decoration: none;
+}
+
+.proofAward img {
+  width: 54px;
+  height: auto;
+}
+
+/* Sections. */
+.section {
+  padding: 5.5rem 0;
+}
+
+.sectionTight {
+  padding: 2.5rem 0;
+}
+
+.sectionDark {
+  border-top: 1px solid var(--home-line);
+  border-bottom: 1px solid var(--home-line);
+  background: #03050c;
+}
+
+.sectionTitle {
+  margin: 0;
+  color: #fff;
+  font-family: var(--site-font-display);
+  font-size: clamp(1.9rem, 3vw, 2.9rem);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.12;
+}
+
+.sectionLead {
+  max-width: 38rem;
+  margin: 1rem 0 0;
+  color: #b5c1dc;
+  font-size: 1.1rem;
+  line-height: 1.55;
+}
+
+.textLink {
+  display: inline-block;
+  margin-top: 1.25rem;
+  color: #fff;
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: rgb(255 255 255 / 35%);
+  text-underline-offset: 4px;
+}
+
+.textLink:hover {
+  color: var(--home-accent);
+  text-decoration-color: currentColor;
+}
+
+/* Take the controls. */
+/* Its column is sized so the player, its controls and its form all fit in a 1080p browser window
+   without scrolling. The form reserves room for the longest example, so switching doesn't move the page. */
+.live {
+  /* This section is dark in both colour modes, so the player's form takes the dark palette in both.
+     Keep these in step with [data-theme='dark'] in custom.css. */
+  color-scheme: dark;
+  --ifm-background-color: #080c18;
+  --ifm-font-color-base: #e3e3e3;
+  --ifm-font-color-base-inverse: #000;
+  --ifm-color-primary: #6f97ff;
+  --ifm-color-primary-dark: #4f80ff;
+  --ifm-color-primary-darker: #3f74ff;
+  --ifm-color-primary-darkest: #0f52ff;
+  --ifm-color-primary-light: #8fadff;
+  --ifm-color-primary-lighter: #9fb9ff;
+  --ifm-color-primary-lightest: #cfdcff;
+  --ifm-link-color: #6f97ff;
+  --ifm-link-hover-color: #8fadff;
+  --site-border: #1d2538;
+  --site-surface: #0f1524;
+  --site-muted: #9aa5bd;
+  --site-chip: #18213a;
+  --example-field-width: 170px;
+  display: grid;
+  grid-template-columns: minmax(0, 13fr) minmax(0, 17fr);
+  gap: 3.5rem;
+  align-items: start;
+}
+
+.live figure {
+  margin: 0;
+}
+
+.live :global(.button--primary) {
+  --ifm-button-color: #000;
+}
+
+/* Stacked in one cell at the longest summary's height, so the link under it stays put. */
+.liveNowStack {
+  display: grid;
+  margin-top: 1rem;
+}
+
+.liveNow {
+  grid-area: 1 / 1;
+  margin: 0;
+  color: var(--home-text);
+  font-size: 0.98rem;
+  line-height: 1.5;
+}
+
+.liveNowSizer {
+  visibility: hidden;
+}
+
+/* The examples as sources on a switcher, with a tally on the one on air. */
+.sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.source {
+  display: inline-flex;
+  flex: none;
+  gap: 0.3rem;
+  align-items: center;
+  padding: 0.3rem 0.5rem 0.3rem 0.4rem;
+  border: 1px solid var(--home-line);
+  border-radius: 3px;
+  background: var(--home-raised);
+  color: var(--home-text);
+  cursor: pointer;
+  font-family: var(--site-font-display);
+  font-size: 0.76rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.source:hover {
+  border-color: #fff;
+  color: #fff;
+}
+
+.source:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+}
+
+.source i {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 2px;
+  background: #2b3550;
+}
+
+.source[aria-pressed='true'] {
+  border-color: rgb(255 255 255 / 34%);
+  background: #15203f;
+  color: #fff;
+}
+
+.source[aria-pressed='true'] i {
+  background: var(--home-tally);
+  box-shadow: 0 0 8px rgb(255 66 56 / 80%);
+}
+
+/* Running order: a typographic list instead of a grid of cards. */
+.spec {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+  gap: 3.5rem;
+  align-items: start;
+}
+
+.specHead {
+  position: sticky;
+  top: calc(var(--ifm-navbar-height) + 2rem);
+}
+
+.specList {
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--home-line);
+  list-style: none;
+}
+
+.specList li {
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 15rem) minmax(0, 1fr);
+  gap: 0.5rem 1.25rem;
+  align-items: baseline;
+  margin: 0;
+  padding: 1.15rem 0;
+  border-bottom: 1px solid var(--home-line);
+  transition: background 0.15s ease;
+}
+
+.specNumber {
+  color: var(--home-muted);
+  font-family: var(--site-font-mono);
+  font-size: 0.74rem;
+}
+
+.specList h3 {
+  margin: 0;
+  color: #fff;
+  font-family: var(--site-font-display);
+  font-size: 1.12rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.specList p {
+  margin: 0;
+  color: #b5c1dc;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* Timeline: three segments on a ruler, keyed the way Studio keys Start, Step and End. */
+.timeline {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 2.5rem 0 0;
+  padding: 1.4rem 0 0;
+  background:
+    repeating-linear-gradient(90deg, rgb(255 255 255 / 22%) 0 1px, transparent 1px 1.5%) top / 100%
+      8px no-repeat,
+    linear-gradient(rgb(255 255 255 / 22%), rgb(255 255 255 / 22%)) top / 100% 1px no-repeat;
+  list-style: none;
+}
+
+.timeline li {
+  margin: 0;
+  padding-right: 3rem;
+}
+
+.timelineKey {
+  display: inline-flex;
+  gap: 0.55rem;
+  align-items: center;
+  margin-bottom: 0.9rem;
+  color: var(--home-accent);
+  font-family: var(--site-font-mono);
+  font-size: 0.76rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.timelineKey i {
+  width: 0.7rem;
+  height: 0.7rem;
+  transform: rotate(45deg);
+  background: var(--home-accent);
+}
+
+.timeline h3 {
+  margin: 0 0 0.5rem;
+  color: #fff;
+  font-family: var(--site-font-display);
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.timeline p {
+  margin: 0;
+  color: #b5c1dc;
+  font-size: 1.03rem;
+  line-height: 1.5;
+}
+
+/* Newsroom. */
+.news {
+  margin: 2rem 0 0;
+  padding: 0;
+  border-top: 1px solid var(--home-line);
+  list-style: none;
+}
+
+.news li {
+  margin: 0;
+  border-bottom: 1px solid var(--home-line);
+}
+
+.news a {
+  display: grid;
+  grid-template-columns: 11rem minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: baseline;
+  padding: 1.05rem 0.25rem;
+  color: #fff;
+  transition: padding-left 0.15s ease;
+}
+
+.news a:hover {
+  padding-left: 0.75rem;
+  color: var(--home-accent);
+  text-decoration: none;
+}
+
+.news strong {
+  font-family: var(--site-font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+}
+
+.newsKicker {
+  color: var(--home-muted);
+  font-family: var(--site-font-mono);
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Closing call to action. */
+.cta {
+  padding: 6.5rem 0;
+  border-top: 1px solid var(--home-line);
+  background:
+    radial-gradient(900px 420px at 18% 100%, rgb(38 88 220 / 34%), transparent 70%),
+    #03050c;
+}
+
+.ctaTitle {
+  max-width: 62rem;
+  margin: 0 0 1rem;
+  color: #fff;
+  font-family: var(--site-font-display);
+  font-size: clamp(2.4rem, 5.2vw, 4.75rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.06;
+  text-wrap: balance;
+}
+
+.cta p {
+  margin-bottom: 1.5rem;
+  color: #c4cee4;
+  font-size: 1.15rem;
+}
+
+@media (max-width: 1100px) {
+  /* Stacked, the reel takes the full width, as HeroReel's own breakpoint does. */
+  .heroInner {
+    max-width: none;
+  }
+
+  .heroTitle {
+    font-size: clamp(2.2rem, 7cqi, 4.1rem);
+  }
+
+  .heroHead,
+  .live,
+  .spec {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .specHead {
+    position: static;
+  }
+
+  .proofInner {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .proofInner > * {
+    border-top: 1px solid var(--home-line);
+  }
+
+  .proofInner > *:nth-child(-n + 2) {
+    border-top: 0;
+  }
+
+  .proofInner > *:nth-child(odd) {
+    padding-left: 0;
+    border-left: 0;
+  }
+}
+
+@media (max-width: 700px) {
+  .container,
+  .heroInner {
+    padding: 0 1rem;
+  }
+
+  .proofInner {
+    padding: 0 1rem;
+  }
+
+  .section {
+    padding: 3.5rem 0;
+  }
+
+  /* One line you can swipe along, edge to edge, rather than four rows above the player. */
+  .sources {
+    flex-wrap: nowrap;
+    margin-right: -1rem;
+    margin-left: -1rem;
+    padding: 0 1rem 0.1rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .sources::-webkit-scrollbar {
+    display: none;
+  }
+
+  .timeline {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2rem;
+  }
+
+  .timeline li {
+    padding-right: 0;
+  }
+
+  .specList li {
+    grid-template-columns: 2.25rem minmax(0, 1fr);
+  }
+
+  .specList p {
+    grid-column: 2;
+  }
+
+  .news a {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .newsKicker {
+    grid-column: 1 / -1;
+  }
+
+  .cta {
+    padding: 4rem 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .news a,
+  .source {
+    transition: none;
+  }
+}

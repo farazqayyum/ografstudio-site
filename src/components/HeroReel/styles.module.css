@@ -1,0 +1,720 @@
+/* The feature reel: one live OGraf package, a rundown beside it and a status bar under it. */
+
+.reel {
+  --reel-line: rgb(255 255 255 / 12%);
+  --reel-muted: #93a1c1;
+  --reel-tally: #ff4238;
+  --reel-preview: #2fe6a8;
+}
+
+.fallback {
+  height: var(--stage-height);
+  background: #0a0f1f;
+}
+
+.deck {
+  display: grid;
+  grid-template-columns: 19.5rem minmax(0, 1fr);
+  gap: 0.75rem;
+}
+
+/* The left column: the rundown over the controls. The picture sets its height. */
+.console {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+  min-height: 0;
+}
+
+.consoleHead {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 0.2rem;
+}
+
+.consoleTitle {
+  color: var(--reel-muted);
+  font-family: var(--site-font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.fold {
+  display: grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.35rem;
+  padding: 0;
+  border: 1px solid var(--reel-line);
+  border-radius: 3px;
+  background: transparent;
+  color: #dfe6f7;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.fold:hover {
+  border-color: #fff;
+  color: #fff;
+}
+
+.fold:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+}
+
+.fold svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.controls {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 6px;
+  background: #0a0f1f;
+  box-shadow: 0 0 0 1px var(--reel-line);
+  color: var(--reel-muted);
+}
+
+.toggles {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  gap: 0.3rem;
+}
+
+.toggle {
+  display: inline-flex;
+  gap: 0.28rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3rem 0.1rem;
+  border: 1px solid var(--reel-line);
+  border-radius: 3px;
+  background: transparent;
+  color: #dfe6f7;
+  cursor: pointer;
+  font-family: var(--site-font-mono);
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.toggle:hover {
+  border-color: #fff;
+  color: #fff;
+}
+
+.toggle:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+}
+
+.toggle i {
+  flex: none;
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 2px;
+  background: #4a5573;
+}
+
+/* Only the folded menu uses the icons. */
+.toggleIcon {
+  display: none;
+  width: 1rem;
+  height: 1rem;
+}
+
+.toggle[aria-pressed='true'] {
+  background: #15203f;
+  color: #fff;
+}
+
+.toggle[aria-pressed='true'] i {
+  background: var(--reel-tally);
+  box-shadow: 0 0 8px rgb(255 66 56 / 80%);
+}
+
+.stage {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  border-radius: 6px;
+  background: #0a0f1f;
+  box-shadow:
+    0 0 0 1px var(--reel-line),
+    0 40px 120px rgb(38 88 220 / 28%);
+}
+
+.poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.5s ease;
+}
+
+.posterHidden {
+  opacity: 0;
+}
+
+.viewport {
+  position: absolute;
+  inset: 0;
+}
+
+/* Viewfinder marks, 24 px in from each edge of the 1920x1080 canvas at any stage size. The ticker
+   band fits them: SAFE and BAND in carousel/build.mjs have to match. Each 1px line sits just outside
+   that edge, so the marks frame the band's corners instead of drawing over them. */
+.corner {
+  position: absolute;
+  z-index: 1;
+  width: 1.1rem;
+  height: 1.1rem;
+  border: 0 solid #fff;
+  mix-blend-mode: difference;
+  pointer-events: none;
+}
+
+.cornerTL {
+  top: calc(2.2222% - 1px);
+  left: calc(1.25% - 1px);
+  border-width: 1px 0 0 1px;
+}
+
+.cornerTR {
+  top: calc(2.2222% - 1px);
+  right: calc(1.25% - 1px);
+  border-width: 1px 1px 0 0;
+}
+
+.cornerBL {
+  bottom: calc(2.2222% - 1px);
+  left: calc(1.25% - 1px);
+  border-width: 0 0 1px 1px;
+}
+
+.cornerBR {
+  right: calc(1.25% - 1px);
+  bottom: calc(2.2222% - 1px);
+  border-width: 0 1px 1px 0;
+}
+
+.playOverlay {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  padding: 0.75rem 1.4rem;
+  transform: translate(-50%, -50%);
+  border: 0;
+  border-radius: 4px;
+  background: #fff;
+  color: #070c1c;
+  cursor: pointer;
+  font-family: var(--site-font-display);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/* Things only the visitor can start, because browsers ask first: sound and the webcam. */
+.stageChip {
+  position: absolute;
+  z-index: 2;
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+  padding: 0.35rem 0.7rem 0.35rem 0.5rem;
+  border: 0;
+  border-radius: 4px;
+  background: #fff;
+  color: #070c1c;
+  cursor: pointer;
+  font-family: var(--site-font-display);
+  font-size: 0.82rem;
+  font-weight: 700;
+  box-shadow: 0 0 0 0 rgb(255 255 255 / 55%);
+  /* An edge of its own, so a white chip still shows on a white background. */
+  filter: drop-shadow(0 1px 4px rgb(3 7 18 / 60%));
+  animation: stage-chip-pulse 1.8s ease-out infinite;
+}
+
+.stageChip:focus-visible {
+  outline: 2px solid var(--reel-tally);
+  outline-offset: 2px;
+}
+
+.stageChip svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+@keyframes stage-chip-pulse {
+  to {
+    box-shadow: 0 0 0 0.9rem rgb(255 255 255 / 0%);
+  }
+}
+
+.soundChip {
+  top: 1.1rem;
+  left: 1.1rem;
+}
+
+/* In the corner of the monitor, which runs to 92.9% across and starts 8.7% down the canvas. */
+.cameraChip {
+  top: calc(8.7% + 0.6rem);
+  right: calc(7.1% + 0.6rem);
+}
+
+.chipShort {
+  display: none;
+}
+
+.errorNote {
+  position: absolute;
+  z-index: 2;
+  right: 1rem;
+  bottom: 0.75rem;
+  left: 1rem;
+  margin: 0;
+  padding: 0.35rem 0.7rem;
+  border-radius: 4px;
+  background: rgb(5 7 13 / 85%);
+  color: #fff;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* The rundown: one row per slide, like the running order on a gallery monitor. */
+.rundown {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: 1px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 6px;
+  background: var(--reel-line);
+  box-shadow: 0 0 0 1px var(--reel-line);
+  list-style: none;
+}
+
+.rundown li {
+  display: flex;
+  flex: 1 1 0;
+  min-height: 0;
+  margin: 0;
+}
+
+/* The row on air takes the height its description needs; the others share what's left. */
+.rundown li.rowActive {
+  flex: 0 0 auto;
+}
+
+.cue {
+  position: relative;
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, auto);
+  column-gap: 0.35rem;
+  align-content: center;
+  width: 100%;
+  padding: calc(var(--stage-height, 32rem) * 0.012) 0.9rem calc(var(--stage-height, 32rem) * 0.014) 0.75rem;
+  overflow: hidden;
+  border: 0;
+  background: #0a0f1f;
+  color: #dfe6f7;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition: background 0.2s ease;
+}
+
+.cue:hover {
+  background: #111a33;
+}
+
+.cue:focus-visible {
+  z-index: 1;
+  outline: 2px solid #fff;
+  outline-offset: -2px;
+}
+
+.cueNumber {
+  padding-top: 0.3rem;
+  color: var(--reel-muted);
+  font-family: var(--site-font-mono);
+  font-size: 0.72rem;
+}
+
+.cueName {
+  font-family: var(--site-font-display);
+  font-size: clamp(0.95rem, calc(var(--stage-height, 32rem) * 0.033), 1.14rem);
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  line-height: 1.25;
+  word-spacing: 0.07em;
+}
+
+.cueShort {
+  display: none;
+}
+
+/* Only the row on air explains itself; the others keep the rundown scannable. */
+.cueLine {
+  display: block;
+  grid-column: 2;
+  max-height: 0;
+  overflow: hidden;
+  color: #b5c1dc;
+  font-size: 0.76rem;
+  line-height: 1.4;
+  opacity: 0;
+  transition:
+    max-height 0.35s ease,
+    opacity 0.35s ease;
+}
+
+.cueActive {
+  background: #15203f;
+  color: #fff;
+}
+
+.cueActive:hover {
+  background: #15203f;
+}
+
+.cueActive::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 3px;
+  background: var(--reel-tally);
+  content: '';
+}
+
+.cueActive .cueNumber {
+  color: var(--reel-tally);
+}
+
+.cueActive .cueLine {
+  max-height: 6rem;
+  margin-top: 0.15rem;
+  opacity: 1;
+}
+
+.cueProgress {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  transform-origin: left;
+  animation-name: cue-progress;
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+  background: var(--reel-tally);
+}
+
+@keyframes cue-progress {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.mobileLine {
+  display: none;
+}
+
+/* Status bar under the deck. */
+.status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.1rem;
+  align-items: center;
+  padding: 0.7rem 0.15rem 0;
+  color: var(--reel-muted);
+  font-size: 0.86rem;
+}
+
+.tally {
+  display: inline-flex;
+  gap: 0.45rem;
+  align-items: center;
+  font-family: var(--site-font-mono);
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tally i {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 2px;
+  background: #4a5573;
+}
+
+.tallyOn {
+  color: #fff;
+}
+
+.tallyOn i {
+  background: var(--reel-tally);
+  box-shadow: 0 0 10px rgb(255 66 56 / 80%);
+}
+
+.timecode {
+  color: #dfe6f7;
+  font-family: var(--site-font-mono);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.statusNote {
+  margin-left: auto;
+}
+
+.statusNote a {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Folded to the left: the menu becomes a rail of slide numbers and icons, and the picture takes the
+   room, up to the height that still keeps the bar under it in the window. */
+@media (min-width: 1101px) {
+  .deck {
+    transition: grid-template-columns 0.22s ease;
+  }
+
+  .deckFolded {
+    grid-template-columns: 3rem minmax(0, calc(max(var(--stage-height, 32rem), 100vh - 22rem) * 16 / 9));
+    justify-content: center;
+  }
+
+  .deckFolded .consoleHead {
+    justify-content: center;
+    padding-left: 0;
+  }
+
+  .deckFolded .consoleTitle,
+  .deckFolded .cueName,
+  .deckFolded .cueLine,
+  .deckFolded .backgrounds,
+  .deckFolded .toggle i {
+    display: none;
+  }
+
+  .deckFolded .fold {
+    width: 100%;
+  }
+
+  .deckFolded .cue {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 0;
+    text-align: center;
+  }
+
+  .deckFolded .cueNumber {
+    padding-top: 0;
+    font-size: 0.78rem;
+  }
+
+  /* Every number is a row of its own here, so the one on air doesn't need extra height. */
+  .deckFolded .rundown li.rowActive {
+    flex: 1 1 0;
+  }
+
+  .deckFolded .controls {
+    padding: 0.3rem;
+  }
+
+  .deckFolded .toggles {
+    grid-auto-flow: row;
+  }
+
+  .deckFolded .toggle {
+    padding: 0.22rem 0;
+  }
+
+  .deckFolded .toggleIcon {
+    display: block;
+  }
+
+  .deckFolded .toggleLabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .deckFolded .toggle[aria-pressed='true'] {
+    color: var(--reel-tally);
+  }
+}
+
+@media (max-width: 1100px) {
+  .fallback {
+    height: auto;
+    aspect-ratio: 16 / 9;
+  }
+
+  .deck {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* There's nothing to fold when the menu is already a row under the picture. */
+  .consoleHead {
+    display: none;
+  }
+
+  /* The picture goes back on top, with the controls under it. */
+  .stage {
+    order: -1;
+  }
+
+  .controls {
+    flex-flow: row wrap;
+    gap: 0.5rem 1rem;
+    align-items: center;
+  }
+
+  .toggles {
+    flex: 1 1 15rem;
+  }
+
+  /* The rundown becomes a row of switcher buttons under the picture. */
+  .rundown {
+    display: grid;
+    flex: none;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .cue {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-content: start;
+    padding: 0.55rem 0.25rem 0.65rem;
+    text-align: center;
+  }
+
+  .cueActive::before {
+    top: 0;
+    right: 0;
+    bottom: auto;
+    width: auto;
+    height: 3px;
+  }
+
+  .cueNumber {
+    padding-top: 0;
+  }
+
+  .cueName {
+    font-size: 0.95rem;
+  }
+
+  .cueLong,
+  .cueLine {
+    display: none;
+  }
+
+  .cueShort {
+    display: inline;
+  }
+
+  .mobileLine {
+    display: block;
+    margin: 0.75rem 0.15rem 0;
+    color: #c4cee4;
+    font-size: 0.95rem;
+    line-height: 1.45;
+  }
+
+  .statusNote {
+    margin-left: 0;
+    flex-basis: 100%;
+  }
+}
+
+/* Six names won't fit across a phone, so the switcher becomes two rows of three. */
+@media (max-width: 560px) {
+  .rundown {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .cue {
+    padding: 0.5rem 0.15rem 0.6rem;
+  }
+
+  .cueName {
+    font-size: 0.88rem;
+  }
+}
+
+/* On a phone the monitor is narrower than the full wording. */
+@media (max-width: 700px) {
+  .stageChip {
+    gap: 0.25rem;
+    padding: 0.15rem 0.4rem 0.15rem 0.3rem;
+    font-size: 0.68rem;
+  }
+
+  .stageChip svg {
+    width: 0.9rem;
+    height: 0.9rem;
+  }
+
+  .soundChip {
+    top: 0.5rem;
+    left: 0.5rem;
+  }
+
+  .cameraChip {
+    top: calc(8.7% + 0.25rem);
+    right: calc(7.1% + 0.25rem);
+  }
+
+  .chipLong {
+    display: none;
+  }
+
+  .chipShort {
+    display: inline;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stageChip {
+    animation: none;
+  }
+
+  .cueLine,
+  .cue,
+  .deck,
+  .poster {
+    transition: none;
+  }
+}

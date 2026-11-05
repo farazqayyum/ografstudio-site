@@ -1,0 +1,42 @@
+---
+title: Shader background
+sidebar_position: 8
+description: Animated GLSL bands with speed, tint and glow controls for the operator.
+---
+
+import OGrafExample from '@site/src/components/OGrafExample';
+
+<OGrafExample slug="shader-background" />
+
+A moving full-frame background drawn by a shader. Its speed, tint and glow are controls in
+Properties and fields in the operator's form.
+
+## Try it
+
+1. Download [wave-bands.glsl](pathname:///downloads/wave-bands.glsl).
+2. Draw a **Rectangle** the size of the composition.
+3. In **Properties**, set **Fill** to **Shader** and load the file.
+
+## How it works
+
+The shader marks three constants with `#pragma ograf`, which Studio turns into controls and data
+fields:
+
+```glsl
+#pragma ograf speed slider min(0) max(4) step(0.1)
+const float speed = 1.0;
+#pragma ograf tint color
+const vec3 tint = vec3(0.14, 0.32, 0.76);
+#pragma ograf glow toggle
+const bool glow = true;
+```
+
+The rest is an ordinary Shadertoy-style `mainImage` function that uses `iTime` and `iResolution`.
+Because Studio drives `iTime` from composition time, the background seeks to the same frame every
+time, which frame-based renderers depend on.
+
+## Make it yours
+
+- Animate **speed** or **tint** on the timeline with **+ Property → Fill shader**.
+- Put the same shader on a text layer's **Outline** for a moving border.
+- The [shader guide](/guides/shader-background) explains every pragma type and what's supported.
