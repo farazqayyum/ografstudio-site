@@ -1,7 +1,8 @@
-import type {ReactNode} from 'react';
+import {useState, type ReactNode} from 'react';
 import Link from '@docusaurus/Link';
 import useBaseUrl from '@docusaurus/useBaseUrl';
-import {examples, type Example} from '@site/src/data/examples';
+import ExampleTags from '@site/src/components/ExampleTags';
+import {EXAMPLE_LEVELS, examples, type Example, type ExampleLevel} from '@site/src/data/examples';
 import styles from './styles.module.css';
 
 function ExampleCard({example}: {example: Example}): ReactNode {
@@ -13,23 +14,48 @@ function ExampleCard({example}: {example: Example}): ReactNode {
       <div className={styles.body}>
         <h3 className={styles.title}>{example.title}</h3>
         <p className={styles.summary}>{example.summary}</p>
-        <ul className={styles.tags} aria-label="Tags">
-          {example.tags.map((tag) => (
-            <li key={tag}>{tag}</li>
-          ))}
-        </ul>
+        <ExampleTags slug={example.slug} />
       </div>
     </Link>
   );
 }
 
-export default function ExampleGallery({limit}: {limit?: number}): ReactNode {
-  const shown = limit ? examples.slice(0, limit) : examples;
+// Simplest first, keeping the listed order within each level.
+const byLevel = [...examples].sort(
+  (a, b) => EXAMPLE_LEVELS.indexOf(a.level) - EXAMPLE_LEVELS.indexOf(b.level),
+);
+
+export default function ExampleGallery(): ReactNode {
+  const [level, setLevel] = useState<ExampleLevel | null>(null);
+  const choices: {label: string; value: ExampleLevel | null; count: number}[] = [
+    {label: 'All', value: null, count: examples.length},
+    ...EXAMPLE_LEVELS.map((value) => ({
+      label: value,
+      value,
+      count: examples.filter((example) => example.level === value).length,
+    })),
+  ];
   return (
-    <div className={styles.grid}>
-      {shown.map((example) => (
-        <ExampleCard key={example.slug} example={example} />
-      ))}
-    </div>
+    <>
+      <div className={styles.filter} role="group" aria-label="Filter examples by level">
+        {choices.map((choice) => (
+          <button
+            key={choice.label}
+            type="button"
+            className={styles.choice}
+            aria-pressed={level === choice.value}
+            onClick={() => setLevel(choice.value)}>
+            {choice.label} <span>{choice.count}</span>
+          </button>
+        ))}
+      </div>
+      <div className={styles.grid}>
+        {byLevel
+          .filter((example) => !level || example.level === level)
+          .map((example) => (
+            <ExampleCard key={example.slug} example={example} />
+          ))}
+      </div>
+    </>
   );
 }

@@ -1,0 +1,10 @@
+{
+  "label": "Transitions",
+  "position": 10,
+  "link": {
+    "type": "generated-index",
+    "title": "Transitions",
+    "description": "Decide how the templates of a set go on and off air together.",
+    "slug": "/user-guide/transitions"
+  }
+}

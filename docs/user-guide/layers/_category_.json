@@ -1,0 +1,10 @@
+{
+  "label": "Layers and content",
+  "position": 4,
+  "link": {
+    "type": "generated-index",
+    "title": "Layers and content",
+    "description": "What you can put on the canvas, from images and text to charts, tickers and clocks.",
+    "slug": "/user-guide/layers"
+  }
+}

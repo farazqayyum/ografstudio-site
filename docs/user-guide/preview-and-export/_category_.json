@@ -1,0 +1,10 @@
+{
+  "label": "Preview and export",
+  "position": 11,
+  "link": {
+    "type": "generated-index",
+    "title": "Preview and export",
+    "description": "Check a graphic the way playout will show it, then deliver it.",
+    "slug": "/user-guide/preview-and-export"
+  }
+}

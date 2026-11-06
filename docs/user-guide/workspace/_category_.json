@@ -1,0 +1,10 @@
+{
+  "label": "Studio workspace",
+  "position": 2,
+  "link": {
+    "type": "generated-index",
+    "title": "Studio workspace",
+    "description": "Arrange Studio, find your way around it and keep track of your work.",
+    "slug": "/user-guide/workspace"
+  }
+}

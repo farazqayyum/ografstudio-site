@@ -46,7 +46,7 @@ save go to `Documents\OGraf Studio\Projects` unless you choose another folder wi
 ## Run from source
 
 Use this when you want to change Studio itself or follow the `dev` branch. You need
-[Node.js](https://nodejs.org/) 22 or newer, npm and [Bun](https://bun.sh/).
+[Node.js](https://nodejs.org/) 22 or newer, npm and [Bun](https://bun.sh/) 1.3.11.
 
 ```bash
 git clone https://github.com/zerodensity/ograf-studio.git

@@ -21,13 +21,13 @@ Step, and the exit plays from the last Step to End.
 
 ## Play and step through the timeline
 
-- **Pause at Steps** is on by default, so playback stops at each Step. Turn it off for continuous
+- **Stop at Steps** is on by default, so playback stops at each Step. Turn it off for continuous
   playback.
 - With the timeline focused, **Space** plays and pauses, and **Left/Right Arrow** steps one frame.
 
 ## Make keyframes
 
-Turn on **Auto-keyframe**, next to **Pause at Steps**, to create keys as you edit. Move the playhead,
+Turn on **Auto-keyframe**, next to **Stop at Steps**, to create keys as you edit. Move the playhead,
 then change a property in **Properties** or on the canvas, and Studio adds a key at that frame. You
 can also double-click the timeline or use its context menu to insert keys.
 
@@ -41,6 +41,12 @@ you open or create a project.
 Every property has its own track. Expand a layer in **Timeline** and use **+ Property** to add a
 track, for example for a shader control. Select a property and use its **Loop** section to repeat
 values while the graphic is on air, and preview the loop before you rely on it.
+
+## Quicker motion
+
+Select layers and use **Animate In / Out** to add a Fade, Slide, Fly or Focus entrance and exit. The
+presets write ordinary keyframes that you can edit afterwards. Text layers also have their own
+[animation presets](/docs/user-guide/animation/text-animation), such as Typewriter and Word reveal.
 
 ## Next steps
 

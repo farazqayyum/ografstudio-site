@@ -61,4 +61,4 @@ under **Rendering → Image input**. Extra channels, video, buffer passes, audio
 aren't supported. The playout renderer must support WebGL 2.
 
 A shader can also run as an effect in **Properties → Effects stack**, where `iChannel0` is the layer
-itself. The [user guide](/docs/user-guide#shader-fills) covers both modes in detail.
+itself. The [user guide](/docs/user-guide/paint-and-effects/shader-fills) covers both modes in detail.

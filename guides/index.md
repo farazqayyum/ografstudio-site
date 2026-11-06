@@ -6,8 +6,8 @@ slug: /
 description: Step-by-step guides for building broadcast graphics with OGraf Studio.
 ---
 
-Each guide takes one task from start to finish. They follow the latest stable release; the
-[documentation](/docs) has the complete reference.
+Each guide takes one task from start to finish. They follow the same version as the
+[documentation](/docs), which has the complete reference.
 
 ## Getting started
 
@@ -30,6 +30,17 @@ Each guide takes one task from start to finish. They follow the latest stable re
 - [Export and test an OGraf package](/guides/export): produce a checked `.ograf.zip` and test it in
   your player.
 - [Share projects from GitHub](/guides/share-from-github): open `.ogs` projects straight from a URL.
+
+## Going further
+
+The [user guide](/docs/user-guide) covers these in full:
+
+- [Transitions](/docs/user-guide/transitions/overview): how the templates of a set go on and off air together.
+- [Visual rules](/docs/user-guide/data/visual-rules): graphics that respond to data, clicks, taps and hover.
+- [Charts](/docs/user-guide/layers/charts): Chart.js layers driven by your data.
+- [Media Cues](/docs/user-guide/media/media-cues): clips and live sources inside a graphic.
+- [Plugins](/docs/user-guide/plugins/plugins-pane): add [shaders](/docs/shader-plugins),
+  [animations](/docs/animation-plugins) and [renderers](/docs/renderer-plugins).
 
 ## Working with AI
 

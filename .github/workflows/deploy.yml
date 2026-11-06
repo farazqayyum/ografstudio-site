@@ -27,8 +27,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Import documentation and release notes
-        run: npm run import:docs
+      # docs/ and releases/ are committed. They come from a build newer than the public repository, so
+      # importing here would put the older public documents back. See "Documentation" in the README.
       - run: npm run typecheck
       - run: npm run build
       - uses: actions/upload-pages-artifact@v5

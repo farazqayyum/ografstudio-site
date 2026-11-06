@@ -1,0 +1,10 @@
+{
+  "label": "Template sets",
+  "position": 3,
+  "link": {
+    "type": "generated-index",
+    "title": "Template sets",
+    "description": "Keep several templates in one document and share controls, assets and brand between them.",
+    "slug": "/user-guide/template-sets"
+  }
+}

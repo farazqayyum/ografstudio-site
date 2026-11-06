@@ -1,0 +1,71 @@
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-content: flex-start;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Beats .markdown li + li, so the row sits level on an example's page. Flex drops the line box the
+   level pill would otherwise sit in, which pushed it below the others. */
+.tags li {
+  display: flex;
+  margin: 0;
+}
+
+/* On an example's page the row sits right above the player. */
+:global(.markdown) > .tags {
+  margin-bottom: 1rem;
+}
+
+/* Every pill gets the same box, so the level and feature tags match in height. */
+.tag,
+.level {
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.tag {
+  background: var(--site-chip);
+  color: var(--site-muted);
+}
+
+.level {
+  display: inline-block;
+  font-weight: 700;
+}
+
+.basic {
+  background: #d6f3e4;
+  color: #0b5c3b;
+}
+
+.intermediate {
+  background: #fdeccb;
+  color: #754a00;
+}
+
+.advanced {
+  background: #fbdcd9;
+  color: #8f1c13;
+}
+
+[data-theme='dark'] .basic {
+  background: #10392a;
+  color: #7be3b4;
+}
+
+[data-theme='dark'] .intermediate {
+  background: #40300f;
+  color: #f7c969;
+}
+
+[data-theme='dark'] .advanced {
+  background: #481a18;
+  color: #ff9c94;
+}

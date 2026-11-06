@@ -17,7 +17,7 @@ access (CORS). A public GitHub repository works well.
    https://raw.githubusercontent.com/OWNER/REPOSITORY/main/path/project.ogs
    ```
 
-3. In Studio, choose **Open URL** and paste it. Studio checks the project before loading it, and
+3. In Studio, choose **File → Open from URL…** and paste it. Studio checks the project before loading it, and
    asks before replacing the one you have open.
 
 Replace `main` with a commit SHA when everyone must open exactly the same revision.

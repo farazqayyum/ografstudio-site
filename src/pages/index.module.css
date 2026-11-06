@@ -1,15 +1,51 @@
-/* Homepage: a dark control-room stage in both colour modes. */
+/* Homepage: a control-room stage in the visitor's colour mode. Only the reel's picture stays dark. */
 
 .home {
+  --home-bg: #fff;
+  --home-raised: #f6f8fc;
+  --home-sunken: #eef2f9;
+  --home-active: #dbe5fa;
+  --home-off: #b8c2d8;
+  --home-line: rgb(12 22 48 / 13%);
+  --home-rule: rgb(12 22 48 / 30%);
+  --home-strong: #0a1124;
+  --home-text: #27324c;
+  --home-soft: #3f4b66;
+  --home-muted: #5b6478;
+  --home-accent: #2352c3;
+  --home-tally: #e8352b;
+  --home-glow: rgb(35 82 195 / 11%);
+  --home-glow-strong: rgb(35 82 195 / 17%);
+  --home-button: #0a1124;
+  --home-button-text: #fff;
+  --home-button-hover-text: #fff;
+  --home-ghost-line: rgb(12 22 48 / 34%);
+  --home-wash: rgb(12 22 48 / 6%);
+  background: var(--home-bg);
+  color: var(--home-text);
+}
+
+[data-theme='dark'] .home {
   --home-bg: #060913;
   --home-raised: #0a0f1f;
+  --home-sunken: #03050c;
+  --home-active: #15203f;
+  --home-off: #2b3550;
   --home-line: rgb(255 255 255 / 11%);
+  --home-rule: rgb(255 255 255 / 22%);
+  --home-strong: #fff;
   --home-text: #dfe6f7;
+  --home-soft: #b5c1dc;
   --home-muted: #93a1c1;
   --home-accent: #6f97ff;
   --home-tally: #ff4238;
-  background: var(--home-bg);
-  color: var(--home-text);
+  --home-glow: rgb(38 88 220 / 24%);
+  --home-glow-strong: rgb(38 88 220 / 34%);
+  --home-button: #fff;
+  --home-button-text: #070c1c;
+  --home-button-hover-text: #070c1c;
+  --home-ghost-line: rgb(255 255 255 / 34%);
+  --home-wash: rgb(255 255 255 / 8%);
 }
 
 .container {
@@ -25,7 +61,7 @@
   overflow: hidden;
   padding: 1.25rem 0 1.75rem;
   background:
-    radial-gradient(1100px 620px at 78% 62%, rgb(38 88 220 / 24%), transparent 70%),
+    radial-gradient(1100px 620px at 78% 62%, var(--home-glow), transparent 70%),
     var(--home-bg);
 }
 
@@ -62,7 +98,7 @@
 
 .heroTitle {
   margin: 0;
-  color: #fff;
+  color: var(--home-strong);
   font-family: var(--site-font-display);
   /* Sized so the longer line, about 13em wide, fills the column beside the 23rem lead. */
   font-size: clamp(2.2rem, calc((100cqi - 25.5rem) / 13), 4.1rem);
@@ -74,7 +110,7 @@
 
 .heroLead {
   margin: 0 0 1rem;
-  color: #c4cee4;
+  color: var(--home-soft);
   font-size: 1.04rem;
   line-height: 1.5;
 }
@@ -90,7 +126,7 @@
   display: inline-flex;
   align-items: center;
   padding: 0.5rem 1.15rem;
-  border: 1px solid #fff;
+  border: 1px solid var(--home-button);
   border-radius: 3px;
   font-family: var(--site-font-display);
   font-size: 0.95rem;
@@ -103,27 +139,27 @@
 }
 
 .buttonPrimary {
-  background: #fff;
-  color: #070c1c;
+  background: var(--home-button);
+  color: var(--home-button-text);
 }
 
 .buttonPrimary:hover {
   border-color: var(--home-accent);
   background: var(--home-accent);
-  color: #070c1c;
+  color: var(--home-button-hover-text);
   text-decoration: none;
 }
 
 .buttonGhost {
-  border-color: rgb(255 255 255 / 34%);
+  border-color: var(--home-ghost-line);
   background: transparent;
-  color: #fff;
+  color: var(--home-strong);
 }
 
 .buttonGhost:hover {
-  border-color: #fff;
-  background: rgb(255 255 255 / 8%);
-  color: #fff;
+  border-color: var(--home-strong);
+  background: var(--home-wash);
+  color: var(--home-strong);
   text-decoration: none;
 }
 
@@ -158,7 +194,7 @@
 
 .proofInner strong {
   display: block;
-  color: #fff;
+  color: var(--home-strong);
   font-family: var(--site-font-display);
   font-size: 1rem;
   font-weight: 700;
@@ -172,7 +208,7 @@
 }
 
 .proofAward:hover {
-  color: #fff;
+  color: var(--home-strong);
   text-decoration: none;
 }
 
@@ -193,12 +229,12 @@
 .sectionDark {
   border-top: 1px solid var(--home-line);
   border-bottom: 1px solid var(--home-line);
-  background: #03050c;
+  background: var(--home-sunken);
 }
 
 .sectionTitle {
   margin: 0;
-  color: #fff;
+  color: var(--home-strong);
   font-family: var(--site-font-display);
   font-size: clamp(1.9rem, 3vw, 2.9rem);
   font-weight: 800;
@@ -209,7 +245,7 @@
 .sectionLead {
   max-width: 38rem;
   margin: 1rem 0 0;
-  color: #b5c1dc;
+  color: var(--home-soft);
   font-size: 1.1rem;
   line-height: 1.55;
 }
@@ -217,10 +253,10 @@
 .textLink {
   display: inline-block;
   margin-top: 1.25rem;
-  color: #fff;
+  color: var(--home-strong);
   font-weight: 500;
   text-decoration: underline;
-  text-decoration-color: rgb(255 255 255 / 35%);
+  text-decoration-color: var(--home-ghost-line);
   text-underline-offset: 4px;
 }
 
@@ -233,25 +269,6 @@
 /* Its column is sized so the player, its controls and its form all fit in a 1080p browser window
    without scrolling. The form reserves room for the longest example, so switching doesn't move the page. */
 .live {
-  /* This section is dark in both colour modes, so the player's form takes the dark palette in both.
-     Keep these in step with [data-theme='dark'] in custom.css. */
-  color-scheme: dark;
-  --ifm-background-color: #080c18;
-  --ifm-font-color-base: #e3e3e3;
-  --ifm-font-color-base-inverse: #000;
-  --ifm-color-primary: #6f97ff;
-  --ifm-color-primary-dark: #4f80ff;
-  --ifm-color-primary-darker: #3f74ff;
-  --ifm-color-primary-darkest: #0f52ff;
-  --ifm-color-primary-light: #8fadff;
-  --ifm-color-primary-lighter: #9fb9ff;
-  --ifm-color-primary-lightest: #cfdcff;
-  --ifm-link-color: #6f97ff;
-  --ifm-link-hover-color: #8fadff;
-  --site-border: #1d2538;
-  --site-surface: #0f1524;
-  --site-muted: #9aa5bd;
-  --site-chip: #18213a;
   --example-field-width: 170px;
   display: grid;
   grid-template-columns: minmax(0, 13fr) minmax(0, 17fr);
@@ -263,7 +280,7 @@
   margin: 0;
 }
 
-.live :global(.button--primary) {
+[data-theme='dark'] .live :global(.button--primary) {
   --ifm-button-color: #000;
 }
 
@@ -314,12 +331,12 @@
 }
 
 .source:hover {
-  border-color: #fff;
-  color: #fff;
+  border-color: var(--home-strong);
+  color: var(--home-strong);
 }
 
 .source:focus-visible {
-  outline: 2px solid #fff;
+  outline: 2px solid var(--home-strong);
   outline-offset: 1px;
 }
 
@@ -327,13 +344,13 @@
   width: 0.5rem;
   height: 0.5rem;
   border-radius: 2px;
-  background: #2b3550;
+  background: var(--home-off);
 }
 
 .source[aria-pressed='true'] {
-  border-color: rgb(255 255 255 / 34%);
-  background: #15203f;
-  color: #fff;
+  border-color: var(--home-ghost-line);
+  background: var(--home-active);
+  color: var(--home-strong);
 }
 
 .source[aria-pressed='true'] i {
@@ -380,7 +397,7 @@
 
 .specList h3 {
   margin: 0;
-  color: #fff;
+  color: var(--home-strong);
   font-family: var(--site-font-display);
   font-size: 1.12rem;
   font-weight: 700;
@@ -390,7 +407,7 @@
 
 .specList p {
   margin: 0;
-  color: #b5c1dc;
+  color: var(--home-soft);
   font-size: 1rem;
   line-height: 1.5;
 }
@@ -402,9 +419,9 @@
   margin: 2.5rem 0 0;
   padding: 1.4rem 0 0;
   background:
-    repeating-linear-gradient(90deg, rgb(255 255 255 / 22%) 0 1px, transparent 1px 1.5%) top / 100%
+    repeating-linear-gradient(90deg, var(--home-rule) 0 1px, transparent 1px 1.5%) top / 100%
       8px no-repeat,
-    linear-gradient(rgb(255 255 255 / 22%), rgb(255 255 255 / 22%)) top / 100% 1px no-repeat;
+    linear-gradient(var(--home-rule), var(--home-rule)) top / 100% 1px no-repeat;
   list-style: none;
 }
 
@@ -434,7 +451,7 @@
 
 .timeline h3 {
   margin: 0 0 0.5rem;
-  color: #fff;
+  color: var(--home-strong);
   font-family: var(--site-font-display);
   font-size: 1.45rem;
   font-weight: 700;
@@ -444,7 +461,7 @@
 
 .timeline p {
   margin: 0;
-  color: #b5c1dc;
+  color: var(--home-soft);
   font-size: 1.03rem;
   line-height: 1.5;
 }
@@ -468,7 +485,7 @@
   gap: 1rem;
   align-items: baseline;
   padding: 1.05rem 0.25rem;
-  color: #fff;
+  color: var(--home-strong);
   transition: padding-left 0.15s ease;
 }
 
@@ -499,14 +516,14 @@
   padding: 6.5rem 0;
   border-top: 1px solid var(--home-line);
   background:
-    radial-gradient(900px 420px at 18% 100%, rgb(38 88 220 / 34%), transparent 70%),
-    #03050c;
+    radial-gradient(900px 420px at 18% 100%, var(--home-glow-strong), transparent 70%),
+    var(--home-sunken);
 }
 
 .ctaTitle {
   max-width: 62rem;
   margin: 0 0 1rem;
-  color: #fff;
+  color: var(--home-strong);
   font-family: var(--site-font-display);
   font-size: clamp(2.4rem, 5.2vw, 4.75rem);
   font-weight: 800;
@@ -517,7 +534,7 @@
 
 .cta p {
   margin-bottom: 1.5rem;
-  color: #c4cee4;
+  color: var(--home-soft);
   font-size: 1.15rem;
 }
 

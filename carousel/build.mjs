@@ -23,6 +23,7 @@ const C = {
   green: '#2fe6a8',
   orange: '#ff8a3d',
   violet: '#b58cff',
+  linkedin: '#0a66c2',
 };
 // The type of ograf.ebu.io, as on the rest of the site.
 const FONT = {
@@ -53,6 +54,7 @@ const FEED = [
   ['Video, images, SVG and Lottie on one canvas', 653, C.green],
   ['Build by hand, with the AI Assistant or over MCP', 683, C.blue],
   ['Exports standard EBU OGraf packages', 565, C.orange],
+  ['Join the OGraf Studio Community on LinkedIn', 658, C.linkedin],
   ['Best of Show, IBC 2026', 344, C.red],
   ['Free and open source under AGPL-3.0', 559, C.ink],
 ];
@@ -300,17 +302,19 @@ async function surfaceLayers() {
 
 /** Each slide's pose for the shared surface; the morph between them is Transition Logic. */
 const POSES = {
+  studio: { box: [48, 54, 1824, 972], scrim: 0.78, edge: 1 },
   transitions: { box: [872, 54, 952, 972], scrim: 0.5, edge: 1 },
   shaders: { box: [-70, -70, 2060, 1220], scrim: 0.42, edge: 0 },
   touch: { box: [872, 54, 952, 972], scrim: 0.72, edge: 1 },
   media: { box: [872, 54, 952, 536], scrim: 0.3, edge: 0 },
   charts: { box: [48, 54, 1824, 972], scrim: 0.74, edge: 1 },
   ai: { box: [872, 54, 952, 972], scrim: 0.62, edge: 1 },
+  community: { box: [-70, -70, 2060, 1220], scrim: 0.5, edge: 0 },
 };
 
 async function slideTransitions(s, fallbackAsset) {
   copyColumn(s, {
-    number: '01',
+    number: '02',
     label: 'TRANSITION LOGIC',
     accent: C.cyan,
     lines: ['Graphics', 'that know', "what's on air."],
@@ -480,7 +484,7 @@ async function slideShaders(s) {
 
   s.rect('Eyebrow mark', [96, 641, 20, 20], C.violet, 4);
   s.both('Eyebrow mark', 16, 16);
-  s.text('Eyebrow', [132, 634, 680, 40], '02  LIVE GLSL', { font: FONT.mono, size: 28, color: C.violet, ls: 2 });
+  s.text('Eyebrow', [132, 634, 680, 40], '03  LIVE GLSL', { font: FONT.mono, size: 28, color: C.violet, ls: 2 });
   s.both('Eyebrow', 14, 18);
   s.text('Headline 1', [92, 682, 800, 92], 'Real GLSL, live on air.', { font: FONT.display, size: 74, weight: 800, lh: 1.1, ls: -1.5 });
   s.both('Headline 1', 10, 24);
@@ -532,7 +536,7 @@ async function slideShaders(s) {
 
 function slideTouch(s) {
   copyColumn(s, {
-    number: '03',
+    number: '04',
     label: 'TOUCH CONTROLS',
     accent: C.amber,
     lines: ['Tap it.', 'It answers.'],
@@ -715,7 +719,7 @@ function touchRules(s, ids, { tabs, tabW, tabX }) {
 
 function slideMedia(s, assets, lottie) {
   copyColumn(s, {
-    number: '04',
+    number: '05',
     label: 'MEDIA',
     accent: C.green,
     lines: ['Every kind', 'of picture.'],
@@ -917,7 +921,7 @@ async function slideCharts(s, provider) {
   // Heading, set wider and shorter than the other slides because the charts want the room.
   s.rect('Eyebrow mark', [96, 99, 20, 20], C.orange, 4);
   s.both('Eyebrow mark', 30, 16);
-  s.text('Eyebrow', [132, 92, 680, 40], '05  CHARTS', { font: FONT.mono, size: 28, color: C.orange, ls: 2 });
+  s.text('Eyebrow', [132, 92, 680, 40], '06  CHARTS', { font: FONT.mono, size: 28, color: C.orange, ls: 2 });
   s.both('Eyebrow', 28, 18);
   s.text('Headline 1', [92, 132, 1110, 108], 'Numbers that perform.', { font: FONT.display, size: 92, weight: 800, lh: 1.1, ls: -2 });
   s.both('Headline 1', 20, 28);
@@ -1018,11 +1022,11 @@ function chartRules(s, ids) {
 
 function slideAI(s) {
   copyColumn(s, {
-    number: '06',
+    number: '07',
     label: 'AI, IN STUDIO AND OVER MCP',
     accent: C.blue,
     lines: ['Ask it.', 'Or wire it in.'],
-    body: 'The AI Assistant works inside Studio and shows its changes on the canvas for you to accept. Over MCP, your own agent gets the same tools. This reel was built that way.',
+    body: 'The AI Assistant works inside Studio and shows its changes on the canvas for you to accept. Over MCP, your own agent gets the same tools, and the ograf-authoring skill teaches it to use them at their best. This reel was built that way.',
   });
 
   const show = (name, frame) =>
@@ -1066,13 +1070,14 @@ function slideAI(s) {
   s.text('Terminal where', [1280, 582, 472, 36], '127.0.0.1:4318/mcp', { font: FONT.mono, size: 26, color: C.dim, align: 'right' });
   s.both('Terminal where', 8, 20, 'fade');
   [
+    ['skill: ograf-authoring', 'loaded'],
     ['ograf_get_capabilities', 'connected'],
     ['ograf_apply_operations', 'applied'],
     ['ograf_render_strip', '12 frames'],
     ['ograf_certify_project', 'passed'],
     ['ograf_export_coordinated_package', '.ograf.zip'],
   ].forEach(([tool, result], index) => {
-    const y = 636 + index * 62;
+    const y = 636 + index * 54;
     const name = `Call ${index + 1}`;
     const out = `Result ${index + 1}`;
     s.text(name, [944, y, 580, 40], `> ${tool}`, { font: FONT.mono, size: 26, color: C.ink });
@@ -1081,6 +1086,248 @@ function slideAI(s) {
     s.leave(out);
     show(name, 30 + index * 48);
     show(out, 52 + index * 48);
+  });
+}
+
+// The tour on the Studio slide. Each stop is a real screenshot of the editor, with the part of it to
+// look at, as the box it grows to across the stop. Taken with carousel/capture-studio.mjs.
+const WINDOW = { x: 512, y: 92, width: 1328, height: 747 };
+const STOP_FRAMES = 175;
+const TOUR_FADE = 8;
+const TOUR = [
+  {
+    file: 'studio-canvas',
+    name: 'Canvas',
+    line: 'Layers, canvas and properties.',
+    caption: 'Draw on a real broadcast canvas: text, shapes, images, video, Lottie and charts as layers.',
+    zoom: { x: 0.5, y: 0.34, scale: 1.1 },
+  },
+  {
+    file: 'studio-timeline',
+    name: 'Timeline',
+    line: 'Keyframes, easing and steps.',
+    caption: 'Animate any property on the timeline, with steps an operator can play through on air.',
+    zoom: { x: 0.5, y: 1, scale: 1.24 },
+  },
+  {
+    file: 'studio-transitions',
+    name: 'Transitions',
+    line: 'Lanes, takes and morphs.',
+    caption: 'Lay templates out in lanes, and Studio morphs what they share on every Take.',
+    zoom: { x: 0.6, y: 1, scale: 1.22 },
+  },
+  {
+    file: 'studio-data',
+    name: 'Data and rules',
+    line: 'Fields, bindings and triggers.',
+    caption: 'Bind anything to a data field, then add rules for clicks, taps, hovers and values.',
+    zoom: { x: 1, y: 0.5, scale: 1.2 },
+  },
+];
+
+async function slideStudio(s, shots, assets) {
+  s.rect('Eyebrow mark', [96, 99, 20, 20], C.blue, 4);
+  s.both('Eyebrow mark', 30, 16);
+  s.text('Eyebrow', [132, 92, 360, 40], '01  THE EDITOR', { font: FONT.mono, size: 28, color: C.cyan, ls: 2 });
+  s.both('Eyebrow', 28, 18);
+  s.raw({
+    type: 'add_layer',
+    kind: 'image',
+    name: 'Best of Show award',
+    transform: { x: 1691, y: 846, width: 149, height: 130 },
+    element: { src: `asset:${assets.award}`, fit: 'contain' },
+  });
+  s.both('Best of Show award', 24, 24, 'fade');
+  ['This is', 'Studio.'].forEach((line, index) => {
+    const name = `Headline ${index + 1}`;
+    s.text(name, [92, 136 + index * 98, 410, 104], line, { font: FONT.display, size: 92, weight: 800, lh: 1.08, ls: -2 });
+    s.both(name, 20 - index * 5, 28);
+  });
+  s.text('Body', [96, 348, 396, 130], 'One window to design, animate, bind to data and export standard OGraf.', {
+    size: 28,
+    color: '#e6ecfa',
+    lh: 1.36,
+  });
+  s.both('Body', 8, 24);
+
+  // The stops, with a marker that moves to the one on screen.
+  const rowY = (index) => 510 + index * 112;
+  s.rect('Stop marker', [84, rowY(0), 404, 100], '#ffffff1f', 14, { strokeColor: C.cyan, strokeWidth: 2 });
+  s.both('Stop marker', 6, 20, 'fade');
+  const steps = TOUR.flatMap((_, index) => {
+    const start = index * STOP_FRAMES;
+    return [
+      [start, rowY(index)],
+      [start + STOP_FRAMES - 16, rowY(index)],
+    ];
+  });
+  s.loop('Stop marker', { y: [...steps, [TOUR.length * STOP_FRAMES, rowY(0)]] }, TOUR.length * STOP_FRAMES);
+  TOUR.forEach((stop, index) => {
+    s.text(`Stop ${index + 1} name`, [104, rowY(index) + 12, 372, 44], stop.name, { font: FONT.display, size: 34, weight: 700, lh: 1.2 });
+    s.both(`Stop ${index + 1} name`, 6 - index, 20, 'fade');
+    s.text(`Stop ${index + 1} line`, [104, rowY(index) + 56, 372, 34], stop.line, { size: 24, color: C.muted, lh: 1.2 });
+    s.both(`Stop ${index + 1} line`, 6 - index, 20, 'fade');
+  });
+
+  // The window: a clipped frame, and the screenshots inside it.
+  const { x, y, width, height } = WINDOW;
+  s.rect('Window', [x, y, width, height], '#16181d', 16);
+  s.both('Window', 16, 26, 'fade');
+  s.raw({ type: 'set_layer_layout', layerName: 'Window', clipChildren: true });
+  const total = TOUR.length * STOP_FRAMES;
+  TOUR.forEach((stop, index) => {
+    const name = `Screen ${index + 1}`;
+    const start = index * STOP_FRAMES;
+    const end = start + STOP_FRAMES;
+    s.raw({
+      type: 'add_layer',
+      kind: 'image',
+      name,
+      transform: { x, y, width, height },
+      element: { src: `asset:${shots[index]}`, fit: 'cover' },
+    });
+    s.raw({ type: 'set_layer_layout', layerName: name, parentId: 'Window' });
+    s.both(name, 14, 26, 'fade');
+    const grownWidth = width * stop.zoom.scale;
+    const grownHeight = height * stop.zoom.scale;
+    const grownX = x - (grownWidth - width) * stop.zoom.x;
+    const grownY = y - (grownHeight - height) * stop.zoom.y;
+    // Grows for the whole stop plus the fades either side, then resets while it can't be seen.
+    const from = Math.max(0, start - TOUR_FADE);
+    const to = Math.min(total - 1, end + TOUR_FADE);
+    const grow = (rest, grown) => [
+      ...(from > 0 ? [[0, rest, 'linear']] : []),
+      [from, rest, 'linear'],
+      [to, grown, 'linear'],
+      ...(to + 1 < total ? [[to + 1, rest, 'linear']] : []),
+      [total, rest, 'linear'],
+    ];
+    const tracks = {
+      x: grow(x, grownX),
+      y: grow(y, grownY),
+      width: grow(width, grownWidth),
+      height: grow(height, grownHeight),
+    };
+    // The first screen stays underneath, so the last one fades out to it and the tour has no seam.
+    if (index > 0)
+      tracks.opacity = [
+        [0, 0, 'linear'],
+        [start - TOUR_FADE, 0, 'linear'],
+        [start + TOUR_FADE, 1, 'linear'],
+        ...(index < TOUR.length - 1
+          ? [[end + TOUR_FADE, 1, 'linear'], [end + TOUR_FADE + 1, 0, 'linear']]
+          : [[total - TOUR_FADE * 2, 1, 'linear'], [total, 0, 'linear']]),
+        [total, 0, 'linear'],
+      ].filter(([frame], at, keys) => at === 0 || frame > keys[at - 1][0]);
+    s.loop(name, tracks, total);
+
+    const caption = `Caption ${index + 1}`;
+    s.text(caption, [x, y + height + 26, width - 170, 96], stop.caption, { size: 32, color: C.ink, lh: 1.32 });
+    s.leave(caption);
+    s.loop(caption, {
+      opacity: [
+        [0, index === 0 ? 1 : 0, 'linear'],
+        ...(index === 0
+          ? [[STOP_FRAMES - 12, 1, 'linear'], [STOP_FRAMES, 0, 'linear'], [total - 12, 0, 'linear'], [total, 1, 'linear']]
+          : [[start, 0, 'linear'], [start + 14, 1, 'linear'], [end - 12, 1, 'linear'], [end, 0, 'linear']]),
+        ...(index > 0 && end < total ? [[total, 0, 'linear']] : []),
+      ],
+    }, total);
+  });
+  s.rect('Window edge', [x, y, width, height], '#00000000', 16, { strokeColor: '#ffffff40', strokeWidth: 2 });
+  s.both('Window edge', 14, 26, 'fade');
+}
+
+// JOIN_BUTTON in src/components/HeroReel/index.tsx puts the page's link over this box.
+const JOIN_BUTTON = [96, 672, 590, 112];
+
+function slideCommunity(s, assets) {
+  copyColumn(s, {
+    number: '08',
+    label: 'COMMUNITY',
+    accent: C.cyan,
+    top: 150,
+    lines: ['Come and', 'join us.'],
+    body: 'A public LinkedIn group for everyone who builds with OGraf Studio. Ask questions and share what you make.',
+  });
+
+  const [bx, by, bw, bh] = JOIN_BUTTON;
+  s.rect('Join pulse', [bx, by, bw, bh], '#00000000', 18, { strokeColor: '#7fb6ff', strokeWidth: 4 });
+  s.leave('Join pulse');
+  s.loop('Join pulse', {
+    x: [[0, bx], [80, bx - 18], [120, bx - 18]],
+    y: [[0, by], [80, by - 18], [120, by - 18]],
+    width: [[0, bw], [80, bw + 36], [120, bw + 36]],
+    height: [[0, bh], [80, bh + 36], [120, bh + 36]],
+    opacity: [[0, 0.9], [80, 0], [120, 0]],
+  }, 120);
+  s.rect('Join button', [bx, by, bw, bh], C.linkedin, 18);
+  s.both('Join button', 10, 22, 'pop', { easing: 'back-out' });
+  s.raw({
+    type: 'add_layer',
+    kind: 'image',
+    name: 'Join mark',
+    transform: { x: bx + 36, y: by + 28, width: 56, height: 56 },
+    element: { src: `asset:${assets.linkedin}`, fit: 'contain' },
+  });
+  s.both('Join mark', 8, 20, 'fade');
+  s.text('Join text', [bx + 112, by, bw - 130, bh], 'Join on LinkedIn', { font: FONT.display, size: 48, weight: 700, lh: 1.1, valign: 'middle' });
+  s.both('Join text', 8, 20, 'fade');
+  s.text('Join address', [bx + 2, by + bh + 22, 700, 40], 'linkedin.com/groups/40618425', { font: FONT.mono, size: 28, color: C.ink, ls: 0.5 });
+  s.both('Join address', 6, 20, 'fade');
+  s.shadow('Join address', true);
+
+  // The group's card, in the look of its LinkedIn banner: the editor behind the OGraf blue.
+  const card = { x: 1064, y: 150, width: 760, height: 700 };
+  const bannerHeight = 330;
+  s.rect('Card', [card.x, card.y, card.width, card.height], '#0a1226f2', 28, { strokeColor: C.line, strokeWidth: 2 });
+  s.both('Card', 16, 26);
+  s.raw({ type: 'set_layer_layout', layerName: 'Card', clipChildren: true });
+  s.raw({
+    type: 'add_layer',
+    kind: 'image',
+    name: 'Banner picture',
+    transform: { x: card.x, y: card.y, width: card.width, height: bannerHeight },
+    element: { src: `asset:${assets.banner}`, fit: 'cover' },
+  });
+  s.raw({ type: 'set_layer_layout', layerName: 'Banner picture', parentId: 'Card' });
+  s.both('Banner picture', 14, 24, 'fade');
+  s.rect('Banner shade', [card.x, card.y, card.width, bannerHeight], {
+    type: 'linear',
+    angle: 90,
+    stops: [
+      { offset: 0, color: '#0b1a4a', opacity: 0.96 },
+      { offset: 1, color: '#0b1a4a', opacity: 0.72 },
+    ],
+  });
+  s.raw({ type: 'set_layer_layout', layerName: 'Banner shade', parentId: 'Card' });
+  s.both('Banner shade', 14, 24, 'fade');
+  s.raw({
+    type: 'add_layer',
+    kind: 'image',
+    name: 'Banner logo',
+    transform: { x: card.x + 40, y: card.y + 58, width: 196, height: 66 },
+    element: { src: `asset:${assets.logo}`, fit: 'contain' },
+  });
+  s.both('Banner logo', 12, 22, 'fade');
+  s.text('Banner studio', [card.x + 250, card.y + 52, 300, 76], 'Studio', { font: FONT.display, size: 62, weight: 700, lh: 1.1, ls: -0.8, valign: 'middle' });
+  s.both('Banner studio', 12, 22, 'fade');
+  s.text('Banner community', [card.x + 42, card.y + 134, 680, 72], 'Community', { font: FONT.display, size: 60, weight: 700, lh: 1.1, color: '#a9c6ff', ls: -0.8 });
+  s.both('Banner community', 10, 22, 'fade');
+  s.text('Banner line', [card.x + 42, card.y + 228, 680, 44], "built for EBU's OGraf standard", { font: FONT.mono, size: 30, color: C.ink });
+  s.both('Banner line', 8, 22, 'fade');
+
+  const copyX = card.x + 42;
+  s.text('Card name', [copyX, card.y + bannerHeight + 28, 690, 62], 'OGraf Studio Community', { font: FONT.display, size: 50, weight: 800, lh: 1.15, ls: -0.8 });
+  s.both('Card name', 8, 22, 'fade');
+  s.text('Card kind', [copyX, card.y + bannerHeight + 94, 690, 40], 'Public group on LinkedIn', { size: 30, color: C.muted });
+  s.both('Card kind', 6, 22, 'fade');
+  ['Ask questions', 'Share your templates', 'See what others build'].forEach((line, index) => {
+    const y = card.y + bannerHeight + 156 + index * 56;
+    s.rect(`Card mark ${index + 1}`, [copyX + 2, y + 12, 18, 18], C.cyan, 4);
+    s.both(`Card mark ${index + 1}`, 5 - index, 18, 'fade');
+    s.text(`Card line ${index + 1}`, [copyX + 38, y, 640, 44], line, { size: 32, color: C.ink, lh: 1.25 });
+    s.both(`Card line ${index + 1}`, 5 - index, 18, 'fade');
   });
 }
 
@@ -1231,12 +1478,14 @@ async function fillFeed() {
 }
 
 const SLIDES = [
+  { id: 'studio', name: 'Studio' },
   { id: 'transitions', name: 'Transition Logic' },
   { id: 'shaders', name: 'Shaders' },
   { id: 'touch', name: 'Touch Controls' },
   { id: 'media', name: 'Media' },
   { id: 'charts', name: 'Charts' },
   { id: 'ai', name: 'AI' },
+  { id: 'community', name: 'Community' },
 ];
 // Charts come first because only the template opened from charts-seed.ogs has their renderer pinned.
 // New templates start with an empty renderer catalog; it's put back in order at the end.
@@ -1348,6 +1597,24 @@ async function main() {
       if (!assets.still) throw new Error('Monitor still asset id missing');
     }
 
+    const screenshot = async (file) => {
+      const id = (await importAsset({ path: `carousel/assets/${file}.jpg`, mimeType: 'image/jpeg', name: file })).assets?.[0]?.id;
+      if (!id) throw new Error(`${file} asset id missing`);
+      return id;
+    };
+    let shots = [];
+    if (slide.id === 'studio') {
+      for (const stop of TOUR) shots.push(await screenshot(stop.file));
+      assets.award = (await importAsset({ path: 'carousel/assets/tvbeurope-best-of-show.png', mimeType: 'image/png', name: 'TVBEurope Best of Show' })).assets?.[0]?.id;
+      if (!assets.award) throw new Error('Award asset id missing');
+    }
+    if (slide.id === 'community') {
+      assets.banner = await screenshot(TOUR[0].file);
+      assets.logo = (await importAsset({ path: 'carousel/assets/ograf-logo-mono-white.svg', mimeType: 'image/svg+xml', name: 'OGraf logo' })).assets?.[0]?.id;
+      assets.linkedin = (await importAsset({ path: 'carousel/assets/linkedin-mark-white.svg', mimeType: 'image/svg+xml', name: 'LinkedIn mark' })).assets?.[0]?.id;
+      if (!assets.logo || !assets.linkedin) throw new Error(`Asset ids missing: ${JSON.stringify(assets)}`);
+    }
+
     let touch = null;
     if (slide.id === 'transitions') await slideTransitions(s, assets.still);
     if (slide.id === 'shaders') await slideShaders(s);
@@ -1360,6 +1627,8 @@ async function main() {
       await slideCharts(s, { id: pinned.manifest.id, version: pinned.manifest.version, sha256: pinned.sha256 });
     }
     if (slide.id === 'ai') slideAI(s);
+    if (slide.id === 'studio') await slideStudio(s, shots, assets);
+    if (slide.id === 'community') slideCommunity(s, assets);
 
     // parentId needs the real id, so layout links go in a second batch.
     const parentOps = s.ops.filter((op) => op.type === 'set_layer_layout' && op.parentId);
@@ -1419,7 +1688,7 @@ async function main() {
   await fillFeed();
   console.log('Authored Ticker');
 
-  // Transition Logic: a reel lane with five states and one surface that morphs between them, and
+  // Transition Logic: a reel lane with one state per slide and one surface that morphs between them, and
   // a ticker lane that runs on its own. The surface makes room while the ticker is on.
   const { surface, scrim, edge } = component;
   const values = (slideId) => {
@@ -1440,7 +1709,7 @@ async function main() {
       fade(edge, pose.edge),
     ];
   };
-  const first = POSES.transitions;
+  const first = POSES[SLIDES[0].id];
   const definition = {
     version: 5,
     id: 'feature-reel',

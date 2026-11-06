@@ -7,6 +7,8 @@
  *
  * Needs a running Studio and MCP server; see README.md in this folder.
  */
+import { readFileSync } from 'node:fs';
+import { runInNewContext } from 'node:vm';
 import { call } from '../carousel/mcp.mjs';
 
 const FONT = 'Roboto Condensed, Arial Narrow, Arial, sans-serif';
@@ -119,7 +121,7 @@ const text = (name, box, content, style = {}) => ({
   transform: { x: box[0], y: box[1], width: box[2], height: box[3] },
   element: {
     content,
-    fontFamily: FONT,
+    fontFamily: style.font ?? FONT,
     fontSize: style.size ?? 28,
     minFontSize: Math.round((style.size ?? 28) * 0.5),
     fontWeight: style.weight ?? 600,
@@ -131,6 +133,80 @@ const text = (name, box, content, style = {}) => ({
     letterSpacing: style.ls ?? 0,
   },
 });
+
+/** One row of the Rankings board, in paint order. */
+const BOARD_ROW = [
+  'Row tile',
+  'Row glow',
+  'Row place',
+  'Row avatar',
+  'Row initials',
+  'Row name',
+  'Row chip',
+  'Row award',
+  'Row move',
+  'Row up',
+  'Row down',
+  'Row moved',
+  'Row points',
+];
+
+/** Everything that fades as the board goes off air. */
+const MOTION_OUT = [
+  'Board panel',
+  'Board glow',
+  'Board accent',
+  'Title',
+  'Subtitle',
+  ...BOARD_ROW,
+  'Leader glint',
+  'Side panel',
+  'Side glow',
+  'Side accent',
+  'Jury status',
+  'Jury count',
+  'Jury name',
+  'Pip',
+  'Ladder plate',
+  'Ladder points',
+  'Ladder name',
+  'Top tile',
+  'Top glint',
+  'Top caption',
+  'Top value',
+  'Top name',
+];
+
+/** A band of light crossing a layer once per loop, then waiting offstage. */
+function glintTrack(layerName, durationFrames, sweepFrames) {
+  const stop = (index, from, to) => ({
+    type: 'set_loop_property_track',
+    layerName,
+    property: `fill.stops[${index}].offset`,
+    keys: [
+      { frame: 0, value: from, easing: 'cubic-in-out' },
+      { frame: sweepFrames, value: to },
+      { frame: durationFrames, value: to },
+    ],
+  });
+  return [
+    stop(0, 0, 0.8),
+    stop(1, 0, 0.9),
+    stop(2, 0.2, 1),
+    {
+      type: 'set_loop_property_track',
+      layerName,
+      property: 'opacity',
+      keys: [
+        { frame: 0, value: 0 },
+        { frame: 4, value: 1 },
+        { frame: sweepFrames - 4, value: 1 },
+        { frame: sweepFrames, value: 0 },
+        { frame: durationFrames, value: 0 },
+      ],
+    },
+  ];
+}
 
 const ZONE_LABELS = {
   local: 'LOCAL TIME',
@@ -607,109 +683,646 @@ const EXAMPLES = {
   },
 
   async rankings() {
-    const X = 96;
-    const Y = 200;
-    const W = 720;
-    const ROW = 64;
-    const ROUNDS = [
-      [['am', 'A. Moreau', 25], ['kt', 'K. Tanaka', 18], ['rs', 'R. Silva', 15], ['jn', 'J. Novak', 12], ['ld', 'L. Dubois', 10], ['ma', 'M. Aydin', 8]],
-      [['kt', 'K. Tanaka', 43], ['am', 'A. Moreau', 33], ['ma', 'M. Aydin', 33], ['rs', 'R. Silva', 27], ['jn', 'J. Novak', 22], ['ld', 'L. Dubois', 16]],
-      [['ma', 'M. Aydin', 58], ['kt', 'K. Tanaka', 55], ['am', 'A. Moreau', 51], ['jn', 'J. Novak', 37], ['rs', 'R. Silva', 33], ['ld', 'L. Dubois', 24]],
-    ].map((round) => round.map(([id, name, points]) => ({ id, name, points })));
-    const rows = 6;
+    const OSWALD = 'Oswald, Arial Narrow, Arial, sans-serif';
+    const here = new URL('.', import.meta.url);
+    // A function's source is one expression, so no closing semicolon.
+    const source = readFileSync(new URL('rankings-votes.js', here), 'utf8').trim().replace(/;$/, '');
+    const ROWS = 12;
+    const PANEL = '#10133a';
+    const ACCENT = '#ff3d8b';
+    const ACCENT_2 = '#8a5cff';
+    const SOFT = '#aab2ea';
+    const INK = '#14163a';
+    const TILE = ['#2b3080', '#1d215c'];
+    const GOLD = ['#ffe27d', '#e6a51c'];
+    const SILVER = ['#f4f7fb', '#b1bbcb'];
+    const BRONZE = ['#f6c292', '#c27c40'];
+    const BOARD = { x: 96, y: 54, w: 1170, h: 972 };
+    const SIDE = { x: 1290, y: 54, w: 534, h: 972 };
+    const R = { x: 116, y: 142, w: 1130, h: 64, pitch: 72 };
+    const ALL_ROWS_H = R.pitch * ROWS;
+    const grad = ([from, to], angle = 90) => ({
+      type: 'linear',
+      angle,
+      stops: [
+        { offset: 0, color: from, opacity: 1 },
+        { offset: 1, color: to, opacity: 1 },
+      ],
+    });
+    const glint = (angle) => ({
+      type: 'linear',
+      angle,
+      stops: [
+        { offset: 0, color: '#ffffff', opacity: 0 },
+        { offset: 0.1, color: '#ffffff', opacity: 0.7 },
+        { offset: 0.2, color: '#ffffff', opacity: 0 },
+      ],
+    });
+    const glow = (color, opacity) => ({
+      type: 'linear',
+      angle: 180,
+      stops: [
+        { offset: 0, color, opacity },
+        { offset: 1, color, opacity: 0 },
+      ],
+    });
+    const style = (size, weight, extra = {}) => ({ font: OSWALD, size, weight, ...extra });
+
+    const CONTESTANTS = [
+      ['mk', 'Mira Kolar', '#ff5d73'],
+      ['tl', 'Theo Lang', '#ffa23d'],
+      ['ar', 'Ana Reis', '#f2c21b'],
+      ['ka', 'Kenji Aoki', '#68c93b'],
+      ['lv', 'Lena Vogel', '#22c79a'],
+      ['oh', 'Omar Haddad', '#1fb4e6'],
+      ['sr', 'Sofia Ricci', '#4f8dff'],
+      ['ea', 'Emre Aydin', '#8a6cff'],
+      ['nh', 'Nora Holm', '#c364f5'],
+      ['jb', 'Jonas Berg', '#f25fc4'],
+      ['pn', 'Priya Nair', '#ff8558'],
+      ['lm', 'Leo Marin', '#8796ba'],
+    ].map(([id, name, colour]) => ({ id, name, colour, points: 0 }));
+    // Each jury's ranking, best first. The story: eight changes of lead, and the last jury's
+    // top score lifts Priya Nair five places to win.
+    const JURIES = [
+      ['Lisbon', 'lv,nh,oh,ka,ea,ar,sr,jb,pn,lm'],
+      ['Oslo', 'tl,jb,pn,oh,sr,ka,nh,ea,lv,ar'],
+      ['Istanbul', 'ka,pn,sr,ea,ar,tl,jb,oh,lv,nh'],
+      ['Tokyo', 'oh,ea,lv,ar,pn,tl,ka,jb,nh,sr'],
+      ['Toronto', 'pn,sr,ka,lv,ar,nh,oh,tl,ea,lm'],
+    ].map(([name, ranking]) => ({ name, ranking }));
+    const SCALE = '1,2,3,4,5,6,7,8,10,12';
+    const INITIAL_STATE = {
+      order: [],
+      awarded: {},
+      queue: [],
+      jury: -1,
+      landed: 0,
+      chips: {},
+      topChips: {},
+      lit: {},
+      moves: {},
+      baseline: [],
+      top: 'wait',
+      topTo: null,
+      phase: 'ready',
+    };
+
+    // Studio's canvas doesn't run functions, so the internal fields' defaults show the design: the
+    // same function played up to the top score of the second jury. On air, it starts from zero.
+    const score = runInNewContext(`(${source})`);
+    const sample = { contestants: CONTESTANTS, juries: JURIES, points_scale: SCALE, reveal: 'auto' };
+    let played = { state: structuredClone(INITIAL_STATE) };
+    let now = 0;
+    const step = (event) => {
+      played = score({ state: played.state, data: sample, event, nowMs: now });
+      while (played.wakeAt !== null) {
+        now = played.wakeAt;
+        played = score({ state: played.state, data: sample, event: { type: 'tick' }, nowMs: now });
+      }
+    };
+    step({ type: 'load' });
+    for (let press = 0; press < 3; press++) step({ type: 'custom-action', actionId: 'vote.next' });
+    const look = JSON.parse(JSON.stringify(played.data));
+
+    const INTERNAL = { exposeToOgraf: false };
+    const objectItems = (properties) => ({
+      items: { key: 'item', fieldType: 'object', properties },
+    });
+    const prop = (key, fieldType, label) => ({ key, fieldType, ...(label ? { label } : {}) });
+    const giveOptions = [12, 10, 8, 7, 6, 5, 4, 3, 2, 1].map((points) =>
+      option(String(points), `${points} point${points === 1 ? '' : 's'}`),
+    );
+
+    const first = await scene();
+    const [inTransition, outTransition] = first.composition.transitions;
     await apply(
       [
-        { type: 'add_lifecycle_step', name: 'After round 2' },
-        { type: 'add_lifecycle_step', name: 'After round 3' },
-        addField('text', 'title', 'Title', 'The heading of the table.', 'DRIVER STANDINGS', {
+        // The rows take this long to reach their new places.
+        { type: 'set_composition', updateTransitionFrames: 16 },
+        { type: 'set_transition', transitionId: inTransition.id, durationFrames: 30 },
+        { type: 'set_transition', transitionId: outTransition.id, durationFrames: 16 },
+        {
+          type: 'add_asset',
+          name: 'Oswald',
+          mimeType: 'font/ttf',
+          fontFamily: 'Oswald',
+          fontWeight: '200 700',
+          fontStyle: 'normal',
+          packagePath: 'assets/fonts/oswald.ttf',
+          licenseName: 'SIL Open Font License 1.1',
+          licenseUrl: 'https://github.com/google/fonts/blob/6c1dbe27dcf7d817d4b62cec033ba77fa8e2a5ec/ofl/oswald/OFL.txt',
+          licenseText: readFileSync(new URL('fonts/oswald-OFL.txt', here), 'utf8'),
+          data: readFileSync(new URL('fonts/oswald.ttf', here)).toString('base64'),
+        },
+        addField('text', 'title', 'Title', 'The heading of the board.', 'GRAND FINAL', {
           constraints: { maxLength: 28 },
         }),
-        addField('array', 'standings', 'Standings', 'One entry per driver; the graphic sorts them.', ROUNDS[0], {
-          items: {
-            key: 'item',
-            fieldType: 'object',
-            properties: [
-              { key: 'id', fieldType: 'text' },
-              { key: 'name', fieldType: 'text' },
-              { key: 'points', fieldType: 'integer' },
-            ],
-          },
+        addField('select', 'reveal', 'Low scores', 'How Next vote plays the scores below a jury\'s top score.', 'auto', {
+          options: [
+            option('auto', 'Run by themselves'),
+            option('together', 'Land together'),
+            option('manual', 'One per press'),
+          ],
         }),
-        rect('Table panel', [X, Y - 96, W, 96 + rows * ROW + 16], '#0a1226f2', 6),
-        rect('Table accent', [X, Y - 96, 8, 96 + rows * ROW + 16], '#4fe0ff'),
-        text('Title', [X + 30, Y - 88, W - 240, 52], 'DRIVER STANDINGS', { size: 36, weight: 800, ls: 1 }),
-        text('Round', [X + W - 210, Y - 88, 186, 52], 'ROUND 1', { size: 24, ls: 1.5, align: 'right', color: '#4fe0ff' }),
-        ...Array.from({ length: rows }, (_, index) =>
-          text(`Rank ${index + 1}`, [X + 26, Y + index * ROW, 48, ROW - 8], String(index + 1), {
-            size: 30,
-            weight: 800,
-            align: 'center',
-            color: '#8493b8',
-          }),
+        addField('select', 'give_to', 'Give to', 'Who Give points scores for.', 'pn', {
+          options: CONTESTANTS.map((item) => option(item.id, item.name)),
+        }),
+        addField('select', 'give_points', 'Points', 'How many Give points adds.', '12', { options: giveOptions }),
+        addField('text', 'points_scale', 'Points scale', 'What a jury can give, separated by commas.', SCALE, {
+          constraints: { maxLength: 60 },
+        }),
+        addField('array', 'contestants', 'Contestants', 'The running order. Points set a starting score, for example from a feed.', CONTESTANTS, {
+          ...objectItems([
+            prop('id', 'text', 'ID'),
+            prop('name', 'text', 'Name'),
+            prop('colour', 'color', 'Colour'),
+            prop('points', 'integer', 'Starting points'),
+          ]),
+          constraints: { maxItems: ROWS },
+        }),
+        addField('array', 'juries', 'Juries', 'In voting order. Ranking lists contestant IDs, best first.', JURIES, {
+          ...objectItems([prop('name', 'text', 'Name'), prop('ranking', 'text', 'Ranking')]),
+        }),
+        // Written by the function; layers read them.
+        addField('array', 'board', 'Board', 'Written by the Jury vote function.', look.board, {
+          ...INTERNAL,
+          ...objectItems([
+            prop('id', 'text'),
+            prop('slot', 'integer'),
+            prop('name', 'text'),
+            prop('initials', 'text'),
+            prop('colour', 'color'),
+            prop('points', 'integer'),
+            prop('rank', 'integer'),
+            prop('place', 'text'),
+            prop('award', 'text'),
+            prop('top', 'boolean'),
+            prop('lit', 'boolean'),
+            prop('move', 'text'),
+            prop('moved', 'text'),
+          ]),
+        }),
+        addField('array', 'ladder', 'Ladder', 'Written by the Jury vote function.', look.ladder, {
+          ...INTERNAL,
+          ...objectItems([
+            prop('key', 'text'),
+            prop('points', 'text'),
+            prop('name', 'text'),
+            prop('state', 'text'),
+          ]),
+        }),
+        addField('array', 'pips', 'Pips', 'Written by the Jury vote function.', look.pips, {
+          ...INTERNAL,
+          ...objectItems([prop('key', 'text'), prop('state', 'text')]),
+        }),
+        ...[
+          ['jury_status', look.jury_status],
+          ['jury_name', look.jury_name],
+          ['jury_count', look.jury_count],
+          ['top_state', look.top_state],
+          ['top_value', look.top_value],
+          ['top_caption', look.top_caption],
+          ['top_name', look.top_name],
+        ].map(([key, value]) => addField('text', key, key, 'Written by the Jury vote function.', value, INTERNAL)),
+        addField('boolean', 'voting_started', 'voting_started', 'Written by the Jury vote function.', look.voting_started, INTERNAL),
+        { type: 'add_custom_action', actionId: 'vote.next', name: 'Next vote', description: 'Plays the next scores of the current jury, or starts the next jury.' },
+        { type: 'add_custom_action', actionId: 'vote.give', name: 'Give points', description: 'Adds points by hand. A controller can send {to, points}; without them it uses Give to and Points.' },
+        { type: 'add_custom_action', actionId: 'vote.reset', name: 'Start over', description: 'Clears every score and every jury.' },
+
+        // The board.
+        rect('Board panel', [BOARD.x, BOARD.y, BOARD.w, BOARD.h], PANEL, 16),
+        rect('Board glow', [BOARD.x, BOARD.y, BOARD.w, 86], glow(ACCENT_2, 0.5), 16),
+        rect('Board accent', [BOARD.x, BOARD.y, BOARD.w, 6], grad([ACCENT, ACCENT_2])),
+        text('Title', [126, 66, 720, 60], 'GRAND FINAL', style(46, 700, { ls: 1.5 })),
+        text('Subtitle', [846, 66, 380, 60], 'JURY VOTE', style(26, 500, { ls: 3, align: 'right', color: SOFT })),
+
+        // One row of the board. The collection repeats it twelve times.
+        rect('Row tile', [R.x, R.y, R.w, R.h], grad(TILE), 10),
+        {
+          type: 'add_layer',
+          kind: 'rectangle',
+          name: 'Row glow',
+          transform: { x: R.x, y: R.y, width: R.w, height: R.h },
+          element: { fill: '#ffffff2e', borderRadius: 10, strokeColor: '#ffffff', strokeWidth: 3 },
+        },
+        text('Row place', [R.x + 6, R.y, 66, R.h], '–', style(34, 700, { align: 'center', color: SOFT })),
+        {
+          type: 'add_layer',
+          kind: 'ellipse',
+          name: 'Row avatar',
+          transform: { x: R.x + 80, y: R.y + 8, width: 48, height: 48 },
+          element: { fill: '#5b6bff', strokeWidth: 0 },
+        },
+        text('Row initials', [R.x + 80, R.y + 8, 48, 48], 'AA', style(20, 700, { align: 'center' })),
+        text('Row name', [R.x + 142, R.y, 560, R.h], 'Contestant', style(34, 500)),
+        rect('Row chip', [R.x + 716, R.y + 10, 92, 44], '#0c0e2b', 22),
+        text('Row award', [R.x + 716, R.y + 10, 92, 44], '+12', style(28, 700, { align: 'center' })),
+        rect('Row move', [R.x + 820, R.y + 10, 84, 44], '#0c0e2b', 22),
+        {
+          type: 'add_layer',
+          kind: 'path',
+          name: 'Row up',
+          transform: { x: R.x + 834, y: R.y + 22, width: 20, height: 20 },
+          element: { d: 'M50,8 L96,88 L4,88 Z', fill: '#39e38f', viewBoxWidth: 100, viewBoxHeight: 100, strokeWidth: 0 },
+        },
+        {
+          type: 'add_layer',
+          kind: 'path',
+          name: 'Row down',
+          transform: { x: R.x + 834, y: R.y + 22, width: 20, height: 20 },
+          element: { d: 'M4,12 L96,12 L50,92 Z', fill: '#ff5a72', viewBoxWidth: 100, viewBoxHeight: 100, strokeWidth: 0 },
+        },
+        text('Row moved', [R.x + 858, R.y + 10, 36, 44], '1', style(26, 600, { align: 'center' })),
+        text('Row points', [R.x + 916, R.y, 194, R.h], '0', style(44, 700, { align: 'right' })),
+        ...[
+          ['Row name', 'content', ['name']],
+          ['Row place', 'content', ['place']],
+          ['Row initials', 'content', ['initials']],
+          ['Row avatar', 'fill', ['colour']],
+          ['Row award', 'content', ['award']],
+          ['Row moved', 'content', ['moved']],
+          ['Row points', 'content', ['points']],
+        ].map(([layerName, targetProperty, sourcePath]) =>
+          bind(layerName, [{ fieldKey: 'board', targetProperty, sourcePath }]),
         ),
-        rect('Row plate', [X + 84, Y, W - 110, ROW - 8], '#ffffff14', 4),
-        text('Row name', [X + 104, Y, W - 300, ROW - 8], 'Driver', { size: 30 }),
-        text('Row points', [X + W - 170, Y, 120, ROW - 8], '0', { size: 32, weight: 800, align: 'right', color: '#4fe0ff' }),
         bind('Title', [{ fieldKey: 'title', targetProperty: 'content' }]),
-        bind('Row name', [{ fieldKey: 'standings', targetProperty: 'content', sourcePath: ['name'] }]),
-        bind('Row points', [{ fieldKey: 'standings', targetProperty: 'content', sourcePath: ['points'] }]),
-        ...['Row plate', 'Row name', 'Row points'].map((layerName) => ({
+        ...BOARD_ROW.map((layerName) => ({ type: 'set_layer_layout', layerName, groupId: 'board-row' })),
+        {
+          type: 'create_runtime_collection',
+          name: 'Board rows',
+          fieldKey: 'board',
+          layerNames: BOARD_ROW,
+          offsetPerItem: { x: 0, y: R.pitch },
+          capacity: ROWS,
+          overflow: 'truncate',
+          itemKeyPath: ['id'],
+          sortPath: ['slot'],
+          sortDirection: 'ascending',
+        },
+
+        // A light sweeping over whoever leads.
+        {
+          type: 'add_layer',
+          kind: 'rectangle',
+          name: 'Leader glint',
+          transform: { x: R.x, y: R.y, width: R.w, height: R.h },
+          element: { fill: glint(90), borderRadius: 10, strokeWidth: 0 },
+        },
+
+        // Lifts off the rows as the board comes in.
+        rect('Curtain', [R.x - 8, R.y - 4, R.w + 16, ALL_ROWS_H + 8], PANEL),
+        rect('Curtain edge', [R.x - 8, R.y - 4, R.w + 16, 4], grad([ACCENT, ACCENT_2])),
+
+        // The jury panel.
+        rect('Side panel', [SIDE.x, SIDE.y, SIDE.w, SIDE.h], PANEL, 16),
+        rect('Side glow', [SIDE.x, SIDE.y, SIDE.w, 152], glow(ACCENT, 0.3), 16),
+        rect('Side accent', [SIDE.x, SIDE.y, SIDE.w, 6], grad([ACCENT_2, ACCENT])),
+        text('Jury status', [SIDE.x + 28, SIDE.y + 20, 300, 36], 'NOW VOTING', style(24, 600, { ls: 3, color: ACCENT })),
+        text('Jury count', [SIDE.x + 306, SIDE.y + 20, 200, 36], 'JURY 1 OF 5', style(22, 500, { ls: 1, align: 'right', color: SOFT })),
+        text('Jury name', [SIDE.x + 28, SIDE.y + 56, 478, 80], 'Lisbon', style(62, 700)),
+        rect('Pip', [SIDE.x + 28, SIDE.y + 142, 52, 8], '#3a3f8f', 4),
+        rect('Ladder plate', [SIDE.x + 28, SIDE.y + 166, 478, 46], '#ffffff0a', 8),
+        text('Ladder points', [SIDE.x + 28, SIDE.y + 166, 66, 46], '1', style(28, 700, { align: 'center', color: '#5a60a8' })),
+        text('Ladder name', [SIDE.x + 104, SIDE.y + 166, 392, 46], '', style(28, 500)),
+        rect('Top tile', [SIDE.x + 28, SIDE.y + 648, 478, 300], grad(TILE, 180), 14),
+        {
+          type: 'add_layer',
+          kind: 'rectangle',
+          name: 'Top glint',
+          transform: { x: SIDE.x + 28, y: SIDE.y + 648, width: 478, height: 300 },
+          element: { fill: glint(110), borderRadius: 14, strokeWidth: 0 },
+        },
+        text('Top caption', [SIDE.x + 48, SIDE.y + 664, 438, 44], 'THE TOP SCORE', style(28, 600, { ls: 3, align: 'center', color: SOFT })),
+        text('Top value', [SIDE.x + 48, SIDE.y + 708, 438, 124], '12 POINTS', style(92, 700, { align: 'center', color: '#5a60a8' })),
+        text('Top name', [SIDE.x + 48, SIDE.y + 846, 438, 86], '', style(58, 700, { align: 'center' })),
+        bind('Jury status', [{ fieldKey: 'jury_status', targetProperty: 'content' }]),
+        bind('Jury name', [{ fieldKey: 'jury_name', targetProperty: 'content' }]),
+        bind('Jury count', [{ fieldKey: 'jury_count', targetProperty: 'content' }]),
+        bind('Top caption', [{ fieldKey: 'top_caption', targetProperty: 'content' }]),
+        bind('Top value', [{ fieldKey: 'top_value', targetProperty: 'content' }]),
+        bind('Top name', [{ fieldKey: 'top_name', targetProperty: 'content' }]),
+        bind('Ladder points', [{ fieldKey: 'ladder', targetProperty: 'content', sourcePath: ['points'] }]),
+        bind('Ladder name', [{ fieldKey: 'ladder', targetProperty: 'content', sourcePath: ['name'] }]),
+        { type: 'set_layer_layout', layerName: 'Pip', groupId: 'jury-pip' },
+        {
+          type: 'create_runtime_collection',
+          name: 'Jury pips',
+          fieldKey: 'pips',
+          layerNames: ['Pip'],
+          offsetPerItem: { x: 60, y: 0 },
+          capacity: 8,
+          overflow: 'truncate',
+          itemKeyPath: ['key'],
+        },
+        ...['Ladder plate', 'Ladder points', 'Ladder name'].map((layerName) => ({
           type: 'set_layer_layout',
           layerName,
-          groupId: 'standings-row',
+          groupId: 'ladder-row',
         })),
         {
           type: 'create_runtime_collection',
-          name: 'Standings rows',
-          fieldKey: 'standings',
-          layerNames: ['Row plate', 'Row name', 'Row points'],
-          offsetPerItem: { x: 0, y: ROW },
-          capacity: rows,
+          name: 'Ladder rows',
+          fieldKey: 'ladder',
+          layerNames: ['Ladder plate', 'Ladder points', 'Ladder name'],
+          offsetPerItem: { x: 0, y: 52 },
+          capacity: 9,
           overflow: 'truncate',
-          itemKeyPath: ['id'],
-          sortPath: ['points'],
-          sortDirection: 'descending',
+          itemKeyPath: ['key'],
         },
-        ...[
-          'Table panel',
-          'Table accent',
-          'Title',
-          'Round',
-          'Row plate',
-          'Row name',
-          'Row points',
-          ...Array.from({ length: rows }, (_, index) => `Rank ${index + 1}`),
-        ].flatMap((name) => fadeMotion(name)),
+        {
+          type: 'update_element',
+          layerName: 'Top name',
+          patch: {
+            textAnimation: {
+              type: 'pop',
+              split: 'grapheme',
+              durationFrames: 12,
+              cursor: 'none',
+              cursorBlinkFrames: 25,
+              replayOnUpdate: true,
+              customActionId: null,
+            },
+          },
+        },
       ],
-      'Rankings table',
+      'The voting board',
     );
-    const { composition, field, layer } = await scene();
-    const steps = composition.keyframes ?? [];
-    const stepIds = steps.filter((item) => item.role === 'step').map((item) => item.id);
-    if (stepIds.length !== 3) throw new Error(`Expected three steps: ${JSON.stringify(Object.keys(composition))} ${JSON.stringify(steps).slice(0, 400)}`);
-    const standings = field('standings').id;
-    const roundRule = (id, trigger, eventId, index) =>
-      rule(id, `Round ${index + 1}`, {
-        trigger,
-        ...(eventId ? { eventId } : {}),
-        actions: [
-          { type: 'set-data', fieldId: standings, mode: 'set', value: ROUNDS[index] },
-          { type: 'property', targetProperty: 'content', value: `ROUND ${index + 1}`, targetLayerId: layer('Round').id },
-        ],
+
+    const { field, composition } = await scene();
+    const when = (id, name, fieldKey, sourcePath, operator, value, actions) =>
+      rule(id, name, {
+        trigger: 'data',
+        fieldId: field(fieldKey).id,
+        sourcePath,
+        operator,
+        ...(value === undefined ? {} : { value }),
+        actions,
       });
+    const stops = ([from, to]) => [
+      { type: 'property', targetProperty: 'fill.stops[0].color', value: from },
+      { type: 'property', targetProperty: 'fill.stops[1].color', value: to },
+    ];
+    const ink = [{ type: 'property', targetProperty: 'color', value: INK }];
+    const hide = (transitionFrames = 0) => [{ type: 'visibility', visible: false, transitionFrames }];
+    const medalText = (prefix) =>
+      when(`${prefix}-medal`, 'Dark on a medal', 'board', ['rank'], 'one-of', [1, 2, 3], ink);
+
     await apply(
       [
         {
           type: 'set_layer_visual_rules',
-          layerName: 'Table panel',
+          layerName: 'Row tile',
           rules: [
-            roundRule('round-1', 'play', null, 0),
-            roundRule('round-2', 'step', stepIds[1], 1),
-            roundRule('round-3', 'step', stepIds[2], 2),
+            when('tile-gold', 'First place is gold', 'board', ['rank'], 'equals', 1, stops(GOLD)),
+            when('tile-silver', 'Second place is silver', 'board', ['rank'], 'equals', 2, stops(SILVER)),
+            when('tile-bronze', 'Third place is bronze', 'board', ['rank'], 'equals', 3, stops(BRONZE)),
+          ],
+        },
+        {
+          type: 'set_layer_visual_rules',
+          layerName: 'Row glow',
+          rules: [when('glow-off', 'Lit when it scores', 'board', ['lit'], 'equals', false, hide(10))],
+        },
+        { type: 'set_layer_visual_rules', layerName: 'Row place', rules: [medalText('place')] },
+        { type: 'set_layer_visual_rules', layerName: 'Row name', rules: [medalText('name')] },
+        { type: 'set_layer_visual_rules', layerName: 'Row points', rules: [medalText('points')] },
+        {
+          type: 'set_layer_visual_rules',
+          layerName: 'Row chip',
+          rules: [
+            when('chip-off', 'No score, no chip', 'board', ['award'], 'empty', undefined, hide()),
+            when('chip-top', 'The top score stands out', 'board', ['top'], 'equals', true, [
+              { type: 'property', targetProperty: 'fill', value: ACCENT },
+            ]),
+          ],
+        },
+        {
+          type: 'set_layer_visual_rules',
+          layerName: 'Row award',
+          rules: [when('award-off', 'No score, no chip', 'board', ['award'], 'empty', undefined, hide())],
+        },
+        {
+          type: 'set_layer_visual_rules',
+          layerName: 'Row move',
+          rules: [when('move-off', 'Only when it moved', 'board', ['move'], 'equals', 'same', hide())],
+        },
+        {
+          type: 'set_layer_visual_rules',
+          layerName: 'Row up',
+          rules: [when('up-off', 'Only when it climbed', 'board', ['move'], 'not-equals', 'up', hide())],
+        },
+        {
+          type: 'set_layer_visual_rules',
+          layerName: 'Row down',
+          rules: [when('down-off', 'Only when it fell', 'board', ['move'], 'not-equals', 'down', hide())],
+        },
+        {
+          type: 'set_layer_visual_rules',
+          layerName: 'Row moved',
+          rules: [when('moved-off', 'Only when it moved', 'board', ['move'], 'equals', 'same', hide())],
+        },
+        {
+          type: 'set_layer_visual_rules',
+          layerName: 'Leader glint',
+          rules: [when('glint-off', 'Nobody leads yet', 'voting_started', [], 'equals', false, hide())],
+        },
+        {
+          type: 'set_layer_visual_rules',
+          layerName: 'Pip',
+          rules: [
+            when('pip-done', 'Voted', 'pips', ['state'], 'equals', 'done', [
+              { type: 'property', targetProperty: 'fill', value: ACCENT_2 },
+            ]),
+            when('pip-now', 'Voting now', 'pips', ['state'], 'equals', 'now', [
+              { type: 'property', targetProperty: 'fill', value: ACCENT },
+            ]),
+          ],
+        },
+        {
+          type: 'set_layer_visual_rules',
+          layerName: 'Ladder plate',
+          rules: [
+            when('ladder-done', 'Given', 'ladder', ['state'], 'equals', 'done', [
+              { type: 'property', targetProperty: 'fill', value: '#2b3080' },
+            ]),
+            when('ladder-next', 'Next up', 'ladder', ['state'], 'equals', 'next', [
+              { type: 'property', targetProperty: 'fill', value: '#ff3d8b40' },
+            ]),
+          ],
+        },
+        {
+          type: 'set_layer_visual_rules',
+          layerName: 'Ladder points',
+          rules: [
+            when('ladder-points-done', 'Given', 'ladder', ['state'], 'not-equals', 'wait', [
+              { type: 'property', targetProperty: 'color', value: '#ffffff' },
+            ]),
+          ],
+        },
+        {
+          type: 'set_layer_visual_rules',
+          layerName: 'Top tile',
+          rules: [
+            when('top-gold', 'Gold once it is called', 'top_state', [], 'not-equals', 'wait', stops(GOLD)),
+          ],
+        },
+        {
+          type: 'set_layer_visual_rules',
+          layerName: 'Top glint',
+          rules: [when('top-glint-off', 'Only for the top score', 'top_state', [], 'equals', 'wait', hide())],
+        },
+        ...['Top caption', 'Top value', 'Top name'].map((layerName, index) => ({
+          type: 'set_layer_visual_rules',
+          layerName,
+          rules: [when(`top-ink-${index}`, 'Dark on gold', 'top_state', [], 'not-equals', 'wait', ink)],
+        })),
+
+        // Motion: panels fade, then the curtain lifts off the rows.
+        ...['Board panel', 'Board glow', 'Board accent', 'Side panel', 'Side glow', 'Side accent', 'Curtain'].map((layerName) => ({
+          type: 'set_layer_motion',
+          layerName,
+          side: 'in',
+          spec: { style: 'fade', durationFrames: 8, offsetFrames: 22, easing: 'cubic-out' },
+        })),
+        ...BOARD_ROW.map((layerName) => ({
+          type: 'set_layer_motion',
+          layerName,
+          side: 'in',
+          spec: { style: 'fade', durationFrames: 1, offsetFrames: 21, easing: 'linear' },
+        })),
+        ...['Title', 'Subtitle'].map((layerName, index) => ({
+          type: 'set_layer_motion',
+          layerName,
+          side: 'in',
+          spec: { style: 'slide', direction: 'left', distance: 40, durationFrames: 12, offsetFrames: 14 - index * 3, easing: 'cubic-out' },
+        })),
+        ...['Jury status', 'Jury count', 'Jury name', 'Pip'].map((layerName, index) => ({
+          type: 'set_layer_motion',
+          layerName,
+          side: 'in',
+          spec: { style: 'slide', direction: 'right', distance: 40, durationFrames: 12, offsetFrames: 14 - index * 2, easing: 'cubic-out' },
+        })),
+        ...['Ladder plate', 'Ladder points', 'Ladder name'].map((layerName) => ({
+          type: 'set_layer_motion',
+          layerName,
+          side: 'in',
+          spec: { style: 'fade', durationFrames: 12, offsetFrames: 3, easing: 'cubic-out' },
+        })),
+        ...['Top tile', 'Top caption', 'Top value', 'Top name'].map((layerName) => ({
+          type: 'set_layer_motion',
+          layerName,
+          side: 'in',
+          spec: { style: 'pop', durationFrames: 12, offsetFrames: 0 },
+        })),
+        ...['Leader glint', 'Top glint'].map((layerName) => ({
+          type: 'set_layer_motion',
+          layerName,
+          side: 'in',
+          spec: { style: 'fade', durationFrames: 1, offsetFrames: 0, easing: 'linear' },
+        })),
+        {
+          type: 'set_property_track',
+          layerName: 'Curtain',
+          property: 'y',
+          keys: [
+            { frame: 8, value: R.y - 4 },
+            { frame: 28, value: R.y + ALL_ROWS_H + 4, easing: 'cubic-in-out' },
+          ],
+        },
+        {
+          type: 'set_property_track',
+          layerName: 'Curtain',
+          property: 'height',
+          keys: [
+            { frame: 8, value: ALL_ROWS_H + 8 },
+            { frame: 28, value: 0, easing: 'cubic-in-out' },
+          ],
+        },
+        {
+          type: 'set_property_track',
+          layerName: 'Curtain edge',
+          property: 'y',
+          keys: [
+            { frame: 8, value: R.y - 4 },
+            { frame: 28, value: R.y + ALL_ROWS_H, easing: 'cubic-in-out' },
+          ],
+        },
+        {
+          type: 'set_property_track',
+          layerName: 'Curtain edge',
+          property: 'opacity',
+          keys: [
+            { frame: 0, value: 0 },
+            { frame: 8, value: 1 },
+            { frame: 25, value: 1 },
+            { frame: 29, value: 0 },
+          ],
+        },
+        ...MOTION_OUT.map((layerName) => ({
+          type: 'set_layer_motion',
+          layerName,
+          side: 'out',
+          spec: { style: 'fade', durationFrames: 12, offsetFrames: 0, easing: 'cubic-in' },
+        })),
+        {
+          type: 'set_layer_loop',
+          layerName: 'Leader glint',
+          name: 'Leader sweep',
+          activation: { type: 'lifecycle' },
+          durationFrames: 125,
+          phaseOffsetFrames: 0,
+          repeatCount: null,
+        },
+        ...glintTrack('Leader glint', 125, 40),
+        {
+          type: 'set_layer_loop',
+          layerName: 'Top glint',
+          name: 'Top sweep',
+          activation: { type: 'lifecycle' },
+          durationFrames: 75,
+          phaseOffsetFrames: 0,
+          repeatCount: null,
+        },
+        ...glintTrack('Top glint', 75, 30),
+        {
+          type: 'set_logic_functions',
+          compositionId: composition.id,
+          functions: [
+            {
+              type: 'javascript',
+              version: 1,
+              id: 'jury-vote',
+              name: 'Jury vote',
+              enabled: true,
+              source,
+              inputs: Object.fromEntries(
+                ['contestants', 'juries', 'points_scale', 'reveal', 'give_to', 'give_points'].map((key) => [key, field(key).id]),
+              ),
+              outputs: Object.fromEntries(
+                [
+                  'board',
+                  'ladder',
+                  'pips',
+                  'jury_status',
+                  'jury_name',
+                  'jury_count',
+                  'top_state',
+                  'top_value',
+                  'top_caption',
+                  'top_name',
+                  'voting_started',
+                ].map((key) => [key, field(key).id]),
+              ),
+              actions: ['vote.next', 'vote.give', 'vote.reset'],
+              initialState: INITIAL_STATE,
+              // A wall-clock limit: a busy machine must not stop the graphic from loading.
+              timeoutMs: 1000,
+            },
           ],
         },
       ],
-      'Next plays each round into the table',
+      'Rules, motion and the scoring function',
     );
   },
 };

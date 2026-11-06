@@ -1,31 +1,33 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1.25rem;
-  margin: 1.5rem 0 2rem;
+  column-gap: 1.25rem;
+  margin: 1.5rem 0 0.75rem;
 }
 
+/* Cards in a row share rows for thumbnail, title, summary and tags, so each part lines up across
+   them whatever its length. The space between rows is a margin because a gap would open inside cards. */
 .card {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-row: span 4;
+  grid-template-rows: subgrid;
   overflow: hidden;
+  margin-bottom: 1.25rem;
   border: 1px solid var(--site-border);
   border-radius: 6px;
   background: var(--site-surface);
   color: inherit;
-  transition:
-    border-color 150ms ease,
-    transform 150ms ease;
+  transition: border-color 150ms ease;
 }
 
 .card:hover {
   border-color: var(--ifm-color-primary);
   color: inherit;
   text-decoration: none;
-  transform: translateY(-2px);
 }
 
 .thumb {
+  width: 100%;
   aspect-ratio: 16 / 9;
   background: #05070d;
 }
@@ -39,9 +41,9 @@
 }
 
 .body {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
+  display: grid;
+  grid-row: span 3;
+  grid-template-rows: subgrid;
   padding: 0.9rem 1rem 1rem;
 }
 
@@ -51,26 +53,46 @@
 }
 
 .summary {
-  flex: 1;
   margin: 0 0 0.75rem;
   color: var(--site-muted);
   font-size: 0.9rem;
   line-height: 1.45;
 }
 
-.tags {
+.filter {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  gap: 0.4rem;
+  margin-top: 1.5rem;
 }
 
-.tags li {
-  padding: 0.1rem 0.5rem;
+.choice {
+  padding: 0.3rem 0.8rem;
+  border: 1px solid var(--site-border);
   border-radius: 999px;
-  background: var(--site-chip);
+  background: transparent;
+  color: var(--ifm-font-color-base);
+  cursor: pointer;
+  font-family: var(--site-font-display);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.choice span {
   color: var(--site-muted);
-  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+.choice:hover {
+  border-color: var(--ifm-color-primary);
+}
+
+.choice:focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 1px;
+}
+
+.choice[aria-pressed='true'] {
+  border-color: var(--ifm-color-primary);
+  background: var(--site-chip);
 }

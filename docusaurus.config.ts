@@ -7,6 +7,16 @@ import type * as Docs from '@docusaurus/plugin-content-docs';
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const repository = 'https://github.com/zerodensity/ograf-studio';
+const linkedInGroup = 'https://www.linkedin.com/groups/40618425/';
+
+// A section's landing page is the parent in its menu, so it isn't listed under itself as well.
+const withoutLandingPage: Docs.Options['sidebarItemsGenerator'] = async ({
+  defaultSidebarItemsGenerator,
+  ...args
+}) =>
+  (await defaultSidebarItemsGenerator(args)).filter(
+    (item) => !(item.type === 'doc' && item.id === 'index'),
+  );
 
 const config: Config = {
   title: 'OGraf Studio',
@@ -50,6 +60,7 @@ const config: Config = {
           path: 'docs',
           routeBasePath: 'docs',
           sidebarPath: './sidebars.ts',
+          sidebarItemsGenerator: withoutLandingPage,
         },
         blog: {
           path: 'announcements',
@@ -82,6 +93,7 @@ const config: Config = {
         path: 'guides',
         routeBasePath: 'guides',
         sidebarPath: './sidebarsGuides.ts',
+        sidebarItemsGenerator: withoutLandingPage,
       } satisfies Docs.Options,
     ],
     [
@@ -123,7 +135,7 @@ const config: Config = {
     metadata: [
       {
         name: 'keywords',
-        content: 'OGraf, EBU, broadcast graphics, HTML5 graphics, lower thirds, playout, MCP',
+        content: 'OGraf, EBU, broadcast graphics, lower thirds, playout, MCP',
       },
     ],
     colorMode: {
@@ -169,6 +181,12 @@ const config: Config = {
           className: 'header-github-link',
           'aria-label': 'GitHub repository',
         },
+        {
+          href: linkedInGroup,
+          position: 'right',
+          className: 'header-linkedin-link',
+          'aria-label': 'OGraf Studio Community on LinkedIn',
+        },
       ],
     },
     footer: {
@@ -192,23 +210,19 @@ const config: Config = {
           ],
         },
         {
-          title: 'Project',
+          title: 'Links',
           items: [
-            {label: 'GitHub', href: repository},
+            {label: 'OGraf Studio on GitHub', href: repository},
+            {label: 'LinkedIn community', href: linkedInGroup},
             {label: 'Download', href: `${repository}/releases/latest`},
             {label: 'Contributing', href: `${repository}/blob/stable/CONTRIBUTING.md`},
+            {label: 'OGraf Specifications on GitHub', href: 'https://github.com/ebu/ograf'},
+            {label: 'EBU OGraf', href: 'https://ograf.ebu.io/'},
             {label: 'Third-party credits', to: '/docs/third-party'},
           ],
         },
-        {
-          title: 'OGraf',
-          items: [
-            {label: 'EBU OGraf', href: 'https://ograf.ebu.io/'},
-            {label: 'OGraf on GitHub', href: 'https://github.com/ebu/ograf'},
-          ],
-        },
       ],
-      copyright: `OGraf Studio is open source under the <a href="${repository}/blob/stable/LICENSE">GNU AGPL v3.0</a>. The OGraf logo is © European Broadcasting Union (EBU), used under the <a href="/third-party/ebu-ograf-LICENSE.txt">MIT licence</a>; it identifies OGraf functionality and does not indicate EBU endorsement or certification. The feature reel uses an excerpt of Big Buck Bunny, © 2008 Blender Foundation, <a href="https://peach.blender.org/">peach.blender.org</a>, cut and re-encoded, under <a href="https://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>.`,
+      copyright: `OGraf Studio is open source under the <a href="${repository}/blob/stable/LICENSE">GNU AGPL v3.0</a>. The OGraf logo is © European Broadcasting Union (EBU)`,
     },
     prism: {
       theme: prismThemes.github,

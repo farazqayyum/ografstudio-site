@@ -1,0 +1,10 @@
+{
+  "label": "Animation",
+  "position": 7,
+  "link": {
+    "type": "generated-index",
+    "title": "Animation",
+    "description": "Keyframes, curves and ready-made motion for layers and text.",
+    "slug": "/user-guide/animation"
+  }
+}

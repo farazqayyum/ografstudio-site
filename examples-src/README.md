@@ -8,6 +8,11 @@ clock, countdown, scoreboard, lower-third, ticker, bug and rankings.
 
 `shader-background` and `lottie-pulse` are not built here.
 
+Rankings also has `rankings-votes.js`, the scoring function that Studio's Functions pane shows, and
+`fonts/oswald.ttf` with its licence. Studio's canvas doesn't run functions, so `build.mjs` plays the
+function up to the second jury's top score and uses the result as the default of the fields it
+writes. That sample is what you see while designing. On air, the graphic starts from zero.
+
 ## What each one needs from Studio
 
 These sources use settings driven by data on clocks and timers (`clock.timeZone`, `clock.format` and

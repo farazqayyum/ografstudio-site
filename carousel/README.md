@@ -1,10 +1,10 @@
 # Homepage feature reel
 
 The hero carousel on the homepage is a real OGraf graphic, not a video or a web animation. It's a
-template set with seven templates in two Transition Logic lanes, exported as one certified coordinated
+template set with nine templates in two Transition Logic lanes, exported as one certified coordinated
 package, `graphics/feature-reel.ograf.zip`, and played by the OGraf web player.
 
-- The **reel** lane holds the six slides. The surface that glides between them is one shared
+- The **reel** lane holds the eight slides. The surface that glides between them is one shared
   element morphing between its pose in each template.
 - The **ticker** lane holds the ticker. Taking it in makes the surface give up 40 px of height
   through a Transition Logic layout rule, and taking it out gives them back. The band fits the stage's
@@ -63,6 +63,19 @@ Studio trusts the seed because its bytes match the bundle compiled into Studio. 
 shipping that version, opening the seed reports a plugin mismatch, and you need a new seed. Make one
 in a blank template: open **Window > Plugins > Chart**, click any chart type, delete the chart that
 appears, and save the template over `carousel/charts-seed.ogs`. Deleting the chart keeps the pin.
+
+### The editor screenshots
+
+The Studio slide is a tour of real screenshots, `assets/studio-*.jpg`, 1920 by 1080. `TOUR` in
+`build.mjs` lists them with the part of each to zoom into. They're from Studio holding this reel, so
+retake them when the editor's look changes: build once, keep Studio open at a 1440 by 810 window, set up
+each pane, and save a JPEG at a device scale of 1.333. Check them for personal details before publishing.
+
+### The LinkedIn button
+
+OGraf rules can't open a web page, so the Join button on the Community slide is drawn in the graphic and
+`HeroReel` lays a real link over it. `JOIN_BUTTON` in `build.mjs` and in `HeroReel/index.tsx` must match.
+Where the package plays elsewhere, the button doesn't respond and the address under it does the job.
 
 ### Changing the ticker's text
 
@@ -133,8 +146,8 @@ node carousel/sound/build-sound.mjs --film bbb_sunflower_1080p_30fps_normal.mp4
 
 - Film clip and its sound: excerpt of Big Buck Bunny, © 2008 Blender Foundation,
   [peach.blender.org](https://peach.blender.org/), cut and re-encoded, under
-  [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/). The credit is on the slide and in the
-  site footer.
+  [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/). The credit is on the slide and on the
+  third-party credits page.
 - Sound effects: synthesised by `sound/build-sound.mjs`.
 - Charts: Chart.js 4.5.1, MIT licence, through Studio's AGPL-3.0 renderer. The chart figures are made
   up.
@@ -143,3 +156,5 @@ node carousel/sound/build-sound.mjs --film bbb_sunflower_1080p_30fps_normal.mp4
 - Plus Jakarta Sans: SIL Open Font License 1.1, `assets/PlusJakartaSans-OFL.txt`.
 - Space Mono: SIL Open Font License 1.1, `assets/SpaceMono-OFL.txt`.
 - OGraf logo: © European Broadcasting Union, MIT licence.
+- LinkedIn mark: a trademark of LinkedIn Corporation, used only to link to the group.
+  `linkedin-mark-white.svg` is the Simple Icons drawing, CC0-1.0.

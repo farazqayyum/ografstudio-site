@@ -38,6 +38,9 @@ replacement text along with safe areas, text size and contrast.
 
 ## Go further
 
-- **Runtime Collections** in **Data** drive repeated rows, such as a results table, from a list
-  field.
-- **Custom Actions** (**+ Add Action**) let the operator trigger named actions in the graphic.
+- **Lists** in **Data** drive repeated rows, such as a results table, from a list field.
+- **Actions** in **Data** (**+ Add Action**) let the operator trigger named actions in the graphic.
+- **Connections** in **Data** fill fields from a [data connection](/docs/user-guide/data/connections)
+  while the graphic is on air.
+- [Visual rules](/docs/user-guide/data/visual-rules) change the graphic by itself when a value changes, or
+  when someone clicks, taps or hovers over it.

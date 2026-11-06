@@ -1,25 +1,61 @@
 ---
 title: Rankings
 sidebar_position: 7
-description: A standings table that replays three rounds, one Next at a time, moving each row to its new place.
+description: A jury vote for a TV show. Each jury gives its points, and the graphic keeps the score, reranks the board and calls the winner.
 ---
 
+import ExampleTags from '@site/src/components/ExampleTags';
 import OGrafExample from '@site/src/components/OGrafExample';
+
+<ExampleTags slug="rankings" />
 
 <OGrafExample slug="rankings" />
 
-A leaderboard for sport and elections. Press **Next step** and the package moves to its next round:
-every row keeps its identity and slides to its new position.
+A results board for a song contest or game show. Twelve contestants wait on the board and five
+juries give their points in turn. Each time a score lands, the graphic adds it up, works out the new
+ranking and slides every row to its place. Gold, silver and bronze follow whoever holds the top
+three places.
 
-## How it's built
+## Try it
 
-- **Runtime collection:** one row is designed once, then repeated for each entry in the `standings`
-  array. Rows are keyed by `id` and sorted by `points`.
-- **Steps:** the graphic has three steps, so a controller's Next button walks through them.
-- **Rules:** each step fires a rule that sets the round's standings inside the graphic.
-- **Fields:** the title and the full standings array, which a data feed can replace at any time.
+1. Press **Next vote**. Lisbon's low scores land by themselves, one a second.
+2. Press **Next vote** again for the top score. The tile holds the moment, then gives the name.
+3. Carry on through the five juries. The last top score decides the winner.
+
+There's more to press along the way:
+
+- **Next vote** while scores are still landing lands the rest at once.
+- **Low scores** sets how they arrive: running by themselves, landing together, or one per press.
+- **Give points** adds a score by hand, using **Give to** and **Points**.
+- **Start over** clears the board. **Take out** and **Replay** keep the scores.
+
+## What you get
+
+- **Function:** one function, Jury vote, runs the whole show inside the graphic. It reads the
+  contestants and juries, keeps the score, and writes what the layers display.
+- **Runtime collections:** the board, the jury's list of scores and the jury markers are each one row
+  designed once. The function gives each board row a place, and the row slides there.
+- **Rules:** gold, silver and bronze are rules on a row's rank, so a tie shares its colour. The score
+  chips, arrows and highlights are rules too.
+- **Fields:** the title, how low scores arrive and the points scale, plus the `contestants` and
+  `juries` arrays a controller or feed can send.
+- **Actions:** Next vote, Give points and Start over. A controller can send Give points a payload of
+  `{to, points}`, so a live phone vote can feed the same board.
+- **Motion:** rows take the composition's update transition time to move, 0.64 seconds here. A row
+  that climbs passes over the others.
+
+## How the score works
+
+- A jury's `ranking` lists contestant IDs, best first. The best gets the top of the points scale, the
+  next gets the one below, and so on.
+- Rows sort by points. On equal points, whoever got there first stays ahead, and both show the same
+  place.
+- Arrows show how far a contestant has moved since the current jury began. A contestant with no points
+  has no place and no arrow.
 
 ## Make it yours
 
-- Replace the rounds in the **Table panel** layer's rules, or drive `standings` from your own feed.
-- Change `sortPath` to rank by another value, or set `pageSize` to page through a longer table.
+- Send your own `contestants` and `juries`. This board fits twelve contestants.
+- Change **Points scale**. For a small panel, `1,2,3` works as well as the full ten scores.
+- Give a contestant starting points to carry a score over from an earlier round.
+- Change the pace in the numbers at the top of the function, such as the wait before a top score.

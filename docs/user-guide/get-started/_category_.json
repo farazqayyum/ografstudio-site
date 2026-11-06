@@ -1,0 +1,10 @@
+{
+  "label": "Get started",
+  "position": 1,
+  "link": {
+    "type": "generated-index",
+    "title": "Get started",
+    "description": "Create, open and save templates, and know which file is which.",
+    "slug": "/user-guide/get-started"
+  }
+}

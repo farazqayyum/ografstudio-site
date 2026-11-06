@@ -25,9 +25,9 @@
   },
   "feature-reel": {
     "name": "OGraf Studio Feature Reel",
-    "manifest": "/graphics/feature-reel/set-06e05b11-d8af-448a-957c-d80fc2afd8ed-rt.ograf.json",
+    "manifest": "/graphics/feature-reel/set-733d7c71-dc36-4528-a4a4-8c203faa42e7-rt.ograf.json",
     "download": "/graphics/feature-reel.ograf.zip",
-    "bytes": 7310992,
+    "bytes": 9596160,
     "fields": 0,
     "actions": 4
   },
@@ -49,11 +49,11 @@
   },
   "rankings": {
     "name": "Rankings",
-    "manifest": "/graphics/rankings/project-27b01f69-95c9-46ec-9804-4b70052e6171-rt.ograf.json",
+    "manifest": "/graphics/rankings/project-2c7a8723-7fc8-4430-8b74-416e5737297a-rt.ograf.json",
     "download": "/graphics/rankings.ograf.zip",
-    "bytes": 812916,
-    "fields": 1,
-    "actions": 1
+    "bytes": 1251314,
+    "fields": 5,
+    "actions": 3
   },
   "scoreboard": {
     "name": "Scoreboard",

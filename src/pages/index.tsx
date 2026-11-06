@@ -3,6 +3,7 @@ import Link from '@docusaurus/Link';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import Layout from '@theme/Layout';
 import Heading from '@theme/Heading';
+import {LevelTag} from '@site/src/components/ExampleTags';
 import HeroReel from '@site/src/components/HeroReel';
 import OGrafExample from '@site/src/components/OGrafExample';
 import {examples} from '@site/src/data/examples';
@@ -44,7 +45,7 @@ const FEATURES = [
   },
   {
     title: 'Portable OGraf output',
-    text: 'Export HTML5 packages with realtime playback and deterministic non-realtime seeking, checked before every save and export.',
+    text: 'Export standard OGraf packages with realtime playback and deterministic non-realtime seeking, checked before every save and export.',
   },
 ];
 
@@ -123,7 +124,7 @@ function Proof(): ReactNode {
         </Link>
         <p>
           <strong>Standard output</strong>
-          EBU OGraf HTML5 packages
+          EBU OGraf packages
         </p>
         <p>
           <strong>Free</strong>
@@ -183,7 +184,7 @@ function LiveDemo(): ReactNode {
               <p
                 key={item.slug}
                 className={item === example ? styles.liveNow : `${styles.liveNow} ${styles.liveNowSizer}`}>
-                <strong>{item.title}.</strong> {item.summary}
+                <strong>{item.title}</strong> <LevelTag level={item.level} /> {item.summary}
               </p>
             ))}
           </div>
@@ -270,15 +271,11 @@ function Workflow(): ReactNode {
 
 function News(): ReactNode {
   const items = [
-    ...(info.latestRelease
-      ? [
-          {
-            kicker: 'Latest release',
-            title: `OGraf Studio ${info.latestRelease}`,
-            to: `/releases/${info.latestRelease}`,
-          },
-        ]
-      : []),
+    {
+      kicker: 'Latest release',
+      title: `OGraf Studio ${info.latestPrerelease ?? info.latestRelease}`,
+      to: `/releases/${info.latestPrerelease ?? info.latestRelease}`,
+    },
     {
       kicker: 'Award',
       title: 'Best of Show at IBC 2026',
@@ -331,9 +328,8 @@ export default function Home(): ReactNode {
   return (
     <Layout
       title="Broadcast graphics, designed in your browser"
-      description="OGraf Studio is an open-source, browser-based editor for EBU OGraf-compatible HTML5 broadcast graphics: lower thirds, scoreboards, tickers and full-screen graphics.">
-      {/* The homepage is a dark stage in either colour mode; docs follow the visitor's choice. */}
-      <div className={styles.home} data-theme="dark">
+      description="OGraf Studio is an open-source, browser-based editor for EBU OGraf-compatible broadcast graphics: lower thirds, scoreboards, tickers and full-screen graphics.">
+      <div className={styles.home}>
         <Hero />
         <main>
           <Proof />

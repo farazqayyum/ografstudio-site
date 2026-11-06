@@ -1,0 +1,10 @@
+{
+  "label": "Paint and effects",
+  "position": 5,
+  "link": {
+    "type": "generated-index",
+    "title": "Paint and effects",
+    "description": "Fills, transparency, shaders and the effects stack.",
+    "slug": "/user-guide/paint-and-effects"
+  }
+}

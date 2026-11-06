@@ -19,8 +19,16 @@ const TICKER_LANE = 'ticker';
 const TICKER_STATE = 'ticker-on';
 const SLIDES = [
   {
-    id: 'transitions',
+    id: 'studio',
     number: '01',
+    name: 'The editor',
+    short: 'Editor',
+    line: 'A tour of Studio itself: the canvas, the timeline, the Transitions pane and data and rules.',
+    dwell: 15000,
+  },
+  {
+    id: 'transitions',
+    number: '02',
     name: 'Transition Logic',
     short: 'Logic',
     line: 'Lanes, takes and morphs. The surface gliding between these slides is one shared element.',
@@ -28,7 +36,7 @@ const SLIDES = [
   },
   {
     id: 'shaders',
-    number: '02',
+    number: '03',
     name: 'Shaders',
     short: 'Shaders',
     line: 'Live GLSL on text, outlines, shapes and images, with its controls exposed as operator fields.',
@@ -36,7 +44,7 @@ const SLIDES = [
   },
   {
     id: 'touch',
-    number: '03',
+    number: '04',
     name: 'Touch controls',
     short: 'Touch',
     line: 'Hover and tap the tabs in the graphic. Those rules ship inside the exported package.',
@@ -44,7 +52,7 @@ const SLIDES = [
   },
   {
     id: 'media',
-    number: '04',
+    number: '05',
     name: 'Media',
     short: 'Media',
     line: 'Video, images, masks, SVG and Lottie on the canvas. Turn the sound on to hear the clip and its effects.',
@@ -52,7 +60,7 @@ const SLIDES = [
   },
   {
     id: 'charts',
-    number: '05',
+    number: '06',
     name: 'Charts',
     short: 'Charts',
     line: 'Bars, doughnuts and area charts bound to data. They morph when values change, and a shader can paint the marks.',
@@ -60,15 +68,27 @@ const SLIDES = [
   },
   {
     id: 'ai',
-    number: '06',
+    number: '07',
     name: 'AI and MCP',
     short: 'AI',
-    line: 'An assistant inside Studio, and an MCP server for your own agents. This reel was built with it.',
+    line: 'An assistant inside Studio, an MCP server for your own agents and a skill that teaches them Studio. This reel was built with it.',
+    dwell: 11000,
+  },
+  {
+    id: 'community',
+    number: '08',
+    name: 'Join the community',
+    short: 'Join',
+    line: 'The OGraf Studio Community on LinkedIn. Ask questions and share what you make.',
     dwell: 11000,
   },
 ];
 const MEDIA_INDEX = SLIDES.findIndex((slide) => slide.id === 'media');
 const MONITOR_SLIDE = SLIDES.findIndex((slide) => slide.id === 'transitions');
+const COMMUNITY_SLIDE = SLIDES.findIndex((slide) => slide.id === 'community');
+const LINKEDIN_GROUP = 'https://www.linkedin.com/groups/40618425/';
+// JOIN_BUTTON in carousel/build.mjs, on the 1920x1080 canvas: x, y, width, height.
+const JOIN_BUTTON = [96, 672, 590, 112];
 const PARK_AFTER_MS = 4000;
 const TOUCH_HOLD_MS = 15000;
 const FOLD_KEY = 'ograf-reel-menu-folded';
@@ -544,6 +564,23 @@ function Reel(): ReactNode {
               <span className={styles.chipShort}>Webcam</span>
             </button>
           )}
+          {/* OGraf rules can't open a page, so the button drawn in the graphic gets a real link on top. */}
+          {onAir && active === COMMUNITY_SLIDE && (
+            <a
+              className={styles.joinLink}
+              href={LINKEDIN_GROUP}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Opens the group on LinkedIn in a new tab"
+              aria-label="Join the OGraf Studio Community on LinkedIn (opens in a new tab)"
+              style={{
+                left: `${(JOIN_BUTTON[0] / 1920) * 100}%`,
+                top: `${(JOIN_BUTTON[1] / 1080) * 100}%`,
+                width: `${(JOIN_BUTTON[2] / 1920) * 100}%`,
+                height: `${(JOIN_BUTTON[3] / 1080) * 100}%`,
+              }}
+            />
+          )}
           {folded && camera.note && <p className={styles.errorNote}>{camera.note}</p>}
           <span className={`${styles.corner} ${styles.cornerTL}`} aria-hidden="true" />
           <span className={`${styles.corner} ${styles.cornerTR}`} aria-hidden="true" />
@@ -565,6 +602,14 @@ function Reel(): ReactNode {
       {/* The rundown's description folds away on small screens, so it repeats here. */}
       <p className={styles.mobileLine} aria-live="off">
         {SLIDES[active].line}
+        {active === COMMUNITY_SLIDE && (
+          <>
+            {' '}
+            <a href={LINKEDIN_GROUP} target="_blank" rel="noopener noreferrer">
+              Join on LinkedIn
+            </a>
+          </>
+        )}
       </p>
 
       <div className={styles.status}>

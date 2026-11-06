@@ -14,8 +14,8 @@ canvas.
 Above the canvas, open **+ Recipe…** and choose **Lower Third**. Studio adds a group of ordinary
 layers with editable data fields and an entrance and exit animation already in place.
 
-The same menu offers **Bug / DOG**, **Ticker / Crawl**, **Scoreboard** and **Clock**. Each recipe
-creates normal layers, so everything stays editable afterwards.
+The same menu offers **Bug / DOG**, **Ticker**, **Scoreboard**, **Clock / Timer** and **Countdown**.
+Each recipe creates normal layers, so everything stays editable afterwards.
 
 ## 2. Edit the design
 
@@ -44,8 +44,9 @@ Open **Preview & Export**:
 
 ## 5. Save the project
 
-Choose **Save Project**. Pick the frame to use for the thumbnail, then save. Studio writes
-`Template Name.ogs`, the editable source, together with a transparent thumbnail PNG.
+Choose **File → Save Template**, pick the frame to use for the thumbnail, then choose **Save .ogs…**
+and a location. Studio writes `Template Name.ogs`, the editable source. **Download ZIP** gives you
+the same file together with a transparent thumbnail PNG.
 
 Keep the `.ogs` file: it is what you reopen to make changes. When the graphic is ready for playout,
 [export an OGraf package](/guides/export).

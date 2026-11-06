@@ -4,7 +4,10 @@ sidebar_position: 9
 description: A small looping Lottie animation for checking your playout environment.
 ---
 
+import ExampleTags from '@site/src/components/ExampleTags';
 import OGrafExample from '@site/src/components/OGrafExample';
+
+<ExampleTags slug="lottie-pulse" />
 
 <OGrafExample slug="lottie-pulse" />
 
@@ -24,4 +27,4 @@ to check that Lottie layers play in your renderer before you bring in bigger ani
 - Export Lottie files from a current Bodymovin or LottieFiles version. Very old files whose keyframes
   have no easing handles can render as a solid block instead of the animation.
 - Your own Lottie files should embed images as data URIs and use alpha mattes; expressions, luma
-  mattes and external files aren't supported. See the [user guide](/docs/user-guide#lottie-animations).
+  mattes and external files aren't supported. See the [user guide](/docs/user-guide/layers/lottie).

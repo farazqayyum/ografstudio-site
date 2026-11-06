@@ -1,0 +1,10 @@
+{
+  "label": "Data and rules",
+  "position": 8,
+  "link": {
+    "type": "generated-index",
+    "title": "Data and rules",
+    "description": "Let operators and data feeds change a graphic, and make it respond by itself.",
+    "slug": "/user-guide/data"
+  }
+}

@@ -1,15 +1,38 @@
 /* The feature reel: one live OGraf package, a rundown beside it and a status bar under it. */
 
 .reel {
+  --reel-line: rgb(12 22 48 / 14%);
+  --reel-muted: #5b6478;
+  --reel-tally: #e8352b;
+  --reel-preview: #0e9f70;
+  --reel-panel: #f6f8fc;
+  --reel-hover: #e9eef8;
+  --reel-active: #dbe5fa;
+  --reel-off: #a9b4cb;
+  --reel-strong: #0a1124;
+  --reel-text: #27324c;
+  --reel-soft: #3f4b66;
+  --reel-shadow: rgb(35 82 195 / 18%);
+}
+
+[data-theme='dark'] .reel {
   --reel-line: rgb(255 255 255 / 12%);
   --reel-muted: #93a1c1;
   --reel-tally: #ff4238;
   --reel-preview: #2fe6a8;
+  --reel-panel: #0a0f1f;
+  --reel-hover: #111a33;
+  --reel-active: #15203f;
+  --reel-off: #4a5573;
+  --reel-strong: #fff;
+  --reel-text: #dfe6f7;
+  --reel-soft: #b5c1dc;
+  --reel-shadow: rgb(38 88 220 / 28%);
 }
 
 .fallback {
   height: var(--stage-height);
-  background: #0a0f1f;
+  background: var(--reel-panel);
 }
 
 .deck {
@@ -52,18 +75,18 @@
   border: 1px solid var(--reel-line);
   border-radius: 3px;
   background: transparent;
-  color: #dfe6f7;
+  color: var(--reel-text);
   cursor: pointer;
   transition: border-color 0.15s ease;
 }
 
 .fold:hover {
-  border-color: #fff;
-  color: #fff;
+  border-color: var(--reel-strong);
+  color: var(--reel-strong);
 }
 
 .fold:focus-visible {
-  outline: 2px solid #fff;
+  outline: 2px solid var(--reel-strong);
   outline-offset: 1px;
 }
 
@@ -79,7 +102,7 @@
   gap: 0.45rem;
   padding: 0.5rem 0.6rem;
   border-radius: 6px;
-  background: #0a0f1f;
+  background: var(--reel-panel);
   box-shadow: 0 0 0 1px var(--reel-line);
   color: var(--reel-muted);
 }
@@ -100,7 +123,7 @@
   border: 1px solid var(--reel-line);
   border-radius: 3px;
   background: transparent;
-  color: #dfe6f7;
+  color: var(--reel-text);
   cursor: pointer;
   font-family: var(--site-font-mono);
   font-size: 0.64rem;
@@ -111,12 +134,12 @@
 }
 
 .toggle:hover {
-  border-color: #fff;
-  color: #fff;
+  border-color: var(--reel-strong);
+  color: var(--reel-strong);
 }
 
 .toggle:focus-visible {
-  outline: 2px solid #fff;
+  outline: 2px solid var(--reel-strong);
   outline-offset: 1px;
 }
 
@@ -125,7 +148,7 @@
   width: 0.42rem;
   height: 0.42rem;
   border-radius: 2px;
-  background: #4a5573;
+  background: var(--reel-off);
 }
 
 /* Only the folded menu uses the icons. */
@@ -136,8 +159,8 @@
 }
 
 .toggle[aria-pressed='true'] {
-  background: #15203f;
-  color: #fff;
+  background: var(--reel-active);
+  color: var(--reel-strong);
 }
 
 .toggle[aria-pressed='true'] i {
@@ -153,7 +176,7 @@
   background: #0a0f1f;
   box-shadow:
     0 0 0 1px var(--reel-line),
-    0 40px 120px rgb(38 88 220 / 28%);
+    0 40px 120px var(--reel-shadow);
 }
 
 .poster {
@@ -281,6 +304,33 @@
   display: none;
 }
 
+/* Sits exactly over the Join button drawn in the graphic, so it only adds the response to a pointer. */
+.joinLink {
+  position: absolute;
+  z-index: 2;
+  border-radius: 1%/3%;
+  transition:
+    background 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.joinLink:hover {
+  background: rgb(255 255 255 / 14%);
+  box-shadow: 0 0 0 2px #fff;
+}
+
+.joinLink:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+/* On a phone the button is about 20px tall, so the part that takes a tap reaches past it. */
+.joinLink::after {
+  position: absolute;
+  inset: -0.75rem -0.5rem;
+  content: '';
+}
+
 .errorNote {
   position: absolute;
   z-index: 2;
@@ -335,8 +385,8 @@
   padding: calc(var(--stage-height, 32rem) * 0.012) 0.9rem calc(var(--stage-height, 32rem) * 0.014) 0.75rem;
   overflow: hidden;
   border: 0;
-  background: #0a0f1f;
-  color: #dfe6f7;
+  background: var(--reel-panel);
+  color: var(--reel-text);
   cursor: pointer;
   font: inherit;
   text-align: left;
@@ -344,12 +394,12 @@
 }
 
 .cue:hover {
-  background: #111a33;
+  background: var(--reel-hover);
 }
 
 .cue:focus-visible {
   z-index: 1;
-  outline: 2px solid #fff;
+  outline: 2px solid var(--reel-strong);
   outline-offset: -2px;
 }
 
@@ -379,7 +429,7 @@
   grid-column: 2;
   max-height: 0;
   overflow: hidden;
-  color: #b5c1dc;
+  color: var(--reel-soft);
   font-size: 0.76rem;
   line-height: 1.4;
   opacity: 0;
@@ -389,12 +439,12 @@
 }
 
 .cueActive {
-  background: #15203f;
-  color: #fff;
+  background: var(--reel-active);
+  color: var(--reel-strong);
 }
 
 .cueActive:hover {
-  background: #15203f;
+  background: var(--reel-active);
 }
 
 .cueActive::before {
@@ -469,11 +519,11 @@
   width: 0.6rem;
   height: 0.6rem;
   border-radius: 2px;
-  background: #4a5573;
+  background: var(--reel-off);
 }
 
 .tallyOn {
-  color: #fff;
+  color: var(--reel-strong);
 }
 
 .tallyOn i {
@@ -482,7 +532,7 @@
 }
 
 .timecode {
-  color: #dfe6f7;
+  color: var(--reel-text);
   font-family: var(--site-font-mono);
   font-size: 0.78rem;
   font-variant-numeric: tabular-nums;
@@ -493,7 +543,7 @@
 }
 
 .statusNote a {
-  color: #fff;
+  color: var(--reel-strong);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -607,7 +657,7 @@
   .rundown {
     display: grid;
     flex: none;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(8, minmax(0, 1fr));
   }
 
   .cue {
@@ -646,9 +696,16 @@
   .mobileLine {
     display: block;
     margin: 0.75rem 0.15rem 0;
-    color: #c4cee4;
+    color: var(--reel-soft);
     font-size: 0.95rem;
     line-height: 1.45;
+  }
+
+  .mobileLine a {
+    color: var(--reel-strong);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
   }
 
   .statusNote {
@@ -657,10 +714,10 @@
   }
 }
 
-/* Six names won't fit across a phone, so the switcher becomes two rows of three. */
-@media (max-width: 560px) {
+/* Eight names won't fit across a tablet or a phone, so the switcher becomes two rows of four. */
+@media (max-width: 800px) {
   .rundown {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 

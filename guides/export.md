@@ -25,8 +25,12 @@ checks the package before writing it: the manifest, the package layout, the modu
 lifecycle in both realtime and non-realtime playback. If a check fails, nothing is written and
 Studio tells you why.
 
-The ZIP includes a transparent thumbnail referenced from the manifest, and licence files for bundled
-third-party code and assets.
+The ZIP includes a transparent thumbnail referenced from the manifest, licence files for bundled
+third-party code and assets, and a self-contained preview page you can open in a browser.
+
+To export a whole template set, use **File → Export…**. A set that uses
+[Transitions](/docs/user-guide/transitions/overview) becomes one coordinated `.ograf.zip`. Any other set
+becomes an `.ograf-set.zip` with a checked package for each template.
 
 ## 3. Test in your player
 

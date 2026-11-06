@@ -43,7 +43,21 @@ Docs sidebar automatically; give it a fixed place in `KNOWN_DOCS` in the script.
 
 The site is public. `--source <checkout>` refuses a checkout whose origin isn't the public
 repository, so unpublished work from a private fork can't end up on the site by accident.
+
+The live site documents a build newer than the public repository, imported on purpose with:
+
+```sh
+npm run import:docs -- --source ../ograf-studio-dev --ref dev --allow-unpublished
+```
+
+That run links to the public `stable` branch and leaves `static/examples/` alone. The deploy workflow
+doesn't import, because that would put the older public documents back. Once public `stable` has
+caught up, return to the plain `npm run import:docs` and put the step back in `deploy.yml`.
 `--allow-unpublished` overrides that check.
+
+The repository's single `docs/USER_GUIDE.md` becomes the many pages under `docs/user-guide/`.
+`scripts/user-guide-pages.mjs` holds the sections and says which text goes on which page. If an import
+warns about a cut or an unlisted section, the guide has changed upstream: update that file.
 
 ## Live examples
 
