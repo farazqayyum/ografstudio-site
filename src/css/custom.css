@@ -178,6 +178,17 @@ h3 {
   border-radius: 6px;
 }
 
-.navbar {
-  backdrop-filter: blur(10px);
+/* Only at widths without the slide-out menu: a backdrop filter traps that fixed panel inside the
+   navbar, which leaves it no height and the menu never shows. */
+@media (min-width: 997px) {
+  .navbar {
+    backdrop-filter: blur(10px);
+  }
+}
+
+/* The bar is slightly see-through, but page text must not show through the menu laid over it. The
+   menu stays dark in both colour modes, so its current entry always takes the dark mode's blue. */
+.navbar-sidebar {
+  --ifm-navbar-background-color: #060913;
+  --ifm-menu-color-active: #6f97ff;
 }
