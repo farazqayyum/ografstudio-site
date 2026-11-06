@@ -4,6 +4,7 @@
 //   graphics/<slug>.ograf.zip  ->  static/graphics/<slug>/            extracted package
 //                                  static/graphics/<slug>.ograf.zip   download copy
 //                                  src/data/graphics.json             manifest URLs for pages
+//   examples-src/<slug>.ogs    ->  static/graphics/<slug>.ogs         editable source to download
 //
 // Runs before `npm start` and `npm run build`. Add a graphic by exporting it from Studio with
 // Export .ograf.zip and saving it as graphics/<slug>.ograf.zip.
@@ -15,6 +16,7 @@ import {unzipSync} from 'fflate';
 
 const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const sourceDir = path.join(siteRoot, 'graphics');
+const editableDirs = [path.join(siteRoot, 'examples-src'), path.join(siteRoot, 'carousel')];
 const outputDir = path.join(siteRoot, 'static', 'graphics');
 const indexFile = path.join(siteRoot, 'src', 'data', 'graphics.json');
 
@@ -46,11 +48,17 @@ for (const zipName of zips) {
   if (!manifestFile) throw new Error(`${zipName}: no .ograf.json manifest at the top level.`);
   const manifest = JSON.parse(fs.readFileSync(path.join(packageDir, manifestFile), 'utf8'));
   fs.copyFileSync(path.join(sourceDir, zipName), path.join(outputDir, zipName));
+  // The editable project, from whichever build script saved one.
+  const sourceFile = editableDirs.map((dir) => path.join(dir, `${slug}.ogs`)).find((file) => fs.existsSync(file));
+  const hasSource = Boolean(sourceFile);
+  if (hasSource) fs.copyFileSync(sourceFile, path.join(outputDir, `${slug}.ogs`));
   index[slug] = {
     name: manifest.name ?? slug,
     manifest: `/graphics/${slug}/${manifestFile}`,
     download: `/graphics/${zipName}`,
     bytes: bytes.length,
+    source: hasSource ? `/graphics/${slug}.ogs` : null,
+    sourceBytes: hasSource ? fs.statSync(sourceFile).size : 0,
     // Plain values only: what OGrafExample's form can edit.
     fields: Object.values(manifest.schema?.properties ?? {}).filter((field) =>
       ['string', 'number', 'integer', 'boolean'].includes(field.type),

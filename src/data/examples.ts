@@ -14,7 +14,28 @@ export interface Example {
   tags: string[];
   /** Keep it on /examples, but leave it out of the homepage's "Take the controls". */
   notOnHomepage?: boolean;
+  origin: ExampleOrigin;
 }
+
+/** Update this when a template is rebuilt from a new prompt. */
+export interface ExampleOrigin {
+  model: string;
+  /** Writing and building only, estimated from the session records. */
+  generationTime: string;
+  /** In the order they were given. */
+  prompts: string[];
+  /** The prompt was written afterwards, because the template came from a wider brief. */
+  writtenAfterwards?: boolean;
+}
+
+export const MODEL = 'Claude Opus 5.5';
+
+const afterwards = (generationTime: string, prompt: string): ExampleOrigin => ({
+  model: MODEL,
+  generationTime,
+  prompts: [prompt],
+  writtenAfterwards: true,
+});
 
 export const examples: Example[] = [
   {
@@ -24,6 +45,10 @@ export const examples: Example[] = [
     image: '/img/examples/lower-third.png',
     level: 'Basic',
     tags: ['Recipe', 'Value maps', 'Rules'],
+    origin: afterwards(
+      'About 1 minute',
+      "Build a lower third with a name and a role. Add one Style field that changes the accent, the tag colour and the tag text for news, breaking and sport, and a switch for the live tag.",
+    ),
   },
   {
     slug: 'scoreboard',
@@ -32,6 +57,10 @@ export const examples: Example[] = [
     image: '/img/examples/scoreboard.png',
     level: 'Intermediate',
     tags: ['Recipe', 'Custom actions', 'Sport'],
+    origin: afterwards(
+      'About 1 minute',
+      "Build a sports scoreboard for two teams, with a match clock and the current period. Add Home +1 and Away +1 buttons that update the score inside the graphic, and turn the leader's score gold. Expose the team names, scores, team colours and period.",
+    ),
   },
   {
     slug: 'ticker',
@@ -40,6 +69,10 @@ export const examples: Example[] = [
     image: '/img/examples/ticker.png',
     level: 'Basic',
     tags: ['Recipe', 'Native ticker'],
+    origin: afterwards(
+      'About 1 minute',
+      "Build a news ticker with Studio's native crawl. Expose the label, headlines, scroll speed, crawl direction, text direction for right-to-left languages and when updates apply. Add a Breaking switch that restyles the label.",
+    ),
   },
   {
     slug: 'countdown',
@@ -48,6 +81,10 @@ export const examples: Example[] = [
     image: '/img/examples/countdown.png',
     level: 'Intermediate',
     tags: ['Recipe', 'Timer', 'Alarms'],
+    origin: afterwards(
+      'About 1.5 minutes',
+      "Build a 30-second countdown with Start, Pause, Reset and Restart buttons. Expose the title, the duration and whether it runs into overtime. Add a five-second warning that the graphic fires itself, with an on/off switch and a colour.",
+    ),
   },
   {
     slug: 'clock',
@@ -56,6 +93,10 @@ export const examples: Example[] = [
     image: '/img/examples/clock.png',
     level: 'Basic',
     tags: ['Recipe', 'Clock'],
+    origin: afterwards(
+      'About 1 minute',
+      "Build an on-air clock that an operator or a data feed can switch between UTC, local time and other time zones while it is on air. Expose the time zone, the 12- or 24-hour format and whether to show seconds, and make the label follow the time zone.",
+    ),
   },
   {
     slug: 'bug',
@@ -64,6 +105,10 @@ export const examples: Example[] = [
     image: '/img/examples/bug.png',
     level: 'Basic',
     tags: ['Recipe', 'Branding'],
+    origin: afterwards(
+      'About 1 minute',
+      "Build a channel bug for the top-right corner, with a list of channels to choose from (OGraf 1, OGraf News and OGraf Sport) and a pulsing live indicator that can be turned off.",
+    ),
   },
   {
     slug: 'rankings',
@@ -72,6 +117,13 @@ export const examples: Example[] = [
     image: '/img/examples/rankings.png',
     level: 'Advanced',
     tags: ['Function', 'Runtime collection', 'Game show'],
+    origin: {
+      model: MODEL,
+      generationTime: 'About 20 minutes',
+      prompts: [
+        'Refine the Rankings example into a jury vote like that of a well-known song contest, as a good TV game show example. Start with a list of contestants. Each jury then gives them points, and the ranking recalculates automatically whenever a contestant receives points. Use a different background colour for the top three positions, and add up and down arrows.',
+      ],
+    },
   },
   {
     slug: 'shader-background',
@@ -80,6 +132,10 @@ export const examples: Example[] = [
     image: '/img/examples/shader-background.png',
     level: 'Intermediate',
     tags: ['Shader', 'Background'],
+    origin: afterwards(
+      'About 1 minute',
+      "Build a full-frame animated background from a GLSL shader of moving light streaks, with Speed, Tint and Glow fields for the operator.",
+    ),
   },
   {
     slug: 'lottie-pulse',
@@ -88,6 +144,10 @@ export const examples: Example[] = [
     image: '/img/examples/lottie-pulse.png',
     level: 'Basic',
     tags: ['Lottie', 'Loop'],
+    origin: afterwards(
+      'Under 1 minute',
+      "Build a small looping graphic from a Lottie pulse animation, for checking that a playout environment plays Lottie correctly.",
+    ),
     notOnHomepage: true,
   },
 ];

@@ -1,4 +1,4 @@
-/* The feature reel: one live OGraf package, a rundown beside it and a status bar under it. */
+/* The feature reel: one live OGraf package with a rundown beside it. */
 
 .reel {
   --reel-line: rgb(12 22 48 / 14%);
@@ -66,6 +66,14 @@
   text-transform: uppercase;
 }
 
+.onAir {
+  display: inline-flex;
+  gap: 0.6rem;
+  align-items: center;
+  margin-left: auto;
+  margin-right: 0.6rem;
+}
+
 .fold {
   display: grid;
   place-items: center;
@@ -114,6 +122,18 @@
   gap: 0.3rem;
 }
 
+/* Sized to their words, so all four fit on one row. */
+.actions {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.actions .toggle {
+  flex: 1 1 auto;
+  padding-inline: 0.3rem;
+  white-space: nowrap;
+}
+
 .toggle {
   display: inline-flex;
   gap: 0.28rem;
@@ -136,6 +156,7 @@
 .toggle:hover {
   border-color: var(--reel-strong);
   color: var(--reel-strong);
+  text-decoration: none;
 }
 
 .toggle:focus-visible {
@@ -177,6 +198,146 @@
   box-shadow:
     0 0 0 1px var(--reel-line),
     0 40px 120px var(--reel-shadow);
+}
+
+.stageShell {
+  position: relative;
+  min-width: 0;
+}
+
+/* Fullscreen: the stage keeps 16:9, so its marks and links stay on the graphic, and the backdrop
+   fills whatever the screen leaves over. */
+.stageShell:fullscreen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a0f1f;
+}
+
+.stageShell:fullscreen .stage {
+  width: min(100vw, calc(100vh * 16 / 9));
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.stageShell:fullscreen[data-bar-awake='false'],
+.stageShell:fullscreen[data-bar-awake='false'] .stage {
+  cursor: none !important;
+}
+
+.fullscreenBar {
+  position: absolute;
+  z-index: 3;
+  /* At the top, because the ticker runs along the bottom. */
+  top: 0.6rem;
+  left: 50%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  align-items: center;
+  justify-content: center;
+  width: max-content;
+  max-width: calc(100% - 3rem);
+  padding: 0.5rem;
+  transform: translateX(-50%);
+  transition: opacity 200ms;
+  border-radius: 6px;
+  background: rgb(5 7 13 / 88%);
+}
+
+.fullscreenBar button {
+  padding: 0.35rem 0.65rem;
+  border: 0;
+  border-radius: 3px;
+  background: rgb(255 255 255 / 10%);
+  color: #e6ebf7;
+  cursor: pointer;
+  font-family: var(--site-font-display);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.fullscreenBar button:hover {
+  background: rgb(255 255 255 / 22%);
+}
+
+.fullscreenBar button[aria-current='true'],
+.fullscreenBar button[aria-pressed='true'] {
+  background: #fff;
+  color: #070c1c;
+}
+
+.barGap {
+  width: 0.6rem;
+}
+
+.stageShell[data-bar-awake='false'] .fullscreenBar:not(:focus-within) {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.statusButton {
+  padding: 0.15rem 0.55rem;
+  border: 1px solid var(--reel-line);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--reel-strong);
+  cursor: pointer;
+  font-family: var(--site-font-display);
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.statusButton:hover {
+  background: var(--reel-hover);
+}
+
+.origin {
+  width: min(46rem, calc(100vw - 2rem));
+  max-height: 85vh;
+  padding: 0;
+  border: 1px solid var(--site-border);
+  border-radius: 6px;
+  background: var(--site-surface);
+  color: var(--ifm-font-color-base);
+}
+
+.origin::backdrop {
+  background: rgb(5 7 13 / 70%);
+}
+
+.originBody {
+  padding: 0 1.25rem 1.25rem;
+}
+
+/* The prompts are long, so the title and Close stay put while they scroll. */
+.originHead {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 0 0.75rem;
+  background: var(--site-surface);
+}
+
+.originHead h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.originNote {
+  margin: 0 0 1rem;
+  font-size: 0.92rem;
+}
+
+.originNote a {
+  white-space: nowrap;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .poster {
@@ -494,17 +655,6 @@
   display: none;
 }
 
-/* Status bar under the deck. */
-.status {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem 1.1rem;
-  align-items: center;
-  padding: 0.7rem 0.15rem 0;
-  color: var(--reel-muted);
-  font-size: 0.86rem;
-}
-
 .tally {
   display: inline-flex;
   gap: 0.45rem;
@@ -538,16 +688,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-.statusNote {
-  margin-left: auto;
-}
-
-.statusNote a {
-  color: var(--reel-strong);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
 /* Folded to the left: the menu becomes a rail of slide numbers and icons, and the picture takes the
    room, up to the height that still keeps the bar under it in the window. */
 @media (min-width: 1101px) {
@@ -566,6 +706,7 @@
   }
 
   .deckFolded .consoleTitle,
+  .deckFolded .onAir,
   .deckFolded .cueName,
   .deckFolded .cueLine,
   .deckFolded .backgrounds,
@@ -599,6 +740,20 @@
 
   .deckFolded .toggles {
     grid-auto-flow: row;
+  }
+
+  .deckFolded .actions {
+    flex-direction: column;
+  }
+
+  .deckFolded .actions .toggle {
+    flex: none;
+    padding: 0.22rem 0;
+  }
+
+  /* The rail has no room for them on a short screen. How it was made still links to both. */
+  .deckFolded .actions a {
+    display: none;
   }
 
   .deckFolded .toggle {
@@ -639,7 +794,7 @@
   }
 
   /* The picture goes back on top, with the controls under it. */
-  .stage {
+  .stageShell {
     order: -1;
   }
 
@@ -706,11 +861,6 @@
     font-weight: 700;
     text-decoration: underline;
     text-underline-offset: 2px;
-  }
-
-  .statusNote {
-    margin-left: 0;
-    flex-basis: 100%;
   }
 }
 

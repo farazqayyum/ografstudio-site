@@ -606,6 +606,62 @@ const EXAMPLES = {
     );
   },
 
+  async 'shader-background'() {
+    const fragmentSource = readFileSync(new URL('../static/downloads/wave-bands.glsl', import.meta.url), 'utf8');
+    await apply(
+      [
+        {
+          type: 'add_layer',
+          kind: 'rectangle',
+          name: 'Wave bands',
+          transform: { x: 0, y: 0, width: 1920, height: 1080 },
+          element: { strokeWidth: 0 },
+        },
+      ],
+      'Full-frame rectangle',
+    );
+    await apply(
+      [
+        {
+          type: 'update_element',
+          layerName: 'Wave bands',
+          patch: { fill: { type: 'shader', fragmentSource, speed: 1, resolutionScale: 1, parameters: {} } },
+        },
+      ],
+      'Shader fill',
+    );
+    // Studio makes one field per #pragma ograf line, with a key that starts with the layer's name.
+    const { composition } = await scene();
+    const texts = {
+      speed: ['Speed', 'How fast the light streaks move.'],
+      tint: ['Tint', 'Colour of the light streaks.'],
+      glow: ['Glow', 'Turns the extra glow on or off.'],
+    };
+    await apply(
+      composition.dataFields.map((item) => {
+        const key = item.key.split('_').pop();
+        return { type: 'update_data_field', fieldId: item.id, key, label: texts[key][0], description: texts[key][1] };
+      }),
+      'Field names',
+    );
+  },
+
+  async 'lottie-pulse'() {
+    const animationData = JSON.parse(readFileSync(new URL('../static/downloads/pulse.json', import.meta.url), 'utf8'));
+    await apply(
+      [
+        {
+          type: 'add_layer',
+          kind: 'lottie',
+          name: 'Pulse',
+          transform: { x: 680, y: 260, width: 560, height: 560 },
+          element: { animationData },
+        },
+      ],
+      'Lottie layer',
+    );
+  },
+
   async bug() {
     const panel = { x: 1584, y: 54, width: 240, height: 90 };
     await apply(
@@ -1335,7 +1391,12 @@ const NAMES = {
   ticker: 'Ticker',
   bug: 'Bug / DOG',
   rankings: 'Rankings',
+  'shader-background': 'Shader background',
+  'lottie-pulse': 'Lottie pulse',
 };
+
+/** These hold no clock or rule, so they seek to the same frame and suit non-real-time playout too. */
+const DUAL_MODE = new Set(['shader-background', 'lottie-pulse']);
 
 const wanted = process.argv.slice(2);
 for (const slug of wanted.length ? wanted : Object.keys(EXAMPLES)) {
@@ -1350,7 +1411,7 @@ for (const slug of wanted.length ? wanted : Object.keys(EXAMPLES)) {
         name: NAMES[slug],
         description: 'A live example from ografstudio.org.',
         supportsRealTime: true,
-        supportsNonRealTime: false,
+        supportsNonRealTime: DUAL_MODE.has(slug),
       },
     ],
     'Name',
@@ -1362,7 +1423,7 @@ for (const slug of wanted.length ? wanted : Object.keys(EXAMPLES)) {
     operationId: `${slug}-${Date.now()}`,
     confirm: true,
     overwrite: true,
-    profile: 'realtime',
+    profile: DUAL_MODE.has(slug) ? 'dual' : 'realtime',
   });
   console.log(JSON.stringify(certified).slice(0, 300));
   await call('ograf_save_project', {

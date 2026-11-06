@@ -1,7 +1,9 @@
 import {useCallback, useEffect, useRef, useState, type ReactNode} from 'react';
 import BrowserOnly from '@docusaurus/BrowserOnly';
 import useBaseUrl from '@docusaurus/useBaseUrl';
+import {OriginDetails} from '@site/src/components/ExampleOrigin';
 import graphics from '@site/src/data/graphics.json';
+import {REEL_ORIGIN} from '@site/src/data/reelOrigin';
 import {BackdropCamera, BackdropPicker, useBackdropStyle, useMonitorCamera} from '../PlayerBackdrop';
 import type {OGrafPlayer} from '../OGrafExample/ograf-player';
 import {defineReelCameraSource, setReelCameraStream} from './reelCamera';
@@ -92,6 +94,7 @@ const JOIN_BUTTON = [96, 672, 590, 112];
 const PARK_AFTER_MS = 4000;
 const TOUCH_HOLD_MS = 15000;
 const FOLD_KEY = 'ograf-reel-menu-folded';
+const BAR_IDLE_MS = 2500;
 
 const TOGGLE_ICONS = {
   ticker: 'M3 8.5A1.500 1.500 0 0 1 4.500 7h15A1.500 1.500 0 0 1 21 8.500v7a1.500 1.500 0 0 1-1.500 1.500h-15A1.500 1.500 0 0 1 3 15.500zM6 11v2h7v-2zm9 0v2h3v-2z',
@@ -101,9 +104,16 @@ const TOGGLE_ICONS = {
   resume: 'M8 5.500v13a.8.8 0 0 0 1.200.7l10-6.500a.8.8 0 0 0 0-1.400l-10-6.500A.8.8 0 0 0 8 5.500z',
   webcam:
     'M3 7.500A2.500 2.500 0 0 1 5.500 5h8A2.500 2.500 0 0 1 16 7.500v1.700l3.700-2.200a.9.9 0 0 1 1.300.8v8.400a.9.9 0 0 1-1.300.8L16 14.800v1.700a2.500 2.500 0 0 1-2.500 2.500h-8A2.500 2.500 0 0 1 3 16.500z',
+  fullscreen: 'M4 9V4h5v2H6v3zm11-5h5v5h-2V6h-3zM4 15h2v3h3v2H4zm14 0h2v5h-5v-2h3z',
+  package: 'M11 4h2v8.200l3-3 1.400 1.400L12 16l-5.400-5.400L8 9.200l3 3zM5 18h14v2H5z',
+  source: 'M4 17.200V20h2.800L17.600 9.200l-2.800-2.800zM19.700 7.100a1 1 0 0 0 0-1.400l-1.400-1.400a1 1 0 0 0-1.400 0l-1.100 1.100 2.800 2.800z',
+  info: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm-1 8h2v6h-2zm0-4h2v2h-2z',
 };
 
-/** A switch in the reel's controls: a word and a light, or just an icon when the menu is folded. */
+/**
+ * A button in the reel's controls: a word, or just an icon when the menu is folded. A switch passes
+ * `on` and also gets a light.
+ */
 function Toggle({
   icon,
   label,
@@ -113,18 +123,40 @@ function Toggle({
 }: {
   icon: keyof typeof TOGGLE_ICONS;
   label: string;
-  on: boolean;
+  on?: boolean;
   title: string;
   onClick: () => void;
 }): ReactNode {
   return (
     <button type="button" className={styles.toggle} onClick={onClick} aria-pressed={on} title={title}>
-      <i aria-hidden="true" />
+      {on !== undefined && <i aria-hidden="true" />}
       <svg className={styles.toggleIcon} viewBox="0 0 24 24" aria-hidden="true">
         <path fill="currentColor" d={TOGGLE_ICONS[icon]} />
       </svg>
       <span className={styles.toggleLabel}>{label}</span>
     </button>
+  );
+}
+
+/** A download in the reel's controls, laid out like the buttons beside it. */
+function DownloadLink({
+  icon,
+  label,
+  href,
+  title,
+}: {
+  icon: keyof typeof TOGGLE_ICONS;
+  label: string;
+  href: string;
+  title: string;
+}): ReactNode {
+  return (
+    <a className={styles.toggle} href={href} download title={title}>
+      <svg className={styles.toggleIcon} viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="currentColor" d={TOGGLE_ICONS[icon]} />
+      </svg>
+      <span className={styles.toggleLabel}>{label}</span>
+    </a>
   );
 }
 
@@ -150,11 +182,15 @@ function Reel(): ReactNode {
   const playerUrl = useBaseUrl('/player/ograf-player.js');
   const manifestUrl = useBaseUrl(entry.manifest);
   const downloadUrl = useBaseUrl(entry.download);
+  const sourceUrl = useBaseUrl(entry.source ?? '');
   const posterUrl = useBaseUrl('/img/feature-reel-poster.jpg');
   const soundIn = useBaseUrl('/audio/reel-media-in.mp3');
   const soundOut = useBaseUrl('/audio/reel-media-out.mp3');
   const soundFilm = useBaseUrl('/audio/reel-media-film.mp3');
 
+  const shellRef = useRef<HTMLDivElement>(null);
+  const originRef = useRef<HTMLDialogElement>(null);
+  const barTimer = useRef<number | undefined>(undefined);
   const stageRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
   const timecodeRef = useRef<HTMLSpanElement>(null);
@@ -172,6 +208,8 @@ function Reel(): ReactNode {
   const [sound, setSound] = useState(false);
   const [folded, setFolded] = useState(false);
   const [progressKey, setProgressKey] = useState(0);
+  const [fullscreen, setFullscreen] = useState(false);
+  const [barAwake, setBarAwake] = useState(true);
   const backdrop = useBackdropStyle();
   const camera = useMonitorCamera();
 
@@ -402,6 +440,39 @@ function Reel(): ReactNode {
     return () => document.removeEventListener('visibilitychange', change);
   }, [setHold]);
 
+  // Esc and the browser's own controls can leave fullscreen too, so follow the browser. The pointer is
+  // always over the picture in fullscreen, so hovering stops holding the slide or the reel would stick.
+  useEffect(() => {
+    const follow = () => {
+      const on = document.fullscreenElement === shellRef.current;
+      setFullscreen(on);
+      setHold('pointer', false);
+    };
+    document.addEventListener('fullscreenchange', follow);
+    return () => {
+      document.removeEventListener('fullscreenchange', follow);
+      window.clearTimeout(barTimer.current);
+    };
+  }, [setHold]);
+
+  // The bar gets out of the picture until the pointer moves.
+  const wakeBar = useCallback(() => {
+    setBarAwake(true);
+    window.clearTimeout(barTimer.current);
+    barTimer.current = window.setTimeout(() => setBarAwake(false), BAR_IDLE_MS);
+  }, []);
+
+  useEffect(() => {
+    if (fullscreen) wakeBar();
+  }, [fullscreen, wakeBar]);
+
+  const toggleFullscreen = useCallback(() => {
+    const request = document.fullscreenElement
+      ? document.exitFullscreen()
+      : shellRef.current?.requestFullscreen();
+    request?.catch((error: unknown) => console.error('Feature reel fullscreen failed', error));
+  }, []);
+
   // A touch has no hover, so a tap on the stage holds the slide for a while.
   const touchTimer = useRef<number | undefined>(undefined);
   const onStagePointerDown = useCallback(
@@ -431,6 +502,15 @@ function Reel(): ReactNode {
           <div className={styles.consoleHead}>
             <span className={styles.consoleTitle} aria-hidden="true">
               Features
+            </span>
+            <span className={styles.onAir}>
+              <span className={`${styles.tally} ${onAir ? styles.tallyOn : ''}`}>
+                <i aria-hidden="true" />
+                {onAir ? 'On air' : status === 'error' ? 'Unavailable' : status === 'parked' ? 'Standby' : 'Loading'}
+              </span>
+              <span ref={timecodeRef} className={styles.timecode} aria-hidden="true">
+                --:--:--:--
+              </span>
             </span>
             <button
               type="button"
@@ -517,19 +597,57 @@ function Reel(): ReactNode {
                 />
               )}
             </div>
+            <div className={styles.actions}>
+              {/* iPhones can't put an element in fullscreen, so they don't get the button. */}
+              {document.fullscreenEnabled && (
+                <Toggle
+                  icon="fullscreen"
+                  label="Fullscreen"
+                  title="Shows the reel fullscreen"
+                  onClick={toggleFullscreen}
+                />
+              )}
+              <Toggle
+                icon="info"
+                label="How it was made"
+                title="The prompts, the model and the generation time behind this reel"
+                onClick={() => originRef.current?.showModal()}
+              />
+              <DownloadLink
+                icon="package"
+                label="↓ Zip"
+                href={downloadUrl}
+                title="Download the certified OGraf package and run it yourself"
+              />
+              {entry.source && (
+                <DownloadLink
+                  icon="source"
+                  label="↓ Ogs"
+                  href={sourceUrl}
+                  title={`Download the editable project, ${(entry.sourceBytes / 1024 / 1024).toFixed(1)} MB. It needs OGraf Studio 0.23 or later.`}
+                />
+              )}
+            </div>
             <div className={styles.backgrounds}>
               <BackdropPicker compact />
             </div>
           </div>
         </div>
 
+        {/* What goes fullscreen. The stage inside stays 16:9, so everything placed on it stays lined up. */}
+        <div
+          ref={shellRef}
+          className={styles.stageShell}
+          style={fullscreen ? backdrop : undefined}
+          data-bar-awake={barAwake}
+          onPointerMove={fullscreen ? wakeBar : undefined}>
         <div
           ref={stageRef}
           className={styles.stage}
           style={backdrop}
           role="group"
           aria-label={`OGraf Studio feature reel, showing ${SLIDES[active].name}`}
-          onPointerEnter={(event) => event.pointerType === 'mouse' && setHold('pointer', true)}
+          onPointerEnter={(event) => event.pointerType === 'mouse' && !fullscreen && setHold('pointer', true)}
           onPointerLeave={(event) => event.pointerType === 'mouse' && setHold('pointer', false)}
           onPointerMove={onStagePointerMove}
           onPointerDown={onStagePointerDown}>
@@ -597,6 +715,33 @@ function Reel(): ReactNode {
             </p>
           )}
         </div>
+          {fullscreen && (
+            <div className={styles.fullscreenBar} role="group" aria-label="Reel controls">
+              {SLIDES.map((slide, index) => (
+                <button
+                  key={slide.id}
+                  type="button"
+                  aria-current={index === active ? 'true' : undefined}
+                  onClick={() => choose(index)}>
+                  {slide.short}
+                </button>
+              ))}
+              <span className={styles.barGap} aria-hidden="true" />
+              <button type="button" aria-pressed={ticker} onClick={toggleTicker}>
+                Ticker
+              </button>
+              <button type="button" aria-pressed={sound} onClick={toggleSound}>
+                Sound
+              </button>
+              <button type="button" aria-pressed={paused} onClick={togglePause}>
+                {paused ? 'Resume' : 'Pause'}
+              </button>
+              <button type="button" onClick={toggleFullscreen}>
+                Exit fullscreen
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* The rundown's description folds away on small screens, so it repeats here. */}
@@ -612,21 +757,38 @@ function Reel(): ReactNode {
         )}
       </p>
 
-      <div className={styles.status}>
-        <span className={`${styles.tally} ${onAir ? styles.tallyOn : ''}`}>
-          <i aria-hidden="true" />
-          {onAir ? 'On air' : status === 'error' ? 'Unavailable' : status === 'parked' ? 'Standby' : 'Loading'}
-        </span>
-        <span ref={timecodeRef} className={styles.timecode} aria-hidden="true">
-          --:--:--:--
-        </span>
-        <span className={styles.statusNote}>
-          Not a video! One certified OGraf package, playing in your browser.{' '}
-          <a href={downloadUrl} download>
-            Download to run!
-          </a>
-        </span>
-      </div>
+      <dialog
+        ref={originRef}
+        className={styles.origin}
+        aria-labelledby="reel-origin-title"
+        onClick={(event) => {
+          // A click on the dimmed area lands on the dialog itself, and closes it.
+          if (event.target === originRef.current) originRef.current.close();
+        }}>
+        <div className={styles.originBody}>
+          <div className={styles.originHead}>
+            <h2 id="reel-origin-title">How this reel was made</h2>
+            <button type="button" className={styles.statusButton} onClick={() => originRef.current?.close()}>
+              Close
+            </button>
+          </div>
+          <p className={styles.originNote}>
+            Not a video! One certified OGraf package, playing in your browser.{' '}
+            <a href={downloadUrl} download>
+              Download to run!
+            </a>
+            {entry.source && (
+              <>
+                {' · '}
+                <a href={sourceUrl} download>
+                  Download .ogs
+                </a>
+              </>
+            )}
+          </p>
+          <OriginDetails origin={REEL_ORIGIN} />
+        </div>
+      </dialog>
     </div>
   );
 }

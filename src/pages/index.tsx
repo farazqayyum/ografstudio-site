@@ -82,7 +82,7 @@ function Hero(): ReactNode {
           <div>
             <p className={styles.eyebrow}>The open-source editor for EBU OGraf</p>
             <Heading as="h1" className={styles.heroTitle}>
-              Broadcast graphics, designed in your browser
+              Broadcast graphics, designed for EBU's OGraf Standard
             </Heading>
           </div>
           <div>
@@ -327,7 +327,7 @@ function CallToAction(): ReactNode {
 export default function Home(): ReactNode {
   return (
     <Layout
-      title="Broadcast graphics, designed in your browser"
+      title="Broadcast graphics, designed for EBU's OGraf Standard"
       description="OGraf Studio is an open-source, browser-based editor for EBU OGraf-compatible broadcast graphics: lower thirds, scoreboards, tickers and full-screen graphics.">
       <div className={styles.home}>
         <Hero />

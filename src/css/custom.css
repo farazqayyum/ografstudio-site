@@ -127,7 +127,16 @@ h3 {
 }
 
 .navbar__logo {
+  height: 21px;
   margin-right: 0.4rem;
+}
+
+.navbar__logo img {
+  width: auto;
+}
+
+.navbar__link {
+  white-space: nowrap;
 }
 
 .navbar-download {

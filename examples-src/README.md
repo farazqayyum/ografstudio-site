@@ -4,9 +4,14 @@
 saves the editable source here (`<slug>.ogs`) and exports the certified package to
 `graphics/<slug>.ograf.zip`:
 
-clock, countdown, scoreboard, lower-third, ticker, bug and rankings.
+clock, countdown, scoreboard, lower-third, ticker, bug, rankings, shader-background and lottie-pulse.
 
-`shader-background` and `lottie-pulse` are not built here.
+`npm run graphics` copies each `.ogs` to `static/graphics`, and the player's caption links to it. The
+prompt, model and generation time on each page live in `origin` in `src/data/examples.ts`. The time
+is estimated from the session records and counts writing and building only. When you rebuild a
+template from a new prompt, update its record.
+
+The last two are built from `static/downloads/wave-bands.glsl` and `static/downloads/pulse.json`.
 
 Rankings also has `rankings-votes.js`, the scoring function that Studio's Functions pane shows, and
 `fonts/oswald.ttf` with its licence. Studio's canvas doesn't run functions, so `build.mjs` plays the

@@ -174,6 +174,24 @@ function FieldInput({
 }
 
 const DATA_LEGEND = 'Operator controls — changes update the graphic live';
+const BAR_IDLE_MS = 2500;
+
+function FullscreenIcon({exit}: {exit: boolean}): ReactNode {
+  return (
+    <svg className={styles.fullscreenIcon} viewBox="0 0 16 16" aria-hidden="true">
+      <path
+        d={
+          exit
+            ? 'M6 1v5H1M10 1v5h5M6 15v-5H1M10 15v-5h5'
+            : 'M1 6V1h5M15 6V1h-5M1 10v5h5M15 10v5h-5'
+        }
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+    </svg>
+  );
+}
 
 function LivePlayer({
   slug,
@@ -200,7 +218,41 @@ function LivePlayer({
   const [actions, setActions] = useState<OperatorAction[]>([]);
   const [stepCount, setStepCount] = useState(1);
   const [step, setStep] = useState(0);
+  const [fullscreen, setFullscreen] = useState(false);
+  const [barAwake, setBarAwake] = useState(true);
+  const barTimer = useRef<number | undefined>(undefined);
+  const sourceUrl = useBaseUrl(entry.source ?? '');
   const backdrop = useBackdropStyle();
+
+  // Esc and the browser's own controls can leave fullscreen too, so follow the browser.
+  useEffect(() => {
+    const follow = () => setFullscreen(document.fullscreenElement === frameRef.current);
+    document.addEventListener('fullscreenchange', follow);
+    return () => {
+      document.removeEventListener('fullscreenchange', follow);
+      window.clearTimeout(barTimer.current);
+    };
+  }, []);
+
+  // The bar gets out of the picture until the pointer moves.
+  const wakeBar = useCallback(() => {
+    setBarAwake(true);
+    window.clearTimeout(barTimer.current);
+    barTimer.current = window.setTimeout(() => setBarAwake(false), BAR_IDLE_MS);
+  }, []);
+
+  useEffect(() => {
+    if (fullscreen) wakeBar();
+  }, [fullscreen, wakeBar]);
+
+  const toggleFullscreen = () => {
+    const request = document.fullscreenElement
+      ? document.exitFullscreen()
+      : frameRef.current?.requestFullscreen();
+    request?.catch((cause: unknown) => {
+      setError(cause instanceof Error ? cause.message : String(cause));
+    });
+  };
 
   // Load the graphic only when it is about to scroll into view.
   useEffect(() => {
@@ -323,10 +375,82 @@ function LivePlayer({
   const lastStep = step >= stepCount - 1;
   const ready = status === 'on-air' || status === 'off-air';
   const sizeMb = (entry.bytes / 1024 / 1024).toFixed(1);
+  const sourceSize =
+    entry.sourceBytes < 1024 * 1024
+      ? `${Math.max(1, Math.round(entry.sourceBytes / 1024))} KB`
+      : `${(entry.sourceBytes / 1024 / 1024).toFixed(1)} MB`;
+
+  const takeButtons = (
+    <>
+      <button
+        type="button"
+        className="button button--primary button--sm"
+        disabled={status !== 'off-air'}
+        onClick={() => {
+          setStep(0);
+          void run((p) => p.play(), 'on-air');
+        }}>
+        ▶ Take in
+      </button>
+      <button
+        type="button"
+        className="button button--secondary button--sm"
+        disabled={status !== 'on-air'}
+        onClick={() => void run((p) => p.stop(), 'off-air')}>
+        ■ Take out
+      </button>
+      <button
+        type="button"
+        className="button button--secondary button--sm"
+        disabled={!ready}
+        onClick={() => {
+          setStep(0);
+          void run(async (p) => {
+            await p.stop({skipAnimation: true});
+            await p.play();
+          }, 'on-air');
+        }}>
+        ↻ Replay
+      </button>
+    </>
+  );
+
+  const actionButtons = (
+    <>
+      {stepCount > 1 && (
+        <button
+          type="button"
+          className="button button--primary button--sm"
+          disabled={status !== 'on-air' || lastStep}
+          onClick={() => {
+            setStep((current) => current + 1);
+            void run((p) => p.next(), 'on-air');
+          }}>
+          Next step ({Math.min(step + 1, stepCount)}/{stepCount})
+        </button>
+      )}
+      {actions.map((action) => (
+        <button
+          key={action.id}
+          type="button"
+          className="button button--secondary button--sm"
+          disabled={status !== 'on-air'}
+          title={action.description}
+          onClick={() => runAction(action.id)}>
+          {action.name}
+        </button>
+      ))}
+    </>
+  );
 
   return (
     <figure className={styles.example} aria-label={label ?? `${entry.name}, live OGraf graphic`}>
-      <div ref={frameRef} className={styles.frame} style={backdrop}>
+      <div
+        ref={frameRef}
+        className={styles.frame}
+        style={backdrop}
+        data-bar-awake={barAwake}
+        onPointerMove={fullscreen ? wakeBar : undefined}>
         <BackdropCamera />
         <div ref={viewportRef} className={styles.viewport} />
         {status === 'loading' && (
@@ -343,39 +467,31 @@ function LivePlayer({
             </p>
           </div>
         )}
+        {fullscreen && (
+          <div className={styles.fullscreenBar}>
+            {takeButtons}
+            {actionButtons}
+            <button
+              type="button"
+              className="button button--secondary button--sm"
+              onClick={toggleFullscreen}>
+              <FullscreenIcon exit /> Exit fullscreen
+            </button>
+          </div>
+        )}
       </div>
       <div className={styles.controls}>
         <div className={styles.buttons}>
-          <button
-            type="button"
-            className="button button--primary button--sm"
-            disabled={status !== 'off-air'}
-            onClick={() => {
-              setStep(0);
-              void run((p) => p.play(), 'on-air');
-            }}>
-            ▶ Take in
-          </button>
-          <button
-            type="button"
-            className="button button--secondary button--sm"
-            disabled={status !== 'on-air'}
-            onClick={() => void run((p) => p.stop(), 'off-air')}>
-            ■ Take out
-          </button>
-          <button
-            type="button"
-            className="button button--secondary button--sm"
-            disabled={!ready}
-            onClick={() => {
-              setStep(0);
-              void run(async (p) => {
-                await p.stop({skipAnimation: true});
-                await p.play();
-              }, 'on-air');
-            }}>
-            ↻ Replay
-          </button>
+          {takeButtons}
+          {/* iPhones can't put an element in fullscreen, so they don't get the button. */}
+          {document.fullscreenEnabled && (
+            <button
+              type="button"
+              className="button button--secondary button--sm"
+              onClick={toggleFullscreen}>
+              <FullscreenIcon exit={false} /> Fullscreen
+            </button>
+          )}
         </div>
         <BackdropPicker />
         <span className={styles.status} data-status={status} role="status">
@@ -408,31 +524,7 @@ function LivePlayer({
           <fieldset className={styles.data} disabled={status === 'error' || status === 'loading'}>
             <legend>{DATA_LEGEND}</legend>
             {(actions.length > 0 || stepCount > 1) && (
-              <div className={styles.actions}>
-                {stepCount > 1 && (
-                  <button
-                    type="button"
-                    className="button button--primary button--sm"
-                    disabled={status !== 'on-air' || lastStep}
-                    onClick={() => {
-                      setStep((current) => current + 1);
-                      void run((p) => p.next(), 'on-air');
-                    }}>
-                    Next step ({Math.min(step + 1, stepCount)}/{stepCount})
-                  </button>
-                )}
-                {actions.map((action) => (
-                  <button
-                    key={action.id}
-                    type="button"
-                    className="button button--secondary button--sm"
-                    disabled={status !== 'on-air'}
-                    title={action.description}
-                    onClick={() => runAction(action.id)}>
-                    {action.name}
-                  </button>
-                ))}
-              </div>
+              <div className={styles.actions}>{actionButtons}</div>
             )}
             {fields.map(([key, field]) => {
               const id = `${slug}-${key}`;
@@ -459,6 +551,15 @@ function LivePlayer({
           Download .ograf.zip
         </a>{' '}
         ({sizeMb} MB)
+        {entry.source && (
+          <>
+            {' · '}
+            <a href={sourceUrl} download>
+              Download .ogs
+            </a>{' '}
+            ({sourceSize}), the editable project. It needs OGraf Studio 0.23 or later.
+          </>
+        )}
       </figcaption>
     </figure>
   );

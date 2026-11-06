@@ -4,6 +4,8 @@
     "manifest": "/graphics/bug/project-b2e432a8-6d9e-4646-bd05-ca1e2ec13764-rt.ograf.json",
     "download": "/graphics/bug.ograf.zip",
     "bytes": 1263976,
+    "source": "/graphics/bug.ogs",
+    "sourceBytes": 582587,
     "fields": 2,
     "actions": 0
   },
@@ -12,6 +14,8 @@
     "manifest": "/graphics/clock/project-d79ee1b2-4b34-49f0-b8f9-29d647f9dabe-rt.ograf.json",
     "download": "/graphics/clock.ograf.zip",
     "bytes": 1268913,
+    "source": "/graphics/clock.ogs",
+    "sourceBytes": 600796,
     "fields": 3,
     "actions": 0
   },
@@ -20,22 +24,28 @@
     "manifest": "/graphics/countdown/project-ea7c2acf-3968-465a-bcab-b3845ea3ce95-rt.ograf.json",
     "download": "/graphics/countdown.ograf.zip",
     "bytes": 1273946,
+    "source": "/graphics/countdown.ogs",
+    "sourceBytes": 637034,
     "fields": 5,
     "actions": 4
   },
   "feature-reel": {
     "name": "OGraf Studio Feature Reel",
-    "manifest": "/graphics/feature-reel/set-733d7c71-dc36-4528-a4a4-8c203faa42e7-rt.ograf.json",
+    "manifest": "/graphics/feature-reel/set-22a31cb4-661d-4c20-a97f-4020fa3a2ce4-rt.ograf.json",
     "download": "/graphics/feature-reel.ograf.zip",
-    "bytes": 9596160,
+    "bytes": 9601891,
+    "source": "/graphics/feature-reel.ogs",
+    "sourceBytes": 3840472,
     "fields": 0,
     "actions": 4
   },
   "lottie-pulse": {
     "name": "Lottie pulse",
-    "manifest": "/graphics/lottie-pulse/project-f45f9087-14dc-4358-af02-c93f737250f4.ograf.json",
+    "manifest": "/graphics/lottie-pulse/project-ba350a6a-17ab-4169-8837-eda9cff87acf.ograf.json",
     "download": "/graphics/lottie-pulse.ograf.zip",
-    "bytes": 1476969,
+    "bytes": 868716,
+    "source": "/graphics/lottie-pulse.ogs",
+    "sourceBytes": 19205,
     "fields": 0,
     "actions": 0
   },
@@ -44,6 +54,8 @@
     "manifest": "/graphics/lower-third/project-355cbd42-f283-44c3-9771-630f74edb443-rt.ograf.json",
     "download": "/graphics/lower-third.ograf.zip",
     "bytes": 1280141,
+    "source": "/graphics/lower-third.ogs",
+    "sourceBytes": 641695,
     "fields": 4,
     "actions": 0
   },
@@ -52,6 +64,8 @@
     "manifest": "/graphics/rankings/project-2c7a8723-7fc8-4430-8b74-416e5737297a-rt.ograf.json",
     "download": "/graphics/rankings.ograf.zip",
     "bytes": 1251314,
+    "source": "/graphics/rankings.ogs",
+    "sourceBytes": 786081,
     "fields": 5,
     "actions": 3
   },
@@ -60,14 +74,18 @@
     "manifest": "/graphics/scoreboard/project-5e984c92-68de-41a4-82e9-471859a7b345-rt.ograf.json",
     "download": "/graphics/scoreboard.ograf.zip",
     "bytes": 1283540,
+    "source": "/graphics/scoreboard.ogs",
+    "sourceBytes": 691370,
     "fields": 7,
     "actions": 6
   },
   "shader-background": {
     "name": "Shader background",
-    "manifest": "/graphics/shader-background/project-cf8201d1-8da7-4be1-a326-dac7155706cc.ograf.json",
+    "manifest": "/graphics/shader-background/project-0b730075-c8dc-4620-b5e6-102d2e3f0652.ograf.json",
     "download": "/graphics/shader-background.ograf.zip",
-    "bytes": 439155,
+    "bytes": 1048727,
+    "source": "/graphics/shader-background.ogs",
+    "sourceBytes": 17332,
     "fields": 3,
     "actions": 0
   },
@@ -76,6 +94,8 @@
     "manifest": "/graphics/ticker/project-2d6125cd-4be9-4886-972e-fa4398ce5b0c-rt.ograf.json",
     "download": "/graphics/ticker.ograf.zip",
     "bytes": 1279234,
+    "source": "/graphics/ticker.ogs",
+    "sourceBytes": 588721,
     "fields": 7,
     "actions": 0
   }

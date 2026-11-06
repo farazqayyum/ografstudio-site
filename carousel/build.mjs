@@ -1360,16 +1360,14 @@ async function sceneTicker(s, logoAsset) {
   s.leave('Band glint');
   s.loop('Band glint', { x: [[0, x - 240, 'linear'], [300, x + width, 'linear']] }, 300);
 
-  // The product's lockup, as in the site's navbar: the OGraf wordmark, then "Studio". The plate runs
-  // between the two blues of the OGraf logo.
+  // The navbar's logo without ".org". Its blues need a light plate: they vanish on a blue one.
   const plateWidth = 232;
   s.rect('Plate', [x, y, plateWidth, height], {
     type: 'linear',
     angle: 90,
     stops: [
-      { offset: 0, color: '#1b45ad', opacity: 1 },
-      { offset: 0.55, color: '#2352c3', opacity: 1 },
-      { offset: 1, color: '#5f85e4', opacity: 1 },
+      { offset: 0, color: '#ffffff', opacity: 1 },
+      { offset: 1, color: '#d6e2fa', opacity: 1 },
     ],
   }, radius);
   s.enter('Plate', 14, 18, 'pop', { easing: 'back-out' });
@@ -1378,21 +1376,11 @@ async function sceneTicker(s, logoAsset) {
     type: 'add_layer',
     kind: 'image',
     name: 'Logo',
-    transform: { x: x + 20, y: y + 14, width: 92, height: 31 },
+    transform: { x: x + 18, y: y + 17, width: 195, height: 31 },
     element: { src: `asset:${logoAsset}`, fit: 'contain' },
   });
   s.enter('Logo', 10, 14, 'fade');
   s.leave('Logo', 2, 10);
-  s.text('Logo Studio', [x + 119, y, 100, height], 'Studio', {
-    font: FONT.display,
-    size: 28,
-    weight: 700,
-    lh: 1.1,
-    ls: -0.3,
-    valign: 'middle',
-  });
-  s.enter('Logo Studio', 10, 14, 'fade');
-  s.leave('Logo Studio', 2, 10);
 
   const clockWidth = 130;
   s.raw({
@@ -1677,8 +1665,8 @@ async function main() {
   const tickerTemplateId = (await call('ograf_get_template_set')).activeTemplateId;
   await formatTemplate('Ticker', TICKER_IN);
   await importFonts();
-  const logoAsset = (await importAsset({ path: 'carousel/assets/ograf-logo-mono-white.svg', mimeType: 'image/svg+xml', name: 'OGraf logo' })).assets?.[0]?.id;
-  if (!logoAsset) throw new Error('OGraf logo asset id missing');
+  const logoAsset = (await importAsset({ path: 'carousel/assets/ograf-studio-logo-ticker.png', mimeType: 'image/png', name: 'OGraf Studio logo' })).assets?.[0]?.id;
+  if (!logoAsset) throw new Error('OGraf Studio logo asset id missing');
   const band = scene();
   await sceneTicker(band, logoAsset);
   const bandParents = band.ops.filter((op) => op.type === 'set_layer_layout' && op.parentId);

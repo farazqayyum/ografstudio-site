@@ -1,0 +1,513 @@
+{
+  "documentVersion": 37,
+  "id": "project-0b730075-c8dc-4620-b5e6-102d2e3f0652",
+  "name": "Shader background",
+  "description": "A live example from ografstudio.org.",
+  "version": "0.1.0",
+  "author": {
+    "name": ""
+  },
+  "supportsRealTime": true,
+  "supportsNonRealTime": true,
+  "mainCompositionId": "comp-56cd9bab-6e68-4024-a855-90fe4848e123",
+  "compositions": [
+    {
+      "id": "comp-56cd9bab-6e68-4024-a855-90fe4848e123",
+      "name": "Main",
+      "width": 1920,
+      "height": 1080,
+      "backgroundColor": "transparent",
+      "frameRate": 25,
+      "updateTransitionFrames": 0,
+      "updateInterruption": "queue",
+      "layout": {
+        "showRulers": true,
+        "showActionSafe": false,
+        "showTitleSafe": false,
+        "showCenterMarker": false,
+        "dimOutsideCanvas": true,
+        "presentationBackground": "none",
+        "presentationBackgroundImageSource": "",
+        "presentationBackgroundImageName": "",
+        "snappingEnabled": true,
+        "snapToGrid": false,
+        "snapToGuides": true,
+        "snapToLayers": true,
+        "gridSize": 10,
+        "snapThreshold": 6,
+        "boundsMode": "allow",
+        "overflowPreview": "visible",
+        "guides": [],
+        "timelineFolders": []
+      },
+      "layers": [
+        {
+          "id": "layer-29b39aed-2708-4f25-bef1-2d0b1dc51f9a",
+          "name": "Wave bands",
+          "isVisible": true,
+          "isGuide": false,
+          "blendMode": "normal",
+          "isLocked": false,
+          "groupId": null,
+          "parentId": null,
+          "clipChildren": false,
+          "isMaskOnly": false,
+          "mask": null,
+          "constraints": {
+            "horizontal": "left",
+            "vertical": "top"
+          },
+          "autoLayout": {
+            "direction": "none",
+            "gap": 0,
+            "paddingTop": 0,
+            "paddingRight": 0,
+            "paddingBottom": 0,
+            "paddingLeft": 0,
+            "align": "start",
+            "hugWidth": false,
+            "hugHeight": false,
+            "minWidth": 0,
+            "maxWidth": 0,
+            "collapseHidden": true
+          },
+          "updateTransition": {
+            "style": "inherit",
+            "durationFrames": 0,
+            "distance": 24
+          },
+          "motionPath": null,
+          "keyframes": [
+            {
+              "id": "layer-keyframe-00a179fa-1781-40d9-be99-65caee68b8b6",
+              "frame": 0,
+              "easing": "ease-in-out",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "width": 1920,
+                "height": 1080,
+                "rotation": 0,
+                "opacity": 1,
+                "transformOriginX": 0.5,
+                "transformOriginY": 0.5
+              }
+            },
+            {
+              "id": "layer-keyframe-1e42cb7b-7df5-4a73-bc39-718ad6fdecba",
+              "frame": 12,
+              "easing": "linear",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "width": 1920,
+                "height": 1080,
+                "rotation": 0,
+                "opacity": 1,
+                "transformOriginX": 0.5,
+                "transformOriginY": 0.5
+              }
+            },
+            {
+              "id": "layer-keyframe-5171dd22-8a68-494b-9f8c-183a67b16df0",
+              "frame": 24,
+              "easing": "linear",
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "width": 1920,
+                "height": 1080,
+                "rotation": 0,
+                "opacity": 1,
+                "transformOriginX": 0.5,
+                "transformOriginY": 0.5
+              }
+            }
+          ],
+          "animationTracks": {
+            "x": [
+              {
+                "id": "layer-keyframe-00a179fa-1781-40d9-be99-65caee68b8b6:x",
+                "frame": 0,
+                "value": 0,
+                "easing": "ease-in-out"
+              },
+              {
+                "id": "layer-keyframe-1e42cb7b-7df5-4a73-bc39-718ad6fdecba:x",
+                "frame": 12,
+                "value": 0,
+                "easing": "linear"
+              },
+              {
+                "id": "layer-keyframe-5171dd22-8a68-494b-9f8c-183a67b16df0:x",
+                "frame": 24,
+                "value": 0,
+                "easing": "linear"
+              }
+            ],
+            "y": [
+              {
+                "id": "layer-keyframe-00a179fa-1781-40d9-be99-65caee68b8b6:y",
+                "frame": 0,
+                "value": 0,
+                "easing": "ease-in-out"
+              },
+              {
+                "id": "layer-keyframe-1e42cb7b-7df5-4a73-bc39-718ad6fdecba:y",
+                "frame": 12,
+                "value": 0,
+                "easing": "linear"
+              },
+              {
+                "id": "layer-keyframe-5171dd22-8a68-494b-9f8c-183a67b16df0:y",
+                "frame": 24,
+                "value": 0,
+                "easing": "linear"
+              }
+            ],
+            "width": [
+              {
+                "id": "layer-keyframe-00a179fa-1781-40d9-be99-65caee68b8b6:width",
+                "frame": 0,
+                "value": 1920,
+                "easing": "ease-in-out"
+              },
+              {
+                "id": "layer-keyframe-1e42cb7b-7df5-4a73-bc39-718ad6fdecba:width",
+                "frame": 12,
+                "value": 1920,
+                "easing": "linear"
+              },
+              {
+                "id": "layer-keyframe-5171dd22-8a68-494b-9f8c-183a67b16df0:width",
+                "frame": 24,
+                "value": 1920,
+                "easing": "linear"
+              }
+            ],
+            "height": [
+              {
+                "id": "layer-keyframe-00a179fa-1781-40d9-be99-65caee68b8b6:height",
+                "frame": 0,
+                "value": 1080,
+                "easing": "ease-in-out"
+              },
+              {
+                "id": "layer-keyframe-1e42cb7b-7df5-4a73-bc39-718ad6fdecba:height",
+                "frame": 12,
+                "value": 1080,
+                "easing": "linear"
+              },
+              {
+                "id": "layer-keyframe-5171dd22-8a68-494b-9f8c-183a67b16df0:height",
+                "frame": 24,
+                "value": 1080,
+                "easing": "linear"
+              }
+            ],
+            "rotation": [
+              {
+                "id": "layer-keyframe-00a179fa-1781-40d9-be99-65caee68b8b6:rotation",
+                "frame": 0,
+                "value": 0,
+                "easing": "ease-in-out"
+              },
+              {
+                "id": "layer-keyframe-1e42cb7b-7df5-4a73-bc39-718ad6fdecba:rotation",
+                "frame": 12,
+                "value": 0,
+                "easing": "linear"
+              },
+              {
+                "id": "layer-keyframe-5171dd22-8a68-494b-9f8c-183a67b16df0:rotation",
+                "frame": 24,
+                "value": 0,
+                "easing": "linear"
+              }
+            ],
+            "opacity": [
+              {
+                "id": "layer-keyframe-00a179fa-1781-40d9-be99-65caee68b8b6:opacity",
+                "frame": 0,
+                "value": 1,
+                "easing": "ease-in-out"
+              },
+              {
+                "id": "layer-keyframe-1e42cb7b-7df5-4a73-bc39-718ad6fdecba:opacity",
+                "frame": 12,
+                "value": 1,
+                "easing": "linear"
+              },
+              {
+                "id": "layer-keyframe-5171dd22-8a68-494b-9f8c-183a67b16df0:opacity",
+                "frame": 24,
+                "value": 1,
+                "easing": "linear"
+              }
+            ],
+            "transformOriginX": [
+              {
+                "id": "layer-keyframe-00a179fa-1781-40d9-be99-65caee68b8b6:transformOriginX",
+                "frame": 0,
+                "value": 0.5,
+                "easing": "ease-in-out"
+              },
+              {
+                "id": "layer-keyframe-1e42cb7b-7df5-4a73-bc39-718ad6fdecba:transformOriginX",
+                "frame": 12,
+                "value": 0.5,
+                "easing": "linear"
+              },
+              {
+                "id": "layer-keyframe-5171dd22-8a68-494b-9f8c-183a67b16df0:transformOriginX",
+                "frame": 24,
+                "value": 0.5,
+                "easing": "linear"
+              }
+            ],
+            "transformOriginY": [
+              {
+                "id": "layer-keyframe-00a179fa-1781-40d9-be99-65caee68b8b6:transformOriginY",
+                "frame": 0,
+                "value": 0.5,
+                "easing": "ease-in-out"
+              },
+              {
+                "id": "layer-keyframe-1e42cb7b-7df5-4a73-bc39-718ad6fdecba:transformOriginY",
+                "frame": 12,
+                "value": 0.5,
+                "easing": "linear"
+              },
+              {
+                "id": "layer-keyframe-5171dd22-8a68-494b-9f8c-183a67b16df0:transformOriginY",
+                "frame": 24,
+                "value": 0.5,
+                "easing": "linear"
+              }
+            ],
+            "blur": [
+              {
+                "id": "layer-29b39aed-2708-4f25-bef1-2d0b1dc51f9a:blur:0",
+                "frame": 0,
+                "value": 0,
+                "easing": "linear"
+              }
+            ],
+            "dropShadowOpacity": [
+              {
+                "id": "layer-29b39aed-2708-4f25-bef1-2d0b1dc51f9a:dropShadowOpacity:0",
+                "frame": 0,
+                "value": 0.65,
+                "easing": "linear"
+              }
+            ],
+            "dropShadowOffsetX": [
+              {
+                "id": "layer-29b39aed-2708-4f25-bef1-2d0b1dc51f9a:dropShadowOffsetX:0",
+                "frame": 0,
+                "value": 8,
+                "easing": "linear"
+              }
+            ],
+            "dropShadowOffsetY": [
+              {
+                "id": "layer-29b39aed-2708-4f25-bef1-2d0b1dc51f9a:dropShadowOffsetY:0",
+                "frame": 0,
+                "value": 8,
+                "easing": "linear"
+              }
+            ],
+            "dropShadowBlur": [
+              {
+                "id": "layer-29b39aed-2708-4f25-bef1-2d0b1dc51f9a:dropShadowBlur:0",
+                "frame": 0,
+                "value": 12,
+                "easing": "linear"
+              }
+            ]
+          },
+          "loop": null,
+          "element": {
+            "type": "rectangle",
+            "fill": {
+              "type": "shader",
+              "fragmentSource": "// Wave Bands - an OGraf Studio shader fill example.\n//\n// Diagonal streaks of light drifting across a tinted background, with an optional glow. In\n// OGraf Studio the \"#pragma ograf\" lines turn the constants below into controls and operator\n// data fields.\n//\n// Dedicated to the public domain under CC0-1.0.\n\n#pragma ograf speed slider min(0) max(4) step(0.1)\nconst float speed = 1.0;\n#pragma ograf tint color\nconst vec3 tint = vec3(0.14, 0.32, 0.76);\n#pragma ograf glow toggle\nconst bool glow = true;\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord) {\n  vec2 uv = fragCoord / iResolution.xy;\n  float diagonal = uv.x * 1.6 + uv.y;\n\n  // A deep gradient in the tint colour.\n  vec3 colour = mix(tint * 0.12, tint * 0.75, uv.y * 0.7 + 0.15);\n\n  // Broad, soft streaks and finer bright ones moving at different speeds.\n  float broad = pow(0.5 + 0.5 * sin(diagonal * 9.0 - iTime * speed), 10.0);\n  float fine = pow(0.5 + 0.5 * sin(diagonal * 23.0 - iTime * speed * 1.7 + 1.3), 28.0);\n  colour += tint * broad * 0.9 + vec3(0.85, 0.92, 1.0) * fine * 0.3;\n\n  if (glow) colour += tint * 0.6 * exp(-7.0 * length(uv - vec2(0.75, 0.7)));\n\n  // Darken towards the edges so text over the middle stays readable.\n  colour *= 1.0 - 0.55 * dot(uv - 0.5, uv - 0.5);\n  fragColor = vec4(colour, 1.0);\n}\n",
+              "speed": 1,
+              "resolutionScale": 1,
+              "parameters": {
+                "speed": 1,
+                "tint": [
+                  0.14,
+                  0.32,
+                  0.76
+                ],
+                "glow": true
+              }
+            },
+            "strokeColor": "transparent",
+            "strokeWidth": 0,
+            "borderRadius": {
+              "topLeft": 0,
+              "topRight": 0,
+              "bottomRight": 0,
+              "bottomLeft": 0
+            }
+          },
+          "effects": {
+            "blur": 0,
+            "dropShadowEnabled": false,
+            "dropShadowColor": "#000000",
+            "dropShadowOpacity": 0.65,
+            "dropShadowOffsetX": 8,
+            "dropShadowOffsetY": 8,
+            "dropShadowBlur": 12
+          },
+          "semantics": {
+            "role": "none",
+            "description": "",
+            "tags": []
+          },
+          "designTokenBindings": [],
+          "componentLink": null,
+          "bindings": [
+            {
+              "fieldId": "shader-field:layer-29b39aed-2708-4f25-bef1-2d0b1dc51f9a:speed",
+              "targetProperty": "fill.parameters.speed"
+            },
+            {
+              "fieldId": "shader-field:layer-29b39aed-2708-4f25-bef1-2d0b1dc51f9a:tint",
+              "targetProperty": "fill.parameters.tint"
+            },
+            {
+              "fieldId": "shader-field:layer-29b39aed-2708-4f25-bef1-2d0b1dc51f9a:glow",
+              "targetProperty": "fill.parameters.glow"
+            }
+          ],
+          "visualRules": []
+        }
+      ],
+      "dataFields": [
+        {
+          "id": "shader-field:layer-29b39aed-2708-4f25-bef1-2d0b1dc51f9a:speed",
+          "key": "speed",
+          "label": "Speed",
+          "description": "How fast the light streaks move.",
+          "type": "number",
+          "defaultValue": 1,
+          "required": false,
+          "options": [],
+          "constraints": {
+            "minimum": 0,
+            "maximum": 4,
+            "step": 0.1
+          },
+          "fileExtensions": [],
+          "properties": [],
+          "items": null,
+          "generatedShaderParameter": {
+            "layerId": "layer-29b39aed-2708-4f25-bef1-2d0b1dc51f9a",
+            "paintSlot": "fill",
+            "name": "speed",
+            "glslType": "float",
+            "control": "slider",
+            "value": 1
+          }
+        },
+        {
+          "id": "shader-field:layer-29b39aed-2708-4f25-bef1-2d0b1dc51f9a:tint",
+          "key": "tint",
+          "label": "Tint",
+          "description": "Colour of the light streaks.",
+          "type": "color",
+          "defaultValue": "#2452c2",
+          "required": false,
+          "options": [],
+          "constraints": {},
+          "fileExtensions": [],
+          "properties": [],
+          "items": null,
+          "generatedShaderParameter": {
+            "layerId": "layer-29b39aed-2708-4f25-bef1-2d0b1dc51f9a",
+            "paintSlot": "fill",
+            "name": "tint",
+            "glslType": "vec3",
+            "control": "color",
+            "value": [
+              0.14,
+              0.32,
+              0.76
+            ]
+          }
+        },
+        {
+          "id": "shader-field:layer-29b39aed-2708-4f25-bef1-2d0b1dc51f9a:glow",
+          "key": "glow",
+          "label": "Glow",
+          "description": "Turns the extra glow on or off.",
+          "type": "boolean",
+          "defaultValue": true,
+          "required": false,
+          "options": [],
+          "constraints": {},
+          "fileExtensions": [],
+          "properties": [],
+          "items": null,
+          "generatedShaderParameter": {
+            "layerId": "layer-29b39aed-2708-4f25-bef1-2d0b1dc51f9a",
+            "paintSlot": "fill",
+            "name": "glow",
+            "glslType": "bool",
+            "control": "toggle",
+            "value": true
+          }
+        }
+      ],
+      "runtimeCollections": [],
+      "dataConnections": [],
+      "mediaCues": [],
+      "patterns": [],
+      "rendererPlugins": [],
+      "customActions": [],
+      "assets": [],
+      "designSystem": {
+        "name": "Brand Kit",
+        "tokens": []
+      },
+      "components": [],
+      "keyframes": [
+        {
+          "id": "keyframe-f4365445-cf97-4ecc-8b49-ea5361ccb95c",
+          "name": "Start",
+          "role": "start"
+        },
+        {
+          "id": "keyframe-ab7720c9-cc2a-48f4-84ae-b259aae10f67",
+          "name": "Step 1",
+          "role": "step"
+        },
+        {
+          "id": "keyframe-5666b483-aaf9-4032-a970-1ce1393b772f",
+          "name": "End",
+          "role": "end"
+        }
+      ],
+      "transitions": [
+        {
+          "id": "transition-6eef6cf2-890e-495a-bccd-3cee127892c9",
+          "fromKeyframeId": "keyframe-f4365445-cf97-4ecc-8b49-ea5361ccb95c",
+          "toKeyframeId": "keyframe-ab7720c9-cc2a-48f4-84ae-b259aae10f67",
+          "durationFrames": 12,
+          "easing": "linear"
+        },
+        {
+          "id": "transition-211f2ab0-b2d8-4a2b-813d-b71b669a02af",
+          "fromKeyframeId": "keyframe-ab7720c9-cc2a-48f4-84ae-b259aae10f67",
+          "toKeyframeId": "keyframe-5666b483-aaf9-4032-a970-1ce1393b772f",
+          "durationFrames": 12,
+          "easing": "linear"
+        }
+      ]
+    }
+  ],
+  "shaders": []
+}

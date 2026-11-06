@@ -145,11 +145,11 @@ const config: Config = {
     navbar: {
       // Always dark, so it meets the homepage stage cleanly in either colour mode.
       style: 'dark',
-      title: 'Studio',
       logo: {
-        alt: 'OGraf',
-        src: 'img/ograf-logo-mono-white.svg',
-        height: 24,
+        alt: 'OGraf Studio',
+        src: 'img/ograf-studio-logo.png',
+        width: 156,
+        height: 21,
       },
       items: [
         {type: 'docSidebar', sidebarId: 'docs', position: 'left', label: 'Docs'},
