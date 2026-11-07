@@ -11,7 +11,18 @@ import OGrafExample from '@site/src/components/OGrafExample';
 
 <ExampleTags slug="live-markets" />
 
-<OGrafExample slug="live-markets" feed="markets" formFields={[]} />
+<OGrafExample
+  slug="live-markets"
+  feed="markets"
+  formFields={[]}
+  landscapeFullscreen
+  sources={
+    <>
+      Live prices from <a href="https://docs.cdp.coinbase.com/exchange/docs/welcome">Coinbase Exchange</a>.
+      Daily exchange rates from the European Central Bank through <a href="https://frankfurter.dev">Frankfurter</a>.
+    </>
+  }
+/>
 
 <ExampleOrigin slug="live-markets" />
 
@@ -29,8 +40,9 @@ For illustration only. This isn't investment advice.
 3. Move your pointer over the chart to read any price and time.
 4. Click **Auto tour** to let it move through the markets by itself, as it would on air. Picking a
    market turns the tour off.
-5. Press **Fullscreen**, then try the keyboard: the up and down arrows change market, 1, 2 and 3
-   change range, C switches the chart and T the tour.
+5. Press **Fullscreen**. On a phone it turns to landscape however you hold it. On a computer, try the
+   keyboard: the up and down arrows change market, 1, 2 and 3 change range, C switches the chart and
+   T the tour.
 
 ## What you get
 
@@ -59,6 +71,7 @@ some:
 | `history` | Candles for every market and range, as JSON |
 | `trades` | The latest trades, newest first |
 | `fx` | Exchange rates for the crawl along the bottom |
+| `source` | Who the prices come from, named at the top of the graphic |
 | `feed_status` | `live`, `connecting` or `reconnecting` |
 | `as_of` | The time of the latest trade |
 
@@ -71,6 +84,7 @@ connects to both directly while the graphic is on screen.
 
 ## Make it yours
 
-- Send your own `markets`, such as stocks from your data provider. The rows follow your order.
+- Send your own `markets`, such as stocks from your data provider, and name it in `source`. The rows
+  follow your order.
 - Change the colours and the pace in the numbers at the top of the Markets function.
 - Change the chart's look where the function draws it, in `drawChart`.

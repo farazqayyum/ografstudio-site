@@ -1,8 +1,12 @@
 // What the Live markets example shows and where it comes from. The feed on the site and the script
 // that saves the graphic's sample data both read this.
+export const SOURCE = 'Coinbase Exchange';
 export const API = 'https://api.exchange.coinbase.com';
 export const SOCKET = 'wss://ws-feed.exchange.coinbase.com';
-export const FX_URL = 'https://api.frankfurter.dev/v1/latest?base=USD&symbols=EUR,GBP,JPY,CHF,TRY';
+export const FX_URL = 'https://api.frankfurter.dev/v1/latest?base=USD&symbols=EUR,GBP,CHF,JPY,TRY';
+/** These read as dollars for one unit: EUR/USD, not USD/EUR. */
+const USD_SECOND = ['EUR', 'GBP', 'CHF'];
+const USD_FIRST = ['JPY', 'TRY'];
 
 export const ASSETS = [
   {id: 'BTC', name: 'Bitcoin'},
@@ -88,6 +92,10 @@ export async function fetchMarket({id, name}, signal) {
 export async function fetchRates(signal) {
   const response = await fetch(FX_URL, {signal});
   if (!response.ok) throw new Error(`Rates: ${response.status}`);
+  // The source quotes everything per dollar.
   const {rates} = await response.json();
-  return Object.entries(rates).map(([currency, rate]) => ({pair: `USD/${currency}`, rate}));
+  return [
+    ...USD_SECOND.map((currency) => ({pair: `${currency}/USD`, rate: round(1 / rates[currency])})),
+    ...USD_FIRST.map((currency) => ({pair: `USD/${currency}`, rate: rates[currency]})),
+  ].filter(({rate}) => Number.isFinite(rate));
 }

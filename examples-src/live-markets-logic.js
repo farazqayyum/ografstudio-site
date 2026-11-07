@@ -15,6 +15,7 @@
   const VIEW_X = { area: 1014, candles: 1116 };
   const BAR_W = 346; // the breadth bar
   const METER = { x: 546, w: 918 }; // the 24-hour range meter
+  const SOURCE_CHAR_W = 11.6; // how wide a character of the source's name is, to size its plate
 
   const MORPH_MS = 420; // a chart reshaping into another market or range
   const FLASH_MS = 300; // a price lit up after it changes, and the dots beating as data arrives
@@ -105,12 +106,21 @@
     const scaled = raw / size;
     return (scaled <= 1 ? 1 : scaled <= 2 ? 2 : scaled <= 2.5 ? 2.5 : scaled <= 5 ? 5 : 10) * size;
   };
+  // Every time on screen is the viewer's own, like the clock.
   const MONTHS = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
+  const two = (value) => String(value).padStart(2, '0');
   const timeLabel = (seconds, range) => {
-    const iso = new Date(seconds * 1000).toISOString();
+    const at = new Date(seconds * 1000);
     return range === '7D'
-      ? `${MONTHS[Number(iso.slice(5, 7)) - 1]} ${Number(iso.slice(8, 10))}`
-      : iso.slice(11, 16);
+      ? `${MONTHS[at.getMonth()]} ${at.getDate()}`
+      : `${two(at.getHours())}:${two(at.getMinutes())}`;
+  };
+  const tradeTime = (text) => {
+    // The exchange writes microseconds, and Date only promises to read milliseconds.
+    const at = new Date(String(text).replace(/(\.\d{3})\d+/, '$1'));
+    return Number.isNaN(at.getTime())
+      ? ''
+      : `${two(at.getHours())}:${two(at.getMinutes())}:${two(at.getSeconds())}`;
   };
 
   // The same price at the same place in every view, so the crosshair can find it again.
@@ -431,17 +441,30 @@
   const status =
     feed === 'live'
       ? late
-        ? ['DELAYED', WAIT]
-        : ['LIVE', UP]
+        ? ['DELAYED', WAIT, 'Delayed data from']
+        : ['LIVE', UP, 'Live data from']
       : feed === 'connecting'
-        ? ['CONNECTING', WAIT]
+        ? ['CONNECTING', WAIT, 'Connecting to']
         : feed === 'reconnecting'
-          ? ['RECONNECTING', WAIT]
-          : ['SAMPLE DATA', WAIT];
+          ? ['RECONNECTING', WAIT, 'Reconnecting to']
+          : ['SAMPLE DATA', WAIT, 'Saved sample from'];
   ui.status = status[0];
   ui.status_c = status[1];
   ui.live_c = `${status[1]}${s.beat > nowMs ? '73' : '1f'}`;
-  ui.as_of = data.as_of ? `Last trade ${String(data.as_of).slice(11, 19)} UTC` : 'Waiting for the first trade';
+  const lastTrade = data.as_of ? tradeTime(data.as_of) : '';
+  ui.as_of = lastTrade ? `Last trade ${lastTrade}` : 'Waiting for a trade';
+
+  // Who the prices come from, and whether they're arriving right now.
+  const source = String(data.source ?? '').trim();
+  ui.source = source ? `${status[2]} ${source}` : '';
+  ui.source_w = Math.min(490, Math.round(ui.source.length * SOURCE_CHAR_W) + 74);
+  ui.source_c = `${status[1]}14`;
+  ui.source_o = source ? 1 : 0;
+  ui.source_icon = picture(
+    `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none' stroke='${status[1]}' stroke-width='2.6' stroke-linecap='round'>` +
+      `<circle cx='16' cy='16' r='3.4' fill='${status[1]}' stroke='none'/>` +
+      `<path d='M10.3 10.3a8 8 0 0 0 0 11.4M21.7 10.3a8 8 0 0 1 0 11.4M6 6a14.1 14.1 0 0 0 0 20M26 6a14.1 14.1 0 0 1 0 20'/></svg>`,
+  );
 
   ui.tour = tour ? 'AUTO TOUR ON' : 'AUTO TOUR OFF';
   ui.tour_c = tour ? UP : SOFT;

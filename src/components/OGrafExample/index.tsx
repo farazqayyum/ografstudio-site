@@ -49,6 +49,10 @@ interface Props {
   formFields?: string[];
   /** Keep the graphic supplied with live data while it's mounted. */
   feed?: 'markets';
+  /** In fullscreen on a phone, show the graphic in landscape however the phone is held. */
+  landscapeFullscreen?: boolean;
+  /** Where a graphic's data comes from, under the player. */
+  sources?: ReactNode;
 }
 
 const STATUS_TEXT: Record<Status, string> = {
@@ -76,7 +80,7 @@ function editableFields(schema: unknown): Array<[string, FieldSchema]> {
  */
 function operatorActions(slug: string, all: OperatorAction[] | undefined): OperatorAction[] {
   if (slug === 'clock' || !all) return [];
-  const actions = slug === 'live-markets' ? all.filter((action) => !action.name.startsWith('UTC clock: ')) : all;
+  const actions = slug === 'live-markets' ? all.filter((action) => !action.name.startsWith('Local clock: ')) : all;
   const prefix = actions[0]?.name.split(': ')[0];
   const shared = actions.length > 0 && actions.every((action) => action.name.startsWith(`${prefix}: `));
   // "Countdown timer: Start" reads as just "Start" when every button belongs to the same timer.
@@ -207,6 +211,21 @@ function FullscreenIcon({exit}: {exit: boolean}): ReactNode {
   );
 }
 
+function SignalIcon(): ReactNode {
+  return (
+    <svg className={styles.signalIcon} viewBox="0 0 32 32" aria-hidden="true">
+      <circle cx="16" cy="16" r="3.4" fill="currentColor" />
+      <path
+        d="M10.3 10.3a8 8 0 0 0 0 11.4M21.7 10.3a8 8 0 0 1 0 11.4M6 6a14.1 14.1 0 0 0 0 20M26 6a14.1 14.1 0 0 1 0 20"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.6"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 function LivePlayer({
   slug,
   label,
@@ -216,6 +235,8 @@ function LivePlayer({
   reserveActions = 0,
   formFields,
   feed,
+  landscapeFullscreen = false,
+  sources,
 }: Props): ReactNode {
   const entry = graphics[slug];
   // A list written in a page is a new array on every render, so the mount follows its contents.
@@ -248,6 +269,8 @@ function LivePlayer({
   const [stepCount, setStepCount] = useState(1);
   const [step, setStep] = useState(0);
   const [fullscreen, setFullscreen] = useState(false);
+  /** The browser couldn't turn the screen to landscape, so the picture turns instead. */
+  const [turned, setTurned] = useState(false);
   const [barAwake, setBarAwake] = useState(true);
   const barTimer = useRef<number | undefined>(undefined);
   const sourceUrl = useBaseUrl(entry.source ?? '');
@@ -255,7 +278,11 @@ function LivePlayer({
 
   // Esc and the browser's own controls can leave fullscreen too, so follow the browser.
   useEffect(() => {
-    const follow = () => setFullscreen(document.fullscreenElement === frameRef.current);
+    const follow = () => {
+      const entered = document.fullscreenElement === frameRef.current;
+      setFullscreen(entered);
+      if (!entered) setTurned(false);
+    };
     document.addEventListener('fullscreenchange', follow);
     return () => {
       document.removeEventListener('fullscreenchange', follow);
@@ -274,10 +301,22 @@ function LivePlayer({
     if (fullscreen) wakeBar();
   }, [fullscreen, wakeBar]);
 
+  const onPhone = landscapeFullscreen && window.matchMedia('(pointer: coarse)').matches;
+
+  // Android browsers can turn the screen during fullscreen, and give it back when fullscreen ends.
+  const turnToLandscape = async () => {
+    if (!onPhone) return;
+    try {
+      await screen.orientation.lock('landscape');
+    } catch {
+      setTurned(true);
+    }
+  };
+
   const toggleFullscreen = () => {
     const request = document.fullscreenElement
       ? document.exitFullscreen()
-      : frameRef.current?.requestFullscreen();
+      : frameRef.current?.requestFullscreen().then(turnToLandscape);
     request?.catch((cause: unknown) => {
       setError(cause instanceof Error ? cause.message : String(cause));
     });
@@ -552,6 +591,9 @@ function LivePlayer({
         className={styles.frame}
         style={backdrop}
         data-bar-awake={barAwake}
+        data-turned={turned}
+        data-letterbox={landscapeFullscreen}
+        onPointerDown={fullscreen ? wakeBar : undefined}
         onPointerMove={fullscreen ? wakeBar : undefined}>
         <BackdropCamera />
         <div ref={viewportRef} className={styles.viewport} />
@@ -571,8 +613,9 @@ function LivePlayer({
         )}
         {fullscreen && (
           <div className={styles.fullscreenBar}>
-            {takeButtons}
-            {actionButtons}
+            {/* On a phone the bar would cover half the graphic, which has its own controls. */}
+            {!onPhone && takeButtons}
+            {!onPhone && actionButtons}
             <button
               type="button"
               className="button button--secondary button--sm"
@@ -582,6 +625,12 @@ function LivePlayer({
           </div>
         )}
       </div>
+      {sources && (
+        <p className={styles.sources}>
+          <SignalIcon />
+          <span>{sources}</span>
+        </p>
+      )}
       <div className={styles.controls}>
         <div className={styles.buttons}>
           {takeButtons}

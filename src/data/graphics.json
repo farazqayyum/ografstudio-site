@@ -41,12 +41,12 @@
   },
   "live-markets": {
     "name": "Live markets",
-    "manifest": "/graphics/live-markets/project-60d5c16d-ccc3-4221-bbba-2a8cf90dede8-rt.ograf.json",
+    "manifest": "/graphics/live-markets/project-ec71f54f-bb8e-4cea-9129-cc832403285d-rt.ograf.json",
     "download": "/graphics/live-markets.ograf.zip",
-    "bytes": 1588234,
+    "bytes": 1593291,
     "source": "/graphics/live-markets.ogs",
-    "sourceBytes": 2447155,
-    "fields": 7,
+    "sourceBytes": 2490481,
+    "fields": 8,
     "actions": 9
   },
   "lottie-pulse": {

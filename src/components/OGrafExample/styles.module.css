@@ -32,6 +32,11 @@
   margin: auto;
 }
 
+/* A graphic that fills its frame has nothing to show through, so the sides are plain. The backdrop is an inline style. */
+.frame:fullscreen[data-letterbox='true'] {
+  background: #000 !important;
+}
+
 .frame:fullscreen[data-bar-awake='false'] {
   cursor: none;
 }
@@ -65,6 +70,40 @@
   pointer-events: none;
 }
 
+/*
+ * The picture on its side, for a phone held upright whose browser can't turn the screen. Held sideways,
+ * this no longer applies. The frame itself can't turn: browsers forbid transforms on a fullscreen element.
+ */
+@media (orientation: portrait) {
+  .frame:fullscreen[data-turned='true'] {
+    --long: min(100vh, calc(100vw * 16 / 9));
+    --short: calc(var(--long) * 9 / 16);
+  }
+
+  /*
+   * The player scales the graphic to how wide its box looks on screen, and on its side that's the box's
+   * height. So the box is as tall as the graphic is long, and the graphic fills its top left corner.
+   */
+  .frame:fullscreen[data-turned='true'] .viewport {
+    inset: auto;
+    top: calc(50vh - var(--long) / 2);
+    left: calc(50vw + var(--short) / 2);
+    width: calc(var(--long) * 16 / 9);
+    height: var(--long);
+    margin: 0;
+    transform: rotate(90deg);
+    transform-origin: 0 0;
+  }
+
+  .frame:fullscreen[data-turned='true'] .fullscreenBar {
+    top: 50%;
+    bottom: auto;
+    left: 0;
+    max-width: calc(100vh - 3rem);
+    transform: translate(-50%, -50%) rotate(90deg) translateY(calc(-50% - 1rem));
+  }
+}
+
 .fullscreenIcon {
   width: 0.8em;
   height: 0.8em;
@@ -91,6 +130,23 @@
   border-radius: 4px;
   background: rgb(5 7 13 / 85%);
   color: #e6ebf7;
+}
+
+.sources {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  margin: 0;
+  padding: 0.6rem 1rem;
+  border-top: 1px solid var(--site-border);
+  font-size: 0.88rem;
+}
+
+.signalIcon {
+  flex: none;
+  width: 1.35rem;
+  height: 1.35rem;
+  color: #2ee6a6;
 }
 
 .controls {

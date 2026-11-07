@@ -7,6 +7,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
+import { SOURCE } from '../src/data/marketData.mjs';
 
 const here = new URL('.', import.meta.url);
 const read = (file) => readFileSync(new URL(file, here), 'utf8');
@@ -104,6 +105,7 @@ export async function liveMarkets({ apply, scene, addField, bind, rule, option }
     trades: snapshot.trades,
     fx: snapshot.fx,
     as_of: snapshot.trades[0]?.time ?? '',
+    source: SOURCE,
     feed_status: '',
     selected: 0,
     range: '24H',
@@ -173,6 +175,7 @@ export async function liveMarkets({ apply, scene, addField, bind, rule, option }
         ...objectItems([prop('pair', 'text'), prop('rate', 'number')]),
       }),
       addField('text', 'as_of', 'Last trade time', 'ISO time of the latest trade.', inputs.as_of),
+      addField('text', 'source', 'Data source', 'Who the prices come from, named at the top. Empty hides it.', inputs.source),
       addField('text', 'feed_status', 'Feed status', 'live, connecting or reconnecting. Empty means the saved sample.', ''),
 
       // What someone on the graphic changes, and an operator can too.
@@ -234,19 +237,22 @@ export async function liveMarkets({ apply, scene, addField, bind, rule, option }
     text('Wordmark', [74, 30, 280, 56], 'LIVE MARKETS', { size: 32, weight: 800, ls: 3 }),
     rect('Status plate', [362, 40, 178, 36], '#ffffff0f', 18),
     text('Status', [362, 40, 178, 36], 'LIVE', { size: 20, weight: 700, ls: 1.4, align: 'center', color: UP }),
-    text('As of', [556, 30, 460, 56], '', { size: 22, color: SOFT, mono: true }),
-    rect('Tour plate', [1284, 34, 228, 48], TILE, 24, LINE),
-    dot('Tour dot', [1304, 51, 14, 14], UP),
-    text('Tour', [1326, 34, 180, 48], 'AUTO TOUR ON', { size: 20, weight: 700, ls: 1 }),
-    rect('Tour hit', [1284, 34, 228, 48], CLEAR, 24),
-    add('clock', 'UTC clock', [1530, 26, 358, 62], {
+    text('As of', [556, 30, 262, 56], '', { size: 22, color: SOFT, mono: true }),
+    rect('Source plate', [832, 34, look.ui.source_w, 48], look.ui.source_c, 24, LINE),
+    add('image', 'Source icon', [846, 41, 34, 34], { src: look.ui.source_icon, fit: 'fill' }),
+    text('Source', [888, 34, 424, 48], look.ui.source, { size: 22, weight: 600 }),
+    rect('Tour plate', [1432, 34, 228, 48], TILE, 24, LINE),
+    dot('Tour dot', [1452, 51, 14, 14], UP),
+    text('Tour', [1474, 34, 180, 48], 'AUTO TOUR ON', { size: 20, weight: 700, ls: 1 }),
+    rect('Tour hit', [1432, 34, 228, 48], CLEAR, 24),
+    add('clock', 'Local clock', [1530, 26, 358, 62], {
       fontFamily: MONO,
       fontSize: 42,
       fontWeight: 500,
       color: INK,
       textAlign: 'right',
       verticalAlign: 'middle',
-      clock: { mode: 'clock', source: 'automatic', format: 'hh:mm:ss', hourCycle: '24', timeZone: 'UTC', suffix: ' UTC' },
+      clock: { mode: 'clock', source: 'automatic', format: 'hh:mm:ss', hourCycle: '24', timeZone: 'local' },
     }),
   ];
 
@@ -431,6 +437,9 @@ export async function liveMarkets({ apply, scene, addField, bind, rule, option }
       ui('Live pulse', { fill: 'live_c' }),
       ui('Live dot', { fill: 'status_c' }),
       ui('As of', { content: 'as_of' }),
+      ui('Source plate', { fill: 'source_c', 'layer.width': 'source_w', 'layer.opacity': 'source_o' }),
+      ui('Source icon', { src: 'source_icon', 'layer.opacity': 'source_o' }),
+      ui('Source', { content: 'source', 'layer.opacity': 'source_o' }),
       ui('Tour', { content: 'tour' }),
       ui('Tour dot', { fill: 'tour_c' }),
       ui('Marker', { 'layer.y': 'marker_y' }),
@@ -584,7 +593,7 @@ export async function liveMarkets({ apply, scene, addField, bind, rule, option }
             enabled: true,
             source: source('live-markets-logic.js'),
             inputs: Object.fromEntries(
-              ['markets', 'history', 'trades', 'fx', 'as_of', 'feed_status', 'selected', 'range', 'view', 'tour', 'hover'].map(
+              ['markets', 'history', 'trades', 'fx', 'as_of', 'source', 'feed_status', 'selected', 'range', 'view', 'tour', 'hover'].map(
                 (name) => [name, field(name).id],
               ),
             ),

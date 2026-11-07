@@ -45,9 +45,10 @@
   const places = close >= 10 ? 2 : close >= 1 ? 4 : 5;
   const [whole, part] = close.toFixed(places).split('.');
   const move = series.first ? ((close - series.first) / series.first) * 100 : 0;
-  const iso = new Date((series.last - (series.n - 1 - index) * series.step) * 1000).toISOString();
+  const at = new Date((series.last - (series.n - 1 - index) * series.step) * 1000);
   const MONTHS = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
-  const date = `${MONTHS[Number(iso.slice(5, 7)) - 1]} ${Number(iso.slice(8, 10))}`;
+  const two = (value) => String(value).padStart(2, '0');
+  const when = `${MONTHS[at.getMonth()]} ${at.getDate()} ${two(at.getHours())}:${two(at.getMinutes())}`;
 
   // The label stays on the chart, on whichever side has room.
   const canvasX = PLOT.x + x;
@@ -67,7 +68,7 @@
         info_y: tipY + 46,
         price: group(whole) + (part ? `.${part}` : ''),
         price_c: move >= 0 ? UP : DOWN,
-        info: `${move >= 0 ? '+' : ''}${move.toFixed(2)}% · ${date} ${iso.slice(11, 16)}`,
+        info: `${move >= 0 ? '+' : ''}${move.toFixed(2)}% · ${when}`,
       },
     },
     wakeAt: again,

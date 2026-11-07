@@ -2,7 +2,7 @@
 // plays it sends it data, and on this page that's the code here. It listens to Coinbase Exchange's
 // public feed and passes on what it hears a few times a second. The graphic does the rest, including
 // everything a visitor clicks, so this sends every market and range and lets the graphic choose.
-import {ASSETS, RANGES, SOCKET, fetchCandles, fetchMarket, fetchRates} from '@site/src/data/marketData.mjs';
+import {ASSETS, RANGES, SOCKET, SOURCE, fetchCandles, fetchMarket, fetchRates} from '@site/src/data/marketData.mjs';
 
 type Sender = {update(data: Record<string, unknown>): Promise<unknown>};
 type Market = {
@@ -40,7 +40,7 @@ export function startMarketFeed(player: Sender, signal: AbortSignal): void {
   let trades: Trade[] = [];
   let asOf = '';
   let status = 'connecting';
-  let pending: Record<string, unknown> = {feed_status: status};
+  let pending: Record<string, unknown> = {feed_status: status, source: SOURCE};
   let sending = false;
   let socket: WebSocket | null = null;
   let attempt = 0;
