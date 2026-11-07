@@ -4,7 +4,8 @@
 saves the editable source here (`<slug>.ogs`) and exports the certified package to
 `graphics/<slug>.ograf.zip`:
 
-clock, countdown, scoreboard, lower-third, ticker, bug, rankings, shader-background and lottie-pulse.
+clock, countdown, scoreboard, lower-third, ticker, bug, rankings, live-markets, shader-background and
+lottie-pulse.
 
 `npm run graphics` copies each `.ogs` to `static/graphics`, and the player's caption links to it. The
 prompt, model and generation time on each page live in `origin` in `src/data/examples.ts`. The time
@@ -17,6 +18,20 @@ Rankings also has `rankings-votes.js`, the scoring function that Studio's Functi
 `fonts/oswald.woff2` with its licence. Studio's canvas doesn't run functions, so `build.mjs` plays the
 function up to the second jury's top score and uses the result as the default of the fields it
 writes. That sample is what you see while designing. On air, the graphic starts from zero.
+
+Live markets lives in `live-markets.mjs`, with its two functions in `live-markets-logic.js` and
+`live-markets-crosshair.js`, and `fonts/inter.woff2` and `fonts/jetbrains-mono.woff2` with their licences.
+`live-markets-snapshot.json` holds real prices, so the template has something to show before a feed
+arrives. Refresh it with `node examples-src/live-markets-snapshot.mjs` before a rebuild. On the site the
+data comes from `src/components/OGrafExample/marketFeed.ts`, and the markets and ranges both read are in
+`src/data/marketData.mjs`. Three limits shaped it:
+
+- Keep looping layers out of it. While any layer loops, the runtime redraws every layer on every frame,
+  and with about 180 layers that starved the function workers until they failed. The dots beat when data
+  arrives instead.
+- A function takes at most 64 KiB of input, so `history` stays around 45 KB.
+- A function runs in a new worker for each call, and all functions share one queue. A call that's already
+  running can return after a click, so return only what the call changed, never an input as it came in.
 
 ## Fonts
 

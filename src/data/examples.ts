@@ -14,6 +14,8 @@ export interface Example {
   tags: string[];
   /** Keep it on /examples, but leave it out of the homepage's "Take the controls". */
   notOnHomepage?: boolean;
+  /** Reachable only by its link: not on /examples. Pair it with `unlisted: true` in the page's front matter. */
+  unlisted?: boolean;
   origin: ExampleOrigin;
 }
 
@@ -122,6 +124,23 @@ export const examples: Example[] = [
       generationTime: 'About 20 minutes',
       prompts: [
         'Refine the Rankings example into a jury vote like that of a well-known song contest, as a good TV game show example. Start with a list of contestants. Each jury then gives them points, and the ranking recalculates automatically whenever a contestant receives points. Use a different background colour for the top three positions, and add up and down arrows.',
+      ],
+    },
+  },
+  {
+    slug: 'live-markets',
+    title: 'Live markets',
+    summary: 'A markets dashboard playing real prices from a public feed, with a chart you can click and read.',
+    image: '/img/examples/live-markets.png',
+    level: 'Advanced',
+    tags: ['Live data', 'Function', 'Interactive'],
+    notOnHomepage: true,
+    unlisted: true,
+    origin: {
+      model: MODEL,
+      generationTime: 'About 15 minutes',
+      prompts: [
+        'Build an advanced live data example on finance: a dashboard that gets real-time data from an external data source while being interactive and attractive in design.',
       ],
     },
   },

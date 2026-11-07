@@ -10,6 +10,7 @@
 import { readFileSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
 import { call } from '../carousel/mcp.mjs';
+import { liveMarkets } from './live-markets.mjs';
 
 const FONT = 'Roboto Condensed, Arial Narrow, Arial, sans-serif';
 
@@ -1400,7 +1401,10 @@ const EXAMPLES = {
   },
 };
 
+EXAMPLES['live-markets'] = () => liveMarkets({ apply, scene, addField, bind, rule, option });
+
 const NAMES = {
+  'live-markets': 'Live markets',
   clock: 'Clock',
   countdown: 'Countdown',
   scoreboard: 'Scoreboard',

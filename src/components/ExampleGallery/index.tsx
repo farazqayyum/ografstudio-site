@@ -20,19 +20,21 @@ function ExampleCard({example}: {example: Example}): ReactNode {
   );
 }
 
+const listed = examples.filter((example) => !example.unlisted);
+
 // Simplest first, keeping the listed order within each level.
-const byLevel = [...examples].sort(
+const byLevel = [...listed].sort(
   (a, b) => EXAMPLE_LEVELS.indexOf(a.level) - EXAMPLE_LEVELS.indexOf(b.level),
 );
 
 export default function ExampleGallery(): ReactNode {
   const [level, setLevel] = useState<ExampleLevel | null>(null);
   const choices: {label: string; value: ExampleLevel | null; count: number}[] = [
-    {label: 'All', value: null, count: examples.length},
+    {label: 'All', value: null, count: listed.length},
     ...EXAMPLE_LEVELS.map((value) => ({
       label: value,
       value,
-      count: examples.filter((example) => example.level === value).length,
+      count: listed.filter((example) => example.level === value).length,
     })),
   ];
   return (

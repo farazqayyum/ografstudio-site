@@ -1,0 +1,76 @@
+---
+title: Live markets
+sidebar_position: 7.5
+unlisted: true
+description: A markets dashboard playing real prices from a public feed. Click any market, change the range, draw candles, and hover the chart to read it.
+---
+
+import ExampleOrigin from '@site/src/components/ExampleOrigin';
+import ExampleTags from '@site/src/components/ExampleTags';
+import OGrafExample from '@site/src/components/OGrafExample';
+
+<ExampleTags slug="live-markets" />
+
+<OGrafExample slug="live-markets" feed="markets" formFields={[]} />
+
+<ExampleOrigin slug="live-markets" />
+
+A markets screen for a business channel, playing live. Eight crypto markets stream in from Coinbase
+Exchange while you watch, because crypto trades around the clock and its public feed needs no key.
+Prices light up as they change, trades slide into the list, and the chart's last point moves with
+the market. The dots beat as data arrives, so if the feed ever stops, you can see it.
+
+For illustration only. This isn't investment advice.
+
+## Try it
+
+1. Click a market in the watchlist. The chart reshapes into it.
+2. Change **1H**, **24H** or **7D**, and switch between **Area** and **Candles**.
+3. Move your pointer over the chart to read any price and time.
+4. Click **Auto tour** to let it move through the markets by itself, as it would on air. Picking a
+   market turns the tour off.
+5. Press **Fullscreen**, then try the keyboard: the up and down arrows change market, 1, 2 and 3
+   change range, C switches the chart and T the tour.
+
+## What you get
+
+- **Live data:** the page you're on is the controller. It listens to the feed and sends the graphic
+  ordinary data updates, twice a second. Any controller could send the same fields.
+- **Functions:** one function, Markets, turns those updates into everything on screen, and another
+  follows the pointer for the crosshair. Clicks stay inside the graphic, with no page code involved.
+- **A chart drawn by a function:** the function writes the chart as a picture to a field, and an image
+  layer shows it. That's one layer for the area, the candles and the volume bars, in any style you
+  can draw.
+- **Rules:** the hover highlights, clicks and keyboard shortcuts.
+- **Runtime collection:** the trade list is one row designed once. New trades push the rows down.
+- **Actions:** the buttons under the graphic send the same commands a controller can send.
+- **A saved sample:** the template holds real prices from the day it was built, so it never starts
+  empty. The status at the top says **SAMPLE DATA** until a feed arrives.
+
+## How the data gets there
+
+A graphic doesn't fetch anything itself. Whoever plays it sends it data, so any controller that sends
+these fields can drive the same package. Opened in Studio, it plays its saved sample until it gets
+some:
+
+| Field | What it holds |
+| --- | --- |
+| `markets` | Up to eight markets, each with its price and its 24-hour open, high, low and volume |
+| `history` | Candles for every market and range, as JSON |
+| `trades` | The latest trades, newest first |
+| `fx` | Exchange rates for the crawl along the bottom |
+| `feed_status` | `live`, `connecting` or `reconnecting` |
+| `as_of` | The time of the latest trade |
+
+A graphic can't report your clicks to whoever plays it, so the feed sends every market and range, and
+the graphic chooses what to show.
+
+Prices come from [Coinbase Exchange](https://docs.cdp.coinbase.com/exchange/docs/welcome) and exchange
+rates from the European Central Bank through [Frankfurter](https://frankfurter.dev). Your browser
+connects to both directly while the graphic is on screen.
+
+## Make it yours
+
+- Send your own `markets`, such as stocks from your data provider. The rows follow your order.
+- Change the colours and the pace in the numbers at the top of the Markets function.
+- Change the chart's look where the function draws it, in `drawChart`.

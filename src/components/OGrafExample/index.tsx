@@ -45,6 +45,10 @@ interface Props {
   reserveFields?: number;
   /** Keep room for this many action buttons, for the same pages. */
   reserveActions?: number;
+  /** Which fields the form offers, when a package has fields a visitor shouldn't type into. */
+  formFields?: string[];
+  /** Keep the graphic supplied with live data while it's mounted. */
+  feed?: 'markets';
 }
 
 const STATUS_TEXT: Record<Status, string> = {
@@ -70,8 +74,9 @@ function editableFields(schema: unknown): Array<[string, FieldSchema]> {
  * The buttons a package offers. A clock's timer commands are always published but do nothing on a
  * running time-of-day clock, so its form leaves them out.
  */
-function operatorActions(slug: string, actions: OperatorAction[] | undefined): OperatorAction[] {
-  if (slug === 'clock' || !actions) return [];
+function operatorActions(slug: string, all: OperatorAction[] | undefined): OperatorAction[] {
+  if (slug === 'clock' || !all) return [];
+  const actions = slug === 'live-markets' ? all.filter((action) => !action.name.startsWith('UTC clock: ')) : all;
   const prefix = actions[0]?.name.split(': ')[0];
   const shared = actions.length > 0 && actions.every((action) => action.name.startsWith(`${prefix}: `));
   // "Countdown timer: Start" reads as just "Start" when every button belongs to the same timer.
@@ -182,6 +187,8 @@ const LOAD_WHEN_SEEN = 0.25;
 /** Share of the graphic and its form that counts as on screen. */
 const ON_SCREEN = 0.1;
 const PARK_AFTER_MS = 4000;
+/** A graphic on a feed starts over after a failed function, but no more often than this. */
+const RESTART_GAP_MS = 10_000;
 
 function FullscreenIcon({exit}: {exit: boolean}): ReactNode {
   return (
@@ -207,8 +214,12 @@ function LivePlayer({
   showData = true,
   reserveFields = 0,
   reserveActions = 0,
+  formFields,
+  feed,
 }: Props): ReactNode {
   const entry = graphics[slug];
+  // A list written in a page is a new array on every render, so the mount follows its contents.
+  const formFieldsKey = formFields ? formFields.join(',') || ' ' : '';
   const playerUrl = useBaseUrl('/player/ograf-player.js');
   const manifestUrl = useBaseUrl(entry.manifest);
   const downloadUrl = useBaseUrl(entry.download);
@@ -225,6 +236,9 @@ function LivePlayer({
   const [offscreen, setOffscreen] = useState(false);
   /** Unmounted for being off screen. */
   const [asleep, setAsleep] = useState(false);
+  /** Counts the times a graphic on a feed has started over. */
+  const [restarts, setRestarts] = useState(0);
+  const lastRestart = useRef(0);
   const [visible, setVisible] = useState(false);
   const [status, setStatus] = useState<Status>('waiting');
   const [error, setError] = useState<string>();
@@ -322,6 +336,21 @@ function LivePlayer({
     waking.current = false;
     touched.current = false;
     setStatus(wakingUp ? 'returning' : 'loading');
+    // A failed function stays failed, and the graphic just stops changing with nothing to show for it. On
+    // a feed the next update has everything back, so starting over loses nothing but the visitor's market.
+    let restartTimer: number | undefined;
+    const restart = () => {
+      if (restartTimer !== undefined) return;
+      restartTimer = window.setTimeout(
+        () => {
+          lastRestart.current = Date.now();
+          waking.current = true;
+          setRestarts((count) => count + 1);
+        },
+        Math.max(0, lastRestart.current + RESTART_GAP_MS - Date.now()),
+      );
+    };
+    if (feed) container.addEventListener('ograf-function-error', restart);
     (async () => {
       try {
         // The player imports each graphic's main.js itself, so it must stay out of the bundle.
@@ -332,7 +361,9 @@ function LivePlayer({
           return;
         }
         playerRef.current = mounted;
-        const editable = editableFields(mounted.manifest.schema);
+        const editable = editableFields(mounted.manifest.schema).filter(
+          ([key]) => !formFieldsKey || formFieldsKey.split(',').includes(key),
+        );
         const defaults = (module.dataFromSchemaDefaults(mounted.manifest.schema) ?? {}) as Record<string, FieldValue>;
         sentValues.current = defaults;
         setFields(editable);
@@ -341,6 +372,11 @@ function LivePlayer({
         setStepCount(Number(mounted.manifest.stepCount ?? 1));
         setStep(0);
         if (!wakingUp) setStatus('off-air');
+        if (feed === 'markets') {
+          const {startMarketFeed} = await import('./marketFeed');
+          // It ends with the mount, so a graphic parked off screen stops listening too.
+          if (!abort.signal.aborted) startMarketFeed(mounted, abort.signal);
+        }
         if (autoPlay || wakingUp) {
           setStatus('busy');
           await mounted.play();
@@ -355,11 +391,13 @@ function LivePlayer({
     return () => {
       disposed = true;
       abort.abort();
+      window.clearTimeout(restartTimer);
+      container.removeEventListener('ograf-function-error', restart);
       window.clearTimeout(updateTimer.current);
       playerRef.current = null;
       void mounted?.dispose().catch(() => undefined);
     };
-  }, [visible, asleep, playerUrl, manifestUrl, autoPlay, slug]);
+  }, [visible, asleep, restarts, playerUrl, manifestUrl, autoPlay, slug, feed, formFieldsKey]);
 
   const run = useCallback(async (action: (player: OGrafPlayer) => Promise<unknown>, after: Status) => {
     const player = playerRef.current;
