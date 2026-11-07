@@ -135,7 +135,6 @@ export const examples: Example[] = [
     level: 'Advanced',
     tags: ['Live data', 'Function', 'Interactive'],
     notOnHomepage: true,
-    unlisted: true,
     origin: {
       model: MODEL,
       generationTime: 'About 15 minutes',
