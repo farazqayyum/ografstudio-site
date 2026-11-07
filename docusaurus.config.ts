@@ -131,7 +131,8 @@ const config: Config = {
   ],
 
   themeConfig: {
-    image: 'img/social-card.png',
+    // Raise v when the card changes: chat apps keep the image they fetched from a given address.
+    image: 'img/social-card.png?v=2',
     metadata: [
       {
         name: 'keywords',
