@@ -512,6 +512,12 @@ function LivePlayer({
     });
   };
 
+  const sourcesLine = sources && (
+    <p className={styles.sources}>
+      <SignalIcon />
+      <span>{sources}</span>
+    </p>
+  );
   const lastStep = step >= stepCount - 1;
   const ready = status === 'on-air' || status === 'off-air';
   const sizeMb = (entry.bytes / 1024 / 1024).toFixed(1);
@@ -625,12 +631,7 @@ function LivePlayer({
           </div>
         )}
       </div>
-      {sources && (
-        <p className={styles.sources}>
-          <SignalIcon />
-          <span>{sources}</span>
-        </p>
-      )}
+      {reserveFields === 0 && sourcesLine}
       <div className={styles.controls}>
         <div className={styles.buttons}>
           {takeButtons}
@@ -693,6 +694,8 @@ function LivePlayer({
                 This graphic has no operator data. Use Take in and Take out to control it.
               </p>
             )}
+            {/* Where the page keeps room for a form, this goes in that room, so switching doesn't move the page. */}
+            {reserveFields > 0 && sourcesLine}
           </fieldset>
         </div>
       )}

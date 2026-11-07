@@ -7,21 +7,11 @@ description: A markets dashboard playing real prices from a public feed. Click a
 import ExampleOrigin from '@site/src/components/ExampleOrigin';
 import ExampleTags from '@site/src/components/ExampleTags';
 import OGrafExample from '@site/src/components/OGrafExample';
+import {LIVE_MARKETS} from '@site/src/components/OGrafExample/liveMarkets';
 
 <ExampleTags slug="live-markets" />
 
-<OGrafExample
-  slug="live-markets"
-  feed="markets"
-  formFields={[]}
-  landscapeFullscreen
-  sources={
-    <>
-      Live prices from <a href="https://docs.cdp.coinbase.com/exchange/docs/welcome">Coinbase Exchange</a>.
-      Daily exchange rates from the European Central Bank through <a href="https://frankfurter.dev">Frankfurter</a>.
-    </>
-  }
-/>
+<OGrafExample slug="live-markets" {...LIVE_MARKETS} />
 
 <ExampleOrigin slug="live-markets" />
 
@@ -69,7 +59,7 @@ some:
 | `markets` | Up to eight markets, each with its price and its 24-hour open, high, low and volume |
 | `history` | Candles for every market and range, as JSON |
 | `trades` | The latest trades, newest first |
-| `fx` | Exchange rates for the crawl along the bottom |
+| `fx` | Exchange rates for the crawl along the bottom. Each one's `previous` rate decides its up or down arrow |
 | `source` | Who the prices come from, named at the top of the graphic |
 | `feed_status` | `live`, `connecting` or `reconnecting` |
 | `as_of` | The time of the latest trade |
@@ -78,8 +68,9 @@ A graphic can't report your clicks to whoever plays it, so the feed sends every 
 the graphic chooses what to show.
 
 Prices come from [Coinbase Exchange](https://docs.cdp.coinbase.com/exchange/docs/welcome) and exchange
-rates from the European Central Bank through [Frankfurter](https://frankfurter.dev). Your browser
-connects to both directly while the graphic is on screen.
+rates from the European Central Bank through [Frankfurter](https://frankfurter.dev). Those rates change
+once a working day, so their arrows show the change from the day before. Your browser connects to both
+directly while the graphic is on screen.
 
 ## Make it yours
 

@@ -134,7 +134,6 @@ export const examples: Example[] = [
     image: '/img/examples/live-markets.png',
     level: 'Advanced',
     tags: ['Live data', 'Function', 'Interactive'],
-    notOnHomepage: true,
     origin: {
       model: MODEL,
       generationTime: 'About 15 minutes',
@@ -142,6 +141,7 @@ export const examples: Example[] = [
         'Build an advanced live data example on finance: a dashboard that gets real-time data from an external data source while being interactive and attractive in design.',
         'Show local time instead of UTC by default. Write the exchange rates as EUR/USD, CHF/USD and GBP/USD, with USD second. In fullscreen on a phone, show it in landscape however the phone is held.',
         'Make the data sources more visible, besides the ticker, with an icon: live data from Coinbase.',
+        'On the ticker, add up and down arrows to the currencies, showing whether each is going up or down.',
       ],
     },
   },

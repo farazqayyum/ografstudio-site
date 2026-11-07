@@ -142,6 +142,12 @@
   font-size: 0.88rem;
 }
 
+.data .sources {
+  grid-column: 1 / -1;
+  padding: 0.25rem 0 0;
+  border-top: 0;
+}
+
 .signalIcon {
   flex: none;
   width: 1.35rem;

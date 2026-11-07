@@ -3,7 +3,9 @@
 export const SOURCE = 'Coinbase Exchange';
 export const API = 'https://api.exchange.coinbase.com';
 export const SOCKET = 'wss://ws-feed.exchange.coinbase.com';
-export const FX_URL = 'https://api.frankfurter.dev/v1/latest?base=USD&symbols=EUR,GBP,CHF,JPY,TRY';
+const FX_API = 'https://api.frankfurter.dev/v1';
+/** Far enough back to find the last two days with rates, over any holiday weekend. */
+const FX_DAYS_BACK = 7;
 /** These read as dollars for one unit: EUR/USD, not USD/EUR. */
 const USD_SECOND = ['EUR', 'GBP', 'CHF'];
 const USD_FIRST = ['JPY', 'TRY'];
@@ -88,14 +90,27 @@ export async function fetchMarket({id, name}, signal) {
   };
 }
 
-/** Daily reference rates, as [{pair, rate}]. */
+/** Daily reference rates, as [{pair, rate, previous}], where `previous` is the last day's before that. */
 export async function fetchRates(signal) {
-  const response = await fetch(FX_URL, {signal});
+  const from = new Date(Date.now() - FX_DAYS_BACK * 86_400_000).toISOString().slice(0, 10);
+  const symbols = [...USD_SECOND, ...USD_FIRST].join(',');
+  const response = await fetch(`${FX_API}/${from}..?base=USD&symbols=${symbols}`, {signal});
   if (!response.ok) throw new Error(`Rates: ${response.status}`);
-  // The source quotes everything per dollar.
+  // The source quotes everything per dollar, one set of rates for each working day.
   const {rates} = await response.json();
+  const days = Object.keys(rates).sort();
+  const latest = rates[days[days.length - 1]] ?? {};
+  const before = rates[days[days.length - 2]] ?? {};
   return [
-    ...USD_SECOND.map((currency) => ({pair: `${currency}/USD`, rate: round(1 / rates[currency])})),
-    ...USD_FIRST.map((currency) => ({pair: `USD/${currency}`, rate: rates[currency]})),
+    ...USD_SECOND.map((currency) => ({
+      pair: `${currency}/USD`,
+      rate: round(1 / latest[currency]),
+      previous: round(1 / before[currency]),
+    })),
+    ...USD_FIRST.map((currency) => ({
+      pair: `USD/${currency}`,
+      rate: latest[currency],
+      previous: before[currency],
+    })),
   ].filter(({rate}) => Number.isFinite(rate));
 }

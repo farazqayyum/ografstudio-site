@@ -520,16 +520,22 @@
       },
     };
   };
+  // Which way a rate went since the day before. No earlier rate to go by, or no change, means no arrow.
+  const rateArrow = ({ rate, previous }) => {
+    if (!Number.isFinite(previous) || previous === rate) return [];
+    return rate > previous ? [[' ↑', UP, 700]] : [[' ↓', DOWN, 700]];
+  };
   const rates = (Array.isArray(data.fx) ? data.fx : []).map((rate) =>
     crawlItem(`fx-${rate.pair.replace(/\W/g, '')}`, [
       [`${rate.pair}  `, SOFT, 600],
       [rate.rate.toFixed(rate.rate >= 20 ? 2 : 4), INK, 600],
+      ...rateArrow(rate),
     ]),
   );
   const crawl = [
     ...rates,
     crawlItem('note-source', [
-      ['Crypto: Coinbase Exchange, live  ·  Exchange rates: ECB via Frankfurter, daily', SOFT, 500],
+      ['Crypto: Coinbase Exchange, live  ·  Exchange rates: ECB via Frankfurter, daily, arrows compare with the day before', SOFT, 500],
     ]),
     crawlItem('note-advice', [['For illustration only, not investment advice', SOFT, 500]]),
   ];

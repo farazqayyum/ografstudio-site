@@ -6,6 +6,7 @@ import Heading from '@theme/Heading';
 import {LevelTag} from '@site/src/components/ExampleTags';
 import HeroReel from '@site/src/components/HeroReel';
 import OGrafExample from '@site/src/components/OGrafExample';
+import {LIVE_MARKETS} from '@site/src/components/OGrafExample/liveMarkets';
 import {examples} from '@site/src/data/examples';
 import graphics from '@site/src/data/graphics.json';
 import info from '@site/src/data/importInfo.json';
@@ -159,13 +160,21 @@ function SectionHead({
   );
 }
 
-/** The longest example's form, so switching examples doesn't change the page's height. */
 const controls = examples.filter((item) => !item.notOnHomepage);
+/** What an example needs from its player beyond its name. */
+const PLAYER_PROPS: Record<string, Partial<ComponentProps<typeof OGrafExample>>> = {
+  'live-markets': LIVE_MARKETS,
+};
+/**
+ * The longest example's form, so switching examples doesn't change the page's height. One that picks its
+ * own form shows far less than its package offers, and fits in the room the others need.
+ */
+const sizedByForm = controls.filter((item) => !PLAYER_PROPS[item.slug]?.formFields);
 const MOST_ACTIONS = Math.max(
-  ...controls.map((item) => graphics[item.slug as keyof typeof graphics].actions),
+  ...sizedByForm.map((item) => graphics[item.slug as keyof typeof graphics].actions),
 );
 const LONGEST_FORM = Math.max(
-  ...controls.map((item) => graphics[item.slug as keyof typeof graphics].fields),
+  ...sizedByForm.map((item) => graphics[item.slug as keyof typeof graphics].fields),
 );
 
 function LiveDemo(): ReactNode {
@@ -210,6 +219,7 @@ function LiveDemo(): ReactNode {
             slug={example.slug as ComponentProps<typeof OGrafExample>['slug']}
             reserveFields={LONGEST_FORM}
             reserveActions={MOST_ACTIONS}
+            {...PLAYER_PROPS[example.slug]}
           />
         </div>
       </div>

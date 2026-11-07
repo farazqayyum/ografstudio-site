@@ -41,11 +41,11 @@
   },
   "live-markets": {
     "name": "Live markets",
-    "manifest": "/graphics/live-markets/project-ec71f54f-bb8e-4cea-9129-cc832403285d-rt.ograf.json",
+    "manifest": "/graphics/live-markets/project-9788384b-c9fb-4b7c-b185-809bde59c39d-rt.ograf.json",
     "download": "/graphics/live-markets.ograf.zip",
-    "bytes": 1593291,
+    "bytes": 1594020,
     "source": "/graphics/live-markets.ogs",
-    "sourceBytes": 2490481,
+    "sourceBytes": 2493281,
     "fields": 8,
     "actions": 9
   },

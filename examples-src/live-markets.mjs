@@ -172,7 +172,7 @@ export async function liveMarkets({ apply, scene, addField, bind, rule, option }
         ]),
       }),
       addField('array', 'fx', 'Exchange rates', 'Shown in the crawl.', inputs.fx, {
-        ...objectItems([prop('pair', 'text'), prop('rate', 'number')]),
+        ...objectItems([prop('pair', 'text'), prop('rate', 'number'), prop('previous', 'number')]),
       }),
       addField('text', 'as_of', 'Last trade time', 'ISO time of the latest trade.', inputs.as_of),
       addField('text', 'source', 'Data source', 'Who the prices come from, named at the top. Empty hides it.', inputs.source),
