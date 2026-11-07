@@ -48,7 +48,7 @@ interface Props {
   /** Which fields the form offers, when a package has fields a visitor shouldn't type into. */
   formFields?: string[];
   /** Keep the graphic supplied with live data while it's mounted. */
-  feed?: 'markets';
+  feed?: 'markets' | 'weather';
   /** In fullscreen on a phone, show the graphic in landscape however the phone is held. */
   landscapeFullscreen?: boolean;
   /** Where a graphic's data comes from, under the player. */
@@ -415,6 +415,9 @@ function LivePlayer({
           const {startMarketFeed} = await import('./marketFeed');
           // It ends with the mount, so a graphic parked off screen stops listening too.
           if (!abort.signal.aborted) startMarketFeed(mounted, abort.signal);
+        } else if (feed === 'weather') {
+          const {startWeatherFeed} = await import('./weatherFeed');
+          if (!abort.signal.aborted) startWeatherFeed(mounted, abort.signal);
         }
         if (autoPlay || wakingUp) {
           setStatus('busy');

@@ -160,7 +160,8 @@ function SectionHead({
   );
 }
 
-const controls = examples.filter((item) => !item.notOnHomepage);
+// An unlisted example is reached only by its link, so the homepage doesn't offer it either.
+const controls = examples.filter((item) => !item.notOnHomepage && !item.unlisted);
 /** What an example needs from its player beyond its name. */
 const PLAYER_PROPS: Record<string, Partial<ComponentProps<typeof OGrafExample>>> = {
   'live-markets': LIVE_MARKETS,

@@ -1,0 +1,581 @@
+{
+ "taken": "2026-11-07T22:05:57.383Z",
+ "cities": [
+  {
+   "name": "Lisbon",
+   "temp": 18,
+   "feels": 18,
+   "code": 3,
+   "is_day": false,
+   "wind": 7,
+   "humidity": 70,
+   "night_code": 95,
+   "night_low": 18,
+   "days": [
+    {
+     "date": "2026-11-08",
+     "code": 95,
+     "high": 21,
+     "low": 17,
+     "rain": 85
+    },
+    {
+     "date": "2026-11-09",
+     "code": 95,
+     "high": 20,
+     "low": 18,
+     "rain": 93
+    },
+    {
+     "date": "2026-11-10",
+     "code": 95,
+     "high": 21,
+     "low": 17,
+     "rain": 85
+    },
+    {
+     "date": "2026-11-11",
+     "code": 95,
+     "high": 19,
+     "low": 18,
+     "rain": 73
+    },
+    {
+     "date": "2026-11-12",
+     "code": 80,
+     "high": 20,
+     "low": 16,
+     "rain": 58
+    }
+   ]
+  },
+  {
+   "name": "Madrid",
+   "temp": 9,
+   "feels": 8,
+   "code": 3,
+   "is_day": false,
+   "wind": 5,
+   "humidity": 80,
+   "night_code": 61,
+   "night_low": 12,
+   "days": [
+    {
+     "date": "2026-11-08",
+     "code": 61,
+     "high": 15,
+     "low": 7,
+     "rain": 20
+    },
+    {
+     "date": "2026-11-09",
+     "code": 80,
+     "high": 18,
+     "low": 12,
+     "rain": 100
+    },
+    {
+     "date": "2026-11-10",
+     "code": 80,
+     "high": 18,
+     "low": 13,
+     "rain": 98
+    },
+    {
+     "date": "2026-11-11",
+     "code": 95,
+     "high": 15,
+     "low": 13,
+     "rain": 96
+    },
+    {
+     "date": "2026-11-12",
+     "code": 80,
+     "high": 16,
+     "low": 11,
+     "rain": 73
+    }
+   ]
+  },
+  {
+   "name": "Dublin",
+   "temp": 9,
+   "feels": 8,
+   "code": 2,
+   "is_day": false,
+   "wind": 7,
+   "humidity": 88,
+   "night_code": 51,
+   "night_low": 9,
+   "days": [
+    {
+     "date": "2026-11-08",
+     "code": 51,
+     "high": 11,
+     "low": 7,
+     "rain": 0
+    },
+    {
+     "date": "2026-11-09",
+     "code": 51,
+     "high": 12,
+     "low": 9,
+     "rain": 3
+    },
+    {
+     "date": "2026-11-10",
+     "code": 55,
+     "high": 11,
+     "low": 9,
+     "rain": 78
+    },
+    {
+     "date": "2026-11-11",
+     "code": 61,
+     "high": 11,
+     "low": 10,
+     "rain": 63
+    },
+    {
+     "date": "2026-11-12",
+     "code": 53,
+     "high": 11,
+     "low": 9,
+     "rain": 59
+    }
+   ]
+  },
+  {
+   "name": "London",
+   "temp": 9,
+   "feels": 8,
+   "code": 1,
+   "is_day": false,
+   "wind": 3,
+   "humidity": 85,
+   "night_code": 2,
+   "night_low": 7,
+   "days": [
+    {
+     "date": "2026-11-08",
+     "code": 3,
+     "high": 11,
+     "low": 7,
+     "rain": 2
+    },
+    {
+     "date": "2026-11-09",
+     "code": 3,
+     "high": 11,
+     "low": 7,
+     "rain": 0
+    },
+    {
+     "date": "2026-11-10",
+     "code": 51,
+     "high": 11,
+     "low": 8,
+     "rain": 62
+    },
+    {
+     "date": "2026-11-11",
+     "code": 53,
+     "high": 13,
+     "low": 9,
+     "rain": 69
+    },
+    {
+     "date": "2026-11-12",
+     "code": 61,
+     "high": 13,
+     "low": 8,
+     "rain": 41
+    }
+   ]
+  },
+  {
+   "name": "Paris",
+   "temp": 7,
+   "feels": 5,
+   "code": 2,
+   "is_day": false,
+   "wind": 6,
+   "humidity": 92,
+   "night_code": 3,
+   "night_low": 4,
+   "days": [
+    {
+     "date": "2026-11-08",
+     "code": 80,
+     "high": 9,
+     "low": 4,
+     "rain": 0
+    },
+    {
+     "date": "2026-11-09",
+     "code": 61,
+     "high": 9,
+     "low": 4,
+     "rain": 44
+    },
+    {
+     "date": "2026-11-10",
+     "code": 80,
+     "high": 13,
+     "low": 8,
+     "rain": 78
+    },
+    {
+     "date": "2026-11-11",
+     "code": 61,
+     "high": 17,
+     "low": 12,
+     "rain": 73
+    },
+    {
+     "date": "2026-11-12",
+     "code": 45,
+     "high": 16,
+     "low": 8,
+     "rain": 43
+    }
+   ]
+  },
+  {
+   "name": "Berlin",
+   "temp": 2,
+   "feels": -1,
+   "code": 3,
+   "is_day": false,
+   "wind": 7,
+   "humidity": 97,
+   "night_code": 3,
+   "night_low": 2,
+   "days": [
+    {
+     "date": "2026-11-08",
+     "code": 51,
+     "high": 7,
+     "low": 1,
+     "rain": 0
+    },
+    {
+     "date": "2026-11-09",
+     "code": 3,
+     "high": 8,
+     "low": 2,
+     "rain": 0
+    },
+    {
+     "date": "2026-11-10",
+     "code": 3,
+     "high": 7,
+     "low": 1,
+     "rain": 8
+    },
+    {
+     "date": "2026-11-11",
+     "code": 61,
+     "high": 5,
+     "low": 2,
+     "rain": 44
+    },
+    {
+     "date": "2026-11-12",
+     "code": 61,
+     "high": 6,
+     "low": 2,
+     "rain": 45
+    }
+   ]
+  },
+  {
+   "name": "Rome",
+   "temp": 10,
+   "feels": 10,
+   "code": 45,
+   "is_day": false,
+   "wind": 2,
+   "humidity": 100,
+   "night_code": 3,
+   "night_low": 9,
+   "days": [
+    {
+     "date": "2026-11-08",
+     "code": 45,
+     "high": 17,
+     "low": 9,
+     "rain": 3
+    },
+    {
+     "date": "2026-11-09",
+     "code": 3,
+     "high": 18,
+     "low": 9,
+     "rain": 3
+    },
+    {
+     "date": "2026-11-10",
+     "code": 95,
+     "high": 18,
+     "low": 13,
+     "rain": 81
+    },
+    {
+     "date": "2026-11-11",
+     "code": 80,
+     "high": 21,
+     "low": 15,
+     "rain": 68
+    },
+    {
+     "date": "2026-11-12",
+     "code": 80,
+     "high": 22,
+     "low": 16,
+     "rain": 79
+    }
+   ]
+  },
+  {
+   "name": "Vienna",
+   "temp": 3,
+   "feels": 0,
+   "code": 0,
+   "is_day": false,
+   "wind": 5,
+   "humidity": 74,
+   "night_code": 3,
+   "night_low": 1,
+   "days": [
+    {
+     "date": "2026-11-08",
+     "code": 3,
+     "high": 8,
+     "low": 1,
+     "rain": 5
+    },
+    {
+     "date": "2026-11-09",
+     "code": 3,
+     "high": 9,
+     "low": 1,
+     "rain": 0
+    },
+    {
+     "date": "2026-11-10",
+     "code": 61,
+     "high": 7,
+     "low": 3,
+     "rain": 33
+    },
+    {
+     "date": "2026-11-11",
+     "code": 61,
+     "high": 7,
+     "low": 0,
+     "rain": 9
+    },
+    {
+     "date": "2026-11-12",
+     "code": 61,
+     "high": 11,
+     "low": 5,
+     "rain": 16
+    }
+   ]
+  },
+  {
+   "name": "Warsaw",
+   "temp": 1,
+   "feels": -2,
+   "code": 2,
+   "is_day": false,
+   "wind": 6,
+   "humidity": 82,
+   "night_code": 0,
+   "night_low": -1,
+   "days": [
+    {
+     "date": "2026-11-08",
+     "code": 3,
+     "high": 4,
+     "low": -1,
+     "rain": 0
+    },
+    {
+     "date": "2026-11-09",
+     "code": 0,
+     "high": 6,
+     "low": -1,
+     "rain": 0
+    },
+    {
+     "date": "2026-11-10",
+     "code": 55,
+     "high": 5,
+     "low": -2,
+     "rain": 47
+    },
+    {
+     "date": "2026-11-11",
+     "code": 51,
+     "high": 3,
+     "low": 0,
+     "rain": 22
+    },
+    {
+     "date": "2026-11-12",
+     "code": 53,
+     "high": 11,
+     "low": 2,
+     "rain": 24
+    }
+   ]
+  },
+  {
+   "name": "Stockholm",
+   "temp": 3,
+   "feels": -1,
+   "code": 0,
+   "is_day": false,
+   "wind": 12,
+   "humidity": 89,
+   "night_code": 3,
+   "night_low": 2,
+   "days": [
+    {
+     "date": "2026-11-08",
+     "code": 3,
+     "high": 6,
+     "low": 1,
+     "rain": 0
+    },
+    {
+     "date": "2026-11-09",
+     "code": 3,
+     "high": 5,
+     "low": 2,
+     "rain": 0
+    },
+    {
+     "date": "2026-11-10",
+     "code": 3,
+     "high": 6,
+     "low": 3,
+     "rain": 15
+    },
+    {
+     "date": "2026-11-11",
+     "code": 55,
+     "high": 6,
+     "low": 3,
+     "rain": 36
+    },
+    {
+     "date": "2026-11-12",
+     "code": 85,
+     "high": 5,
+     "low": 0,
+     "rain": 44
+    }
+   ]
+  },
+  {
+   "name": "Athens",
+   "temp": 9,
+   "feels": 6,
+   "code": 0,
+   "is_day": false,
+   "wind": 8,
+   "humidity": 70,
+   "night_code": 61,
+   "night_low": 7,
+   "days": [
+    {
+     "date": "2026-11-08",
+     "code": 1,
+     "high": 14,
+     "low": 8,
+     "rain": 0
+    },
+    {
+     "date": "2026-11-09",
+     "code": 61,
+     "high": 14,
+     "low": 7,
+     "rain": 38
+    },
+    {
+     "date": "2026-11-10",
+     "code": 3,
+     "high": 20,
+     "low": 10,
+     "rain": 3
+    },
+    {
+     "date": "2026-11-11",
+     "code": 45,
+     "high": 20,
+     "low": 13,
+     "rain": 20
+    },
+    {
+     "date": "2026-11-12",
+     "code": 45,
+     "high": 22,
+     "low": 14,
+     "rain": 0
+    }
+   ]
+  },
+  {
+   "name": "Istanbul",
+   "temp": 7,
+   "feels": 4,
+   "code": 1,
+   "is_day": false,
+   "wind": 11,
+   "humidity": 69,
+   "night_code": 2,
+   "night_low": 4,
+   "days": [
+    {
+     "date": "2026-11-08",
+     "code": 3,
+     "high": 11,
+     "low": 6,
+     "rain": 8
+    },
+    {
+     "date": "2026-11-09",
+     "code": 3,
+     "high": 13,
+     "low": 4,
+     "rain": 1
+    },
+    {
+     "date": "2026-11-10",
+     "code": 80,
+     "high": 12,
+     "low": 9,
+     "rain": 63
+    },
+    {
+     "date": "2026-11-11",
+     "code": 61,
+     "high": 17,
+     "low": 9,
+     "rain": 37
+    },
+    {
+     "date": "2026-11-12",
+     "code": 95,
+     "high": 19,
+     "low": 15,
+     "rain": 40
+    }
+   ]
+  }
+ ]
+}

@@ -146,6 +146,38 @@ export const examples: Example[] = [
     },
   },
   {
+    slug: 'weather',
+    title: 'Europe weather',
+    summary: 'A five-step weather show for a presenter, on a live forecast, with see-through rain and snow.',
+    image: '/img/examples/weather.png',
+    level: 'Advanced',
+    tags: ['Live data', 'Steps', 'Shader', 'Function'],
+    unlisted: true,
+    origin: {
+      model: MODEL,
+      generationTime: 'About 45 minutes',
+      prompts: [
+        'Build a broadcast weather report graphics example. Make it Europe, and live: the full sequence plus a strap. A clean, flat look, but with see-through shaders for the rain, snow and so on. First draw a concept storyboard, then build it.',
+      ],
+    },
+  },
+  {
+    slug: 'weather-strap',
+    title: 'Weather strap',
+    summary: 'A weather strap for news bulletins on a live forecast. Rain or snow falls inside its icon box.',
+    image: '/img/examples/weather-strap.png',
+    level: 'Intermediate',
+    tags: ['Live data', 'Shader', 'Function'],
+    unlisted: true,
+    origin: {
+      model: MODEL,
+      generationTime: 'Part of Europe weather',
+      prompts: [
+        'Build a broadcast weather report graphics example. Make it Europe, and live: the full sequence plus a strap. A clean, flat look, but with see-through shaders for the rain, snow and so on. First draw a concept storyboard, then build it.',
+      ],
+    },
+  },
+  {
     slug: 'shader-background',
     title: 'Shader background',
     summary: 'Animated GLSL light streaks with speed, tint and glow controls for the operator.',

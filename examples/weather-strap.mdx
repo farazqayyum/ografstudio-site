@@ -1,0 +1,48 @@
+---
+title: Weather strap
+sidebar_position: 7.7
+unlisted: true
+description: A weather strap for news bulletins, playing a live forecast. A see-through shader fills the icon box when it rains or snows.
+---
+
+import ExampleOrigin from '@site/src/components/ExampleOrigin';
+import ExampleTags from '@site/src/components/ExampleTags';
+import OGrafExample from '@site/src/components/OGrafExample';
+import {WEATHER_STRAP} from '@site/src/components/OGrafExample/weather';
+
+<ExampleTags slug="weather-strap" />
+
+<OGrafExample slug="weather-strap" {...WEATHER_STRAP} />
+
+<ExampleOrigin slug="weather-strap" />
+
+A strap for the weather in a news bulletin: one city, from today's real forecast. When it's raining or
+snowing there, the weather falls inside the icon box.
+
+## Try it
+
+1. Pick a **City** and **When**: now, today, tonight or tomorrow. The number rolls to the new value and
+   the words change in place.
+2. Press **Take out**, then **Take in**. The icon box rises first and the bar wipes open behind it.
+
+## What you get
+
+- **Live data:** the page asks Open-Meteo for the forecast and sends it to the graphic, then again
+  every quarter of an hour.
+- **Functions:** one function, Strap, writes the words, the number, the high and low and the icon for
+  the city and time chosen.
+- **A see-through shader:** the same rain, snow, thunder and fog as the
+  [Europe weather](/examples/weather) map, filling the icon box.
+- **Data updates:** the numbers roll up to their new values.
+
+## How the data gets there
+
+| Field | What it holds |
+| --- | --- |
+| `cities` | The same forecast as Europe weather: one entry per city |
+| `city` | Which city the strap is about |
+| `when` | `now`, `today`, `tonight` or `tomorrow` |
+| `credit` | Where the forecast comes from, under the strap |
+
+The forecast comes from [Open-Meteo](https://open-meteo.com/), and your browser asks for it directly
+while the graphic is on screen.

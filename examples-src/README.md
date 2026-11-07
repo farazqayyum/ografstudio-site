@@ -4,8 +4,8 @@
 saves the editable source here (`<slug>.ogs`) and exports the certified package to
 `graphics/<slug>.ograf.zip`:
 
-clock, countdown, scoreboard, lower-third, ticker, bug, rankings, live-markets, shader-background and
-lottie-pulse.
+clock, countdown, scoreboard, lower-third, ticker, bug, rankings, live-markets, weather, weather-strap,
+shader-background and lottie-pulse.
 
 `npm run graphics` copies each `.ogs` to `static/graphics`, and the player's caption links to it. The
 prompt, model and generation time on each page live in `origin` in `src/data/examples.ts`. The time
@@ -32,6 +32,23 @@ data comes from `src/components/OGrafExample/marketFeed.ts`, and the markets and
 - A function takes at most 64 KiB of input, so `history` stays around 45 KB.
 - A function runs in a new worker for each call, and all functions share one queue. A call that's already
   running can return after a click, so return only what the call changed, never an input as it came in.
+
+Europe weather and the weather strap live in `weather.mjs`, with their functions in `weather-logic.js`
+and `weather-strap-logic.js`, the rain, snow, thunder and fog shader in `weather-sky.glsl`, and
+`fonts/oswald.woff2` and `fonts/inter.woff2`. The cities and the Open-Meteo request are in
+`src/data/weatherData.mjs`, and on the site `src/components/OGrafExample/weatherFeed.ts` sends the
+forecast to the graphic. A few things to know before changing them:
+
+- `weather-snapshot.json` is a real forecast, so the templates show true weather before a feed
+  arrives. Refresh it with `node examples-src/weather-snapshot.mjs` before a rebuild, because its first
+  day becomes the date on screen.
+- `weather-map.svg` is drawn from Natural Earth's 1:50m countries, which are public domain:
+  `node examples-src/weather-map.mjs ne_50m_admin_0_countries.geojson`. The city spots in
+  `weather-logic.js` and `weather-sky.glsl` come from the same script's `project(lon, lat)`. Change the
+  projection and you must update both.
+- Studio names a shader's fields after its layer, as `shader_layer_<id>_<name>`, and `weather.mjs`
+  finds them that way. The Weather function packs each step's weather for six cities into one number.
+- Studio stores every key of every layer, so `weather.ogs` is about 5 MB. The package is about 2 MB.
 
 ## Fonts
 

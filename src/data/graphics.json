@@ -108,5 +108,25 @@
     "sourceBytes": 302026,
     "fields": 7,
     "actions": 0
+  },
+  "weather-strap": {
+    "name": "Weather strap",
+    "manifest": "/graphics/weather-strap/project-36387f11-db12-405a-b634-b1a44a9a0d2f-rt.ograf.json",
+    "download": "/graphics/weather-strap.ograf.zip",
+    "bytes": 1157768,
+    "source": "/graphics/weather-strap.ogs",
+    "sourceBytes": 384766,
+    "fields": 3,
+    "actions": 0
+  },
+  "weather": {
+    "name": "Europe weather",
+    "manifest": "/graphics/weather/project-d14f98ee-04f7-4812-9504-cd2f7139013c-rt.ograf.json",
+    "download": "/graphics/weather.ograf.zip",
+    "bytes": 1879990,
+    "source": "/graphics/weather.ogs",
+    "sourceBytes": 5215549,
+    "fields": 2,
+    "actions": 1
   }
 }
