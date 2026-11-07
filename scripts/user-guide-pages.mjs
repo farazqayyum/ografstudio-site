@@ -84,7 +84,7 @@ export const CUTS = [
   {at: 'The original source and values are saved', name: 'Image input and limits'},
 
   {at: 'AI proposals appear on', name: 'AI proposals'},
-  {at: '**Stop at Steps** is enabled', name: 'Playback and keys'},
+  {at: 'Timeline Play is continuous by default', name: 'Playback and keys'},
   {at: 'For vector points and handles', name: 'Editing vector paths'},
   {at: 'To let playout change a text or image', name: 'Editable in playout'},
   {at: 'The **Data** pane has tabs', name: 'The Data pane'},
@@ -123,7 +123,7 @@ export const REWORDS = [
     'SVGs with companion files use the\nbundle workflow below.',
     'SVGs with companion files use the\n[bundle workflow](/docs/user-guide/layers/svg-photoshop-figma).',
   ],
-  ['For recent changes, see the [release notes](releases/0.21.md).\n', ''],
+  ['For recent changes, see the [0.30.0 release notes](releases/0.30.0.md).\n', ''],
 ];
 
 /** Anchors that aren't headings in the source. */
@@ -289,6 +289,11 @@ export const GROUPS = [
     label: 'Animation',
     description: 'Keyframes, curves and ready-made motion for layers and text.',
     pages: [
+      {
+        slug: 'first-keyframe-animation',
+        title: 'Your first keyframe animation',
+        chunks: ['Your first keyframe animation'],
+      },
       {
         slug: 'timeline',
         title: 'Timeline and keys',

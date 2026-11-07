@@ -621,7 +621,7 @@ function LivePlayer({
             <a href={sourceUrl} download>
               Download .ogs
             </a>{' '}
-            ({sourceSize}), the editable project. It needs OGraf Studio 0.23 or later.
+            ({sourceSize}), the editable project. It needs OGraf Studio 0.30 or later.
           </>
         )}
       </figcaption>

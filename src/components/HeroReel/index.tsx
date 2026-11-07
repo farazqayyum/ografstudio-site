@@ -624,7 +624,7 @@ function Reel(): ReactNode {
                   icon="source"
                   label="↓ Ogs"
                   href={sourceUrl}
-                  title={`Download the editable project, ${(entry.sourceBytes / 1024 / 1024).toFixed(1)} MB. It needs OGraf Studio 0.23 or later.`}
+                  title={`Download the editable project, ${(entry.sourceBytes / 1024 / 1024).toFixed(1)} MB. It needs OGraf Studio 0.30 or later.`}
                 />
               )}
             </div>

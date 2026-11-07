@@ -27,7 +27,7 @@ package, `graphics/feature-reel.ograf.zip`, and played by the OGraf web player.
 
 ## Rebuild
 
-The `.ogs` and the package need Studio 0.23 or later, and these scripts need its MCP server. Run a
+The `.ogs` and the package need Studio 0.30 or later, and these scripts need its MCP server. Run a
 separate copy so they never touch an editor you're working in. From a Studio checkout:
 
 ```bash

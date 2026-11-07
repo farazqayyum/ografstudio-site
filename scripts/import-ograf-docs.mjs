@@ -11,7 +11,7 @@
 //   npm run import:docs -- --source ../ograf-studio-dev --ref dev --allow-unpublished
 //
 // Such an import links to the public "stable" branch, because the private commit doesn't exist in
-// the public repository, and leaves static/examples alone: the checkout's examples aren't published.
+// the public repository.
 //
 // Generated files carry GENERATED_MARKER and are replaced on every run. Hand-written pages in
 // docs/ and releases/ are left alone.
@@ -80,12 +80,17 @@ const blobBase = `${PUBLIC_REPOSITORY}/blob/${linkRef}`;
 const treeBase = `${PUBLIC_REPOSITORY}/tree/${linkRef}`;
 const version = JSON.parse(fs.readFileSync(path.join(source, 'package.json'), 'utf8')).version;
 
+// "0.30" can be a one-line page that points at "0.30.0". It isn't a post; links to it go to that release.
+const RELEASE_POINTER = /^#[^\n]*\s+See the \[[^\]]+\]\((\d[^)\s]*)\.md\)[^\n]*\s*$/;
+const releasePointers = new Map();
+
 const docs = collectDocs(source);
 const releases = collectReleases(source);
 const routes = new Map([
   ['README.md', '/'],
   ...docs.map((doc) => [doc.from, `/docs/${doc.slug}`]),
   ...releases.map((release) => [release.from, `/releases/${release.version}`]),
+  ...releasePointers,
 ]);
 
 const userGuide = prepareUserGuide();
@@ -109,7 +114,6 @@ for (const release of [...releases].reverse()) {
   release.date = `${release.day}T12:${String(index).padStart(2, '0')}:00Z`;
 }
 for (const release of releases) writeRelease(release);
-if (!args.allowUnpublished) copyExamples();
 
 // Releases are sorted newest first, so a pre-release only counts while it is ahead of the stable one.
 const latestRelease = releases.find((release) => !release.prerelease)?.version ?? null;
@@ -210,9 +214,15 @@ function collectReleases(root) {
   return fs
     .readdirSync(releasesDir)
     .filter((name) => /^\d+\.\d+(\.\d+)?(-[\w.]+)?\.md$/.test(name))
-    .map((name) => {
+    .flatMap((name) => {
       const version = name.replace(/\.md$/, '');
-      return {from: `docs/releases/${name}`, version, prerelease: version.includes('-')};
+      const from = `docs/releases/${name}`;
+      const pointer = RELEASE_POINTER.exec(fs.readFileSync(path.join(root, from), 'utf8'));
+      if (pointer) {
+        releasePointers.set(from, `/releases/${pointer[1]}`);
+        return [];
+      }
+      return [{from, version, prerelease: version.includes('-')}];
     })
     .sort((a, b) => compareVersions(b.version, a.version));
 }
@@ -285,7 +295,8 @@ function firstParagraph(body) {
 
 /** Rewrites one relative link from a repository document to its place on the site. */
 function rewriteTarget(target, fromFile) {
-  if (/^([a-z][a-z0-9+.-]*:|#|\/\/)/i.test(target)) return target;
+  // A leading slash is already a place on the site: the guide's own links arrive here as routes.
+  if (/^([a-z][a-z0-9+.-]*:|#|\/)/i.test(target)) return target;
   const [rawPath, hash = ''] = target.split('#');
   const anchor = hash ? `#${hash}` : '';
   if (!rawPath) return target;
@@ -587,12 +598,4 @@ function writeRelease(release) {
     '\n' +
     rewriteLinks(withTruncate(content), release.from);
   fs.writeFileSync(path.join(siteRoot, 'releases', `${release.day}-${release.version}.md`), output);
-}
-
-/** Copies the repository's examples so example pages can offer them as downloads. */
-function copyExamples() {
-  const from = path.join(source, 'examples');
-  const to = path.join(siteRoot, 'static', 'examples');
-  fs.rmSync(to, {recursive: true, force: true});
-  if (fs.existsSync(from)) fs.cpSync(from, to, {recursive: true});
 }

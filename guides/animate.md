@@ -2,39 +2,47 @@
 title: Animate with steps and keyframes
 sidebar_label: Steps and keyframes
 sidebar_position: 4
-description: Use the OGraf lifecycle, the timeline and Auto-keyframe to animate a graphic.
+description: Use the OGraf lifecycle, the timeline and keyframes to animate a graphic.
 ---
 
 ## How an OGraf graphic moves
 
 An OGraf graphic doesn't just play from start to finish. The operator takes it in, it waits on
-air, and later the operator takes it out. Studio models this with three kinds of keyframe:
+air, and later the operator takes it out. Studio models this with markers on the timeline, which are
+separate from the keys that animate your objects:
 
-| Key       | Meaning                                                                               |
-| --------- | ------------------------------------------------------------------------------------- |
-| **Start** | The graphic before it appears                                                         |
-| **Step**  | A moment where the graphic waits on air for the operator; a graphic can have several |
-| **End**   | The graphic after it has left                                                         |
+| Marker     | Meaning                                                                                 |
+| ---------- | --------------------------------------------------------------------------------------- |
+| **Before** | The graphic before it appears                                                           |
+| **On air** | A Step, where the graphic waits on air for the operator; a graphic can have several     |
+| **After**  | The graphic after it has left                                                           |
 
-The entrance plays from Start to the first Step. Each **Next step** moves on to the following
-Step, and the exit plays from the last Step to End.
+The entrance plays up to the first On air cue, so place that cue where the entrance is complete. Each
+**Next step** moves on to the following Step, and the exit plays from the last Step to After.
 
 ## Play and step through the timeline
 
-- **Stop at Steps** is on by default, so playback stops at each Step. Turn it off for continuous
-  playback.
-- With the timeline focused, **Space** plays and pauses, and **Left/Right Arrow** steps one frame.
+- The timeline plays straight through by default. Turn on **Stop at Steps** to rehearse playout, so
+  playback waits at each Step for another Play. This doesn't change how the exported graphic plays.
+- With the timeline focused, **Space** plays and pauses, **Left/Right Arrow** steps one frame, and
+  **Ctrl/Cmd+Left/Right** jumps to the neighbouring keyframe.
 
 ## Make keyframes
 
-Turn on **Auto-keyframe**, next to **Stop at Steps**, to create keys as you edit. Move the playhead,
-then change a property in **Properties** or on the canvas, and Studio adds a key at that frame. You
-can also double-click the timeline or use its context menu to insert keys.
+New objects start with one static pose. To animate a property, click the diamond beside it in
+**Properties**, or use **Key transform** in **Timeline** to record the whole transform. You can also
+double-click the timeline or use its context menu to insert keys. A filled diamond means the property
+has a key at the playhead, and clicking it removes that key.
 
-With **Auto-keyframe** off, edits to position, size, rotation, opacity, gradient stops, stroke width
-and effects apply across a layer's existing keys without adding new ones. Static layers stay
-static, and existing motion is offset rather than replaced. Auto-keyframe turns off again whenever
-you open or create a project.
+Once a property is animated, move the playhead and change its value to record a key at that time.
+That's the default **At playhead** mode in **Properties → Transform → Edit**. Choose **Whole animation**
+to move all of its values together and keep their key times.
+
+**Auto-keyframe**, off by default, also starts animation on static properties as you change them. It
+turns off again whenever you open or create a project.
+
+[Your first keyframe animation](/docs/user-guide/animation/first-keyframe-animation) walks through it
+step by step.
 
 ## Animate one property at a time
 

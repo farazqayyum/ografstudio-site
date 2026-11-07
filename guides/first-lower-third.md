@@ -29,9 +29,9 @@ third matches the rest of your package.
 
 ## 3. Check the animation
 
-Press **Space** with the timeline focused to play. The timeline pauses at each OGraf step, the
-moment where the graphic waits on air for the operator. See
-[Animate with steps and keyframes](/guides/animate) to change the timing.
+Press **Space** with the timeline focused to play. It plays straight through; turn on **Stop at
+Steps** to make it wait at each OGraf step, the moment where the graphic waits on air for the
+operator. See [Animate with steps and keyframes](/guides/animate) to change the timing.
 
 ## 4. Preview it as an operator would
 

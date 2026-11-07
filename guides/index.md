@@ -18,8 +18,8 @@ Each guide takes one task from start to finish. They follow the same version as 
 
 ## Building graphics
 
-- [Animate with steps and keyframes](/guides/animate): the Start, Step and End lifecycle, the
-  timeline and Auto-keyframe.
+- [Animate with steps and keyframes](/guides/animate): the OGraf lifecycle, the timeline and
+  keyframes.
 - [Connect graphics to operator data](/guides/bind-data): add data fields and bind text, images and
   colours to them.
 - [Add images, SVG and Lottie](/guides/images-svg-lottie): bring artwork in and keep it editable.
