@@ -590,18 +590,18 @@
     padding: 3.5rem 0;
   }
 
-  /* One line you can swipe along, edge to edge, rather than four rows above the player. */
+  /* Every example in view: nothing on a phone says a row goes on past the edge. Big enough to tap. */
   .sources {
-    flex-wrap: nowrap;
-    margin-right: -1rem;
-    margin-left: -1rem;
-    padding: 0 1rem 0.1rem;
-    overflow-x: auto;
-    scrollbar-width: none;
+    gap: 0.35rem;
+    margin-bottom: 0.6rem;
   }
 
-  .sources::-webkit-scrollbar {
-    display: none;
+  .source {
+    flex: 1 1 auto;
+    justify-content: center;
+    min-height: 2.25rem;
+    padding: 0.35rem 0.6rem;
+    font-size: 0.82rem;
   }
 
   .timeline {
