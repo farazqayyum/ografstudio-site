@@ -31,11 +31,11 @@
   },
   "feature-reel": {
     "name": "OGraf Studio Feature Reel",
-    "manifest": "/graphics/feature-reel/set-22a31cb4-661d-4c20-a97f-4020fa3a2ce4-rt.ograf.json",
+    "manifest": "/graphics/feature-reel/set-c5e29362-1082-4a99-add8-dc6c4fd0a333-rt.ograf.json",
     "download": "/graphics/feature-reel.ograf.zip",
-    "bytes": 9601891,
+    "bytes": 5790603,
     "source": "/graphics/feature-reel.ogs",
-    "sourceBytes": 3840472,
+    "sourceBytes": 2131654,
     "fields": 0,
     "actions": 4
   },

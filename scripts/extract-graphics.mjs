@@ -19,6 +19,9 @@ const sourceDir = path.join(siteRoot, 'graphics');
 const editableDirs = [path.join(siteRoot, 'examples-src'), path.join(siteRoot, 'carousel')];
 const outputDir = path.join(siteRoot, 'static', 'graphics');
 const indexFile = path.join(siteRoot, 'src', 'data', 'graphics.json');
+// The exporter adds a standalone preview page to each package. The player never loads it and the zip
+// still has it, so these packages don't publish a second copy.
+const noPreviewCopy = new Set(['feature-reel']);
 
 fs.rmSync(outputDir, {recursive: true, force: true});
 fs.mkdirSync(outputDir, {recursive: true});
@@ -36,6 +39,7 @@ for (const zipName of zips) {
   let manifestFile;
   for (const [entry, data] of Object.entries(unzipSync(bytes))) {
     if (entry.endsWith('/')) continue;
+    if (noPreviewCopy.has(slug) && !entry.includes('/') && entry.endsWith('.html')) continue;
     const destination = path.resolve(packageDir, entry);
     // Never write outside the package folder, whatever the archive says.
     if (!destination.startsWith(packageDir + path.sep)) {

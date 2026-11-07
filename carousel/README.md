@@ -52,6 +52,13 @@ npm run graphics
 If the export fails after a long session, reload the Studio tab and run `node carousel/export.mjs`.
 Each shader holds a WebGL context, and a tab that has opened many projects runs out of them.
 
+### Keeping it light
+
+The reel loads on the homepage, so its weight is every visitor's. Screenshots and stills are WebP, and the
+clip is 640 pixels wide because it fills about a third of the frame. Each template carries its own copy of its
+fonts, so `importFonts` packages only the weights that slide uses. Cutting the shaders' `resolutionScale` by about
+a quarter to a half didn't raise the frame rate and visibly softened them, so they stay as they are.
+
 ### The chart renderer
 
 A chart needs its renderer pinned in its template, and MCP can't pin one: only Studio's **Plugins**
@@ -66,7 +73,7 @@ appears, and save the template over `carousel/charts-seed.ogs`. Deleting the cha
 
 ### The editor screenshots
 
-The Studio slide is a tour of real screenshots, `assets/studio-*.jpg`, 1920 by 1080. `TOUR` in
+The Studio slide is a tour of real screenshots, `assets/studio-*.webp`, 1920 by 1080. `TOUR` in
 `build.mjs` lists them with the part of each to zoom into. They're from Studio holding this reel, so
 retake them when the editor's look changes: build once, keep Studio open at a 1440 by 810 window, set up
 each pane, and save a JPEG at a device scale of 1.333. Check them for personal details before publishing.
@@ -96,13 +103,13 @@ and shader 20, Signal Glitch, as an effect on that layer. A live fill asks its r
 through a `zd-ograf-media` element, and this site is the renderer here:
 `src/components/HeroReel/reelCamera.ts` defines that element and hands it the visitor's camera.
 Until the camera is on, or wherever the package plays without that element, the fill shows its
-fallback, `assets/monitor-still.png`. The camera only starts from a click and nothing leaves the
+fallback, `assets/monitor-still.webp`. The camera only starts from a click and nothing leaves the
 browser.
 
 The glitch's values were tuned in the shader explorer, with `zoom` at 0.8. A Media fill keeps the
 untouched picture showing behind a shader effect, so the shader's own zoom doubles the image. Instead
 `zoom` stays at 1 and the picture has the same 10% margin built in: `reelCamera.ts` draws the camera
-into a transparent frame, and `monitor-still.png` is `sunset-still.jpg` on a transparent frame, 800 by
+into a transparent frame, and `monitor-still.webp` is `sunset-still.jpg` on a transparent frame, 800 by
 450 px. Torn lines spill into that margin, as they do in the explorer.
 
 ### Changing the film clip
@@ -112,7 +119,7 @@ Blender Foundation's [download server](https://download.blender.org/demo/movies/
 1:17.9 to 1:34.2, starting and ending on cuts in the film so that its loop looks like another cut.
 
 ```bash
-ffmpeg -ss 77.9 -t 16.27 -i bbb_sunflower_1080p_30fps_normal.mp4 -an -vf "scale=960:540:flags=lanczos,fps=30,format=yuv420p" -c:v libx264 -profile:v high -preset slower -crf 26 -g 30 -movflags +faststart carousel/assets/big-buck-bunny-clip.mp4
+ffmpeg -ss 77.9 -t 16.27 -i bbb_sunflower_1080p_30fps_normal.mp4 -an -vf "scale=640:360:flags=lanczos,fps=30,format=yuv420p" -c:v libx264 -profile:v high -preset veryslow -crf 27 -g 60 -movflags +faststart carousel/assets/big-buck-bunny-clip.mp4
 ```
 
 ```bash

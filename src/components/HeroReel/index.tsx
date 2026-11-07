@@ -183,7 +183,7 @@ function Reel(): ReactNode {
   const manifestUrl = useBaseUrl(entry.manifest);
   const downloadUrl = useBaseUrl(entry.download);
   const sourceUrl = useBaseUrl(entry.source ?? '');
-  const posterUrl = useBaseUrl('/img/feature-reel-poster.jpg');
+  const posterUrl = useBaseUrl('/img/feature-reel-poster.webp');
   const soundIn = useBaseUrl('/audio/reel-media-in.mp3');
   const soundOut = useBaseUrl('/audio/reel-media-out.mp3');
   const soundFilm = useBaseUrl('/audio/reel-media-film.mp3');

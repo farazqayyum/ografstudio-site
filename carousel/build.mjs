@@ -101,7 +101,23 @@ async function importAsset(args) {
   return call('ograf_import_asset', { expectedRevision: revision, ...args });
 }
 
-async function importFonts() {
+/** Every family and weight a batch of operations asks for, as `Family weight`. */
+function fontsUsed(ops) {
+  const used = new Set();
+  const walk = (value) => {
+    if (Array.isArray(value)) value.forEach(walk);
+    else if (value && typeof value === 'object') {
+      if (typeof value.fontFamily === 'string')
+        used.add(`${value.fontFamily.split(',')[0].trim().replace(/['"]/g, '')} ${value.fontWeight}`);
+      Object.values(value).forEach(walk);
+    }
+  };
+  walk(ops);
+  return used;
+}
+
+/** Each template gets its own copy of its fonts, so a slide packages only the weights it uses. */
+async function importFonts(used) {
   const sans = await readFile(new URL('./assets/PlusJakartaSans-OFL.txt', import.meta.url), 'utf8');
   const mono = await readFile(new URL('./assets/SpaceMono-OFL.txt', import.meta.url), 'utf8');
   const fonts = [
@@ -111,7 +127,9 @@ async function importFonts() {
     ['plus-jakarta-sans-latin-800-normal.woff2', 'Plus Jakarta Sans', '800', sans],
     ['space-mono-latin-400-normal.woff2', 'Space Mono', '400', mono],
   ];
-  for (const [file, fontFamily, fontWeight, licenseText] of fonts)
+  const known = new Set(fonts.map(([, family, weight]) => `${family} ${weight}`));
+  for (const font of used) if (!known.has(font)) throw new Error(`No font file for ${font}`);
+  for (const [file, fontFamily, fontWeight, licenseText] of fonts.filter(([, family, weight]) => used.has(`${family} ${weight}`)))
     await importAsset({
       path: `carousel/assets/${file}`,
       mimeType: 'font/woff2',
@@ -1529,7 +1547,6 @@ async function main() {
     if (index > 0) await setOperation({ type: 'new_template' });
     slide.templateId = (await call('ograf_get_template_set')).activeTemplateId;
     await formatTemplate(slide.name, IN);
-    await importFonts();
 
     // The shared surface first, so it sits under everything the slide adds.
     if (!component) {
@@ -1581,12 +1598,12 @@ async function main() {
       if (!assets.still || !assets.logo || !assets.video) throw new Error(`Asset ids missing: ${JSON.stringify(assets)}`);
     }
     if (slide.id === 'transitions') {
-      assets.still = (await importAsset({ path: 'carousel/assets/monitor-still.png', mimeType: 'image/png', name: 'Monitor still' })).assets?.[0]?.id;
+      assets.still = (await importAsset({ path: 'carousel/assets/monitor-still.webp', mimeType: 'image/webp', name: 'Monitor still' })).assets?.[0]?.id;
       if (!assets.still) throw new Error('Monitor still asset id missing');
     }
 
     const screenshot = async (file) => {
-      const id = (await importAsset({ path: `carousel/assets/${file}.jpg`, mimeType: 'image/jpeg', name: file })).assets?.[0]?.id;
+      const id = (await importAsset({ path: `carousel/assets/${file}.webp`, mimeType: 'image/webp', name: file })).assets?.[0]?.id;
       if (!id) throw new Error(`${file} asset id missing`);
       return id;
     };
@@ -1621,6 +1638,7 @@ async function main() {
     // parentId needs the real id, so layout links go in a second batch.
     const parentOps = s.ops.filter((op) => op.type === 'set_layer_layout' && op.parentId);
     const firstOps = s.ops.filter((op) => !parentOps.includes(op) && op.type !== 'image-tile-placeholder');
+    await importFonts(fontsUsed(firstOps));
     await apply(firstOps, `Author ${slide.name}`);
 
     const after = await layerIds();
@@ -1664,12 +1682,12 @@ async function main() {
   await setOperation({ type: 'new_template' });
   const tickerTemplateId = (await call('ograf_get_template_set')).activeTemplateId;
   await formatTemplate('Ticker', TICKER_IN);
-  await importFonts();
   const logoAsset = (await importAsset({ path: 'carousel/assets/ograf-studio-logo-ticker.png', mimeType: 'image/png', name: 'OGraf Studio logo' })).assets?.[0]?.id;
   if (!logoAsset) throw new Error('OGraf Studio logo asset id missing');
   const band = scene();
   await sceneTicker(band, logoAsset);
   const bandParents = band.ops.filter((op) => op.type === 'set_layer_layout' && op.parentId);
+  await importFonts(fontsUsed(band.ops));
   await apply(band.ops.filter((op) => !bandParents.includes(op)), 'Author the ticker');
   const bandIds = await layerIds();
   await apply(bandParents.map((op) => ({ ...op, parentId: bandIds[op.parentId] })), 'Clip the ticker glint');

@@ -9,7 +9,7 @@
 // The tag on the fill in carousel/build.mjs.
 const CAMERA_TAG = 'reel-camera';
 const LIVE_MEDIA_ELEMENT = 'zd-ograf-media';
-// The picture sits 10% inside a transparent frame, as carousel/assets/monitor-still.png does, so the
+// The picture sits 10% inside a transparent frame, as carousel/assets/monitor-still.webp does, so the
 // glitch has a see-through margin to tear into. See "The webcam on the monitor" in carousel/README.md.
 const FRAME_WIDTH = 1280;
 const FRAME_HEIGHT = 720;
