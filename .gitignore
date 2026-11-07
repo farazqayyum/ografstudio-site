@@ -24,3 +24,6 @@ yarn-error.log*
 
 # Unpacked from graphics/ by scripts/extract-graphics.mjs
 /static/graphics/
+
+# Left behind by Studio when examples-src/build.mjs saves a project
+/examples-src/project-*_thumb.png

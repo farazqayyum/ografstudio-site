@@ -1,31 +1,31 @@
 {
   "bug": {
     "name": "Bug / DOG",
-    "manifest": "/graphics/bug/project-b2e432a8-6d9e-4646-bd05-ca1e2ec13764-rt.ograf.json",
+    "manifest": "/graphics/bug/project-be4081fd-a47b-430b-886e-58f0ed1e7863-rt.ograf.json",
     "download": "/graphics/bug.ograf.zip",
-    "bytes": 1263976,
+    "bytes": 1199621,
     "source": "/graphics/bug.ogs",
-    "sourceBytes": 582587,
+    "sourceBytes": 295892,
     "fields": 2,
     "actions": 0
   },
   "clock": {
     "name": "Clock",
-    "manifest": "/graphics/clock/project-d79ee1b2-4b34-49f0-b8f9-29d647f9dabe-rt.ograf.json",
+    "manifest": "/graphics/clock/project-ebb6f596-33d4-47ea-9991-9dee4a6f4493-rt.ograf.json",
     "download": "/graphics/clock.ograf.zip",
-    "bytes": 1268913,
+    "bytes": 1205183,
     "source": "/graphics/clock.ogs",
-    "sourceBytes": 600796,
+    "sourceBytes": 314101,
     "fields": 3,
     "actions": 0
   },
   "countdown": {
     "name": "Countdown",
-    "manifest": "/graphics/countdown/project-ea7c2acf-3968-465a-bcab-b3845ea3ce95-rt.ograf.json",
+    "manifest": "/graphics/countdown/project-2a4e0314-39e2-4a63-a4e1-f87475fb47b9-rt.ograf.json",
     "download": "/graphics/countdown.ograf.zip",
-    "bytes": 1273946,
+    "bytes": 1209240,
     "source": "/graphics/countdown.ogs",
-    "sourceBytes": 637034,
+    "sourceBytes": 350339,
     "fields": 5,
     "actions": 4
   },
@@ -51,31 +51,31 @@
   },
   "lower-third": {
     "name": "Lower third",
-    "manifest": "/graphics/lower-third/project-355cbd42-f283-44c3-9771-630f74edb443-rt.ograf.json",
+    "manifest": "/graphics/lower-third/project-295afc43-7684-4fa6-b0a1-bd8dee8ddca8-rt.ograf.json",
     "download": "/graphics/lower-third.ograf.zip",
-    "bytes": 1280141,
+    "bytes": 1215641,
     "source": "/graphics/lower-third.ogs",
-    "sourceBytes": 641695,
+    "sourceBytes": 355000,
     "fields": 4,
     "actions": 0
   },
   "rankings": {
     "name": "Rankings",
-    "manifest": "/graphics/rankings/project-2c7a8723-7fc8-4430-8b74-416e5737297a-rt.ograf.json",
+    "manifest": "/graphics/rankings/project-3a144ed4-945e-47de-8aaf-8a418ee4602c-rt.ograf.json",
     "download": "/graphics/rankings.ograf.zip",
-    "bytes": 1251314,
+    "bytes": 1186019,
     "source": "/graphics/rankings.ogs",
-    "sourceBytes": 786081,
+    "sourceBytes": 647626,
     "fields": 5,
     "actions": 3
   },
   "scoreboard": {
     "name": "Scoreboard",
-    "manifest": "/graphics/scoreboard/project-5e984c92-68de-41a4-82e9-471859a7b345-rt.ograf.json",
+    "manifest": "/graphics/scoreboard/project-c796a61c-dc9f-4477-b4b2-c70a499fb5fc-rt.ograf.json",
     "download": "/graphics/scoreboard.ograf.zip",
-    "bytes": 1283540,
+    "bytes": 1218890,
     "source": "/graphics/scoreboard.ogs",
-    "sourceBytes": 691370,
+    "sourceBytes": 404675,
     "fields": 7,
     "actions": 6
   },
@@ -91,11 +91,11 @@
   },
   "ticker": {
     "name": "Ticker",
-    "manifest": "/graphics/ticker/project-2d6125cd-4be9-4886-972e-fa4398ce5b0c-rt.ograf.json",
+    "manifest": "/graphics/ticker/project-d8881f70-2c9e-448e-9a8c-5dd04baf8c6e-rt.ograf.json",
     "download": "/graphics/ticker.ograf.zip",
-    "bytes": 1279234,
+    "bytes": 1214498,
     "source": "/graphics/ticker.ogs",
-    "sourceBytes": 588721,
+    "sourceBytes": 302026,
     "fields": 7,
     "actions": 0
   }

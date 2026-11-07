@@ -13,6 +13,23 @@ import { call } from '../carousel/mcp.mjs';
 
 const FONT = 'Roboto Condensed, Arial Narrow, Arial, sans-serif';
 
+// Studio's recipes embed a 371 KB TrueType copy of this font unless the template already has one, so
+// these templates bring the same font as WOFF2. Every character and weight stays.
+const ROBOTO_EXAMPLES = new Set(['clock', 'countdown', 'scoreboard', 'lower-third', 'ticker', 'bug']);
+const robotoFont = () => ({
+  type: 'add_asset',
+  name: 'Roboto Condensed Variable',
+  mimeType: 'font/woff2',
+  fontFamily: 'Roboto Condensed',
+  fontWeight: '100 900',
+  fontStyle: 'normal',
+  packagePath: 'assets/fonts/roboto-condensed.woff2',
+  licenseName: 'SIL Open Font License 1.1',
+  licenseUrl: 'https://github.com/google/fonts/blob/69d0549e8fc7ad72e1531734c81237be401ec4fd/ofl/robotocondensed/OFL.txt',
+  licenseText: readFileSync(new URL('fonts/roboto-condensed-OFL.txt', import.meta.url), 'utf8'),
+  data: readFileSync(new URL('fonts/roboto-condensed.woff2', import.meta.url)).toString('base64'),
+});
+
 async function settled() {
   let last = await call('ograf_get_project', { include: ['metadata'] });
   for (let i = 0; i < 40; i++) {
@@ -861,15 +878,15 @@ const EXAMPLES = {
         {
           type: 'add_asset',
           name: 'Oswald',
-          mimeType: 'font/ttf',
+          mimeType: 'font/woff2',
           fontFamily: 'Oswald',
           fontWeight: '200 700',
           fontStyle: 'normal',
-          packagePath: 'assets/fonts/oswald.ttf',
+          packagePath: 'assets/fonts/oswald.woff2',
           licenseName: 'SIL Open Font License 1.1',
           licenseUrl: 'https://github.com/google/fonts/blob/6c1dbe27dcf7d817d4b62cec033ba77fa8e2a5ec/ofl/oswald/OFL.txt',
           licenseText: readFileSync(new URL('fonts/oswald-OFL.txt', here), 'utf8'),
-          data: readFileSync(new URL('fonts/oswald.ttf', here)).toString('base64'),
+          data: readFileSync(new URL('fonts/oswald.woff2', here)).toString('base64'),
         },
         addField('text', 'title', 'Title', 'The heading of the board.', 'GRAND FINAL', {
           constraints: { maxLength: 28 },
@@ -1402,6 +1419,7 @@ const wanted = process.argv.slice(2);
 for (const slug of wanted.length ? wanted : Object.keys(EXAMPLES)) {
   console.log(`--- ${slug}`);
   await fresh();
+  if (ROBOTO_EXAMPLES.has(slug)) await apply([robotoFont()], 'Add the font');
   await EXAMPLES[slug]();
   // Live clocks, timers and rules: these are made for real-time playout.
   await apply(

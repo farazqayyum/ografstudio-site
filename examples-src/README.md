@@ -14,9 +14,20 @@ template from a new prompt, update its record.
 The last two are built from `static/downloads/wave-bands.glsl` and `static/downloads/pulse.json`.
 
 Rankings also has `rankings-votes.js`, the scoring function that Studio's Functions pane shows, and
-`fonts/oswald.ttf` with its licence. Studio's canvas doesn't run functions, so `build.mjs` plays the
+`fonts/oswald.woff2` with its licence. Studio's canvas doesn't run functions, so `build.mjs` plays the
 function up to the second jury's top score and uses the result as the default of the fields it
 writes. That sample is what you see while designing. On air, the graphic starts from zero.
+
+## Fonts
+
+Studio's recipes embed a 371 KB TrueType copy of Roboto Condensed unless the template already has the
+family, so `build.mjs` gives those templates `fonts/roboto-condensed.woff2` first. Both fonts here are
+the upstream variable fonts as WOFF2 without hinting, which their scaled text doesn't use. Every character
+and weight is still there, because visitors type into these forms and broadcasters download them:
+
+```bash
+pyftsubset font.ttf --unicodes='*' --layout-features='*' --no-hinting --name-IDs='*' --name-languages='*' --notdef-outline --flavor=woff2
+```
 
 ## What each one needs from Studio
 

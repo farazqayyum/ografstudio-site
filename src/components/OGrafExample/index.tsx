@@ -8,7 +8,8 @@ import styles from './styles.module.css';
 
 type PlayerModule = typeof import('./ograf-player');
 type FieldValue = string | number | boolean;
-type Status = 'waiting' | 'loading' | 'off-air' | 'on-air' | 'busy' | 'error';
+/** `returning`: unmounted for being off screen, or on its way back, so nothing can be pressed yet. */
+type Status = 'waiting' | 'loading' | 'returning' | 'off-air' | 'on-air' | 'busy' | 'error';
 
 interface FieldSchema {
   type?: string;
@@ -49,6 +50,7 @@ interface Props {
 const STATUS_TEXT: Record<Status, string> = {
   waiting: 'Waiting',
   loading: 'Loading',
+  returning: 'Playing…',
   'off-air': 'Off air',
   'on-air': 'On air',
   busy: 'Playing…',
@@ -175,6 +177,11 @@ function FieldInput({
 
 const DATA_LEGEND = 'Operator controls — changes update the graphic live';
 const BAR_IDLE_MS = 2500;
+/** Share of the frame on screen that loads the graphic without any scrolling. */
+const LOAD_WHEN_SEEN = 0.25;
+/** Share of the graphic and its form that counts as on screen. */
+const ON_SCREEN = 0.1;
+const PARK_AFTER_MS = 4000;
 
 function FullscreenIcon({exit}: {exit: boolean}): ReactNode {
   return (
@@ -210,6 +217,14 @@ function LivePlayer({
   const playerRef = useRef<OGrafPlayer | null>(null);
   const updateTimer = useRef<number | undefined>(undefined);
   const sentValues = useRef<Record<string, FieldValue>>({});
+  const figureRef = useRef<HTMLElement>(null);
+  /** The visitor changed this graphic, so it keeps running when it's off screen. */
+  const touched = useRef(false);
+  /** The next mount brings back a graphic that was on air before it went to sleep. */
+  const waking = useRef(false);
+  const [offscreen, setOffscreen] = useState(false);
+  /** Unmounted for being off screen. */
+  const [asleep, setAsleep] = useState(false);
   const [visible, setVisible] = useState(false);
   const [status, setStatus] = useState<Status>('waiting');
   const [error, setError] = useState<string>();
@@ -254,33 +269,59 @@ function LivePlayer({
     });
   };
 
-  // Load the graphic only when it is about to scroll into view.
+  // Load the graphic once it's really on screen, or once the visitor scrolls towards it. On the homepage
+  // it sits just under the fold, so being close doesn't count until they start to scroll.
   useEffect(() => {
     const frame = frameRef.current;
+    if (visible) return undefined;
     if (!frame || typeof IntersectionObserver === 'undefined') {
       setVisible(true);
       return undefined;
     }
-    const observer = new IntersectionObserver(
+    const seen = new IntersectionObserver(
       (entries) => {
-        if (entries.some((e) => e.isIntersecting)) {
-          setVisible(true);
-          observer.disconnect();
-        }
+        if (entries.some((e) => e.intersectionRatio >= LOAD_WHEN_SEEN)) setVisible(true);
+      },
+      {threshold: [0, LOAD_WHEN_SEEN]},
+    );
+    const nearby = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) setVisible(true);
       },
       {rootMargin: '200px'},
     );
-    observer.observe(frame);
+    const scrolled = () => nearby.observe(frame);
+    seen.observe(frame);
+    window.addEventListener('scroll', scrolled, {once: true, passive: true});
+    return () => {
+      seen.disconnect();
+      nearby.disconnect();
+      window.removeEventListener('scroll', scrolled);
+    };
+  }, [visible]);
+
+  // Whether the graphic or its form is on screen. The form counts: nobody should type into a stopped graphic.
+  useEffect(() => {
+    const figure = figureRef.current;
+    if (!visible || !figure || typeof IntersectionObserver === 'undefined') return undefined;
+    const observer = new IntersectionObserver(
+      ([entry]) => setOffscreen(entry!.intersectionRatio < ON_SCREEN),
+      {threshold: [0, ON_SCREEN, 0.5]},
+    );
+    observer.observe(figure);
     return () => observer.disconnect();
-  }, []);
+  }, [visible]);
 
   useEffect(() => {
-    if (!visible || !viewportRef.current) return undefined;
+    if (!visible || asleep || !viewportRef.current) return undefined;
     const container = viewportRef.current;
     const abort = new AbortController();
     let disposed = false;
     let mounted: OGrafPlayer | null = null;
-    setStatus('loading');
+    const wakingUp = waking.current;
+    waking.current = false;
+    touched.current = false;
+    setStatus(wakingUp ? 'returning' : 'loading');
     (async () => {
       try {
         // The player imports each graphic's main.js itself, so it must stay out of the bundle.
@@ -299,8 +340,8 @@ function LivePlayer({
         setActions(operatorActions(slug, mounted.manifest.customActions));
         setStepCount(Number(mounted.manifest.stepCount ?? 1));
         setStep(0);
-        setStatus('off-air');
-        if (autoPlay) {
+        if (!wakingUp) setStatus('off-air');
+        if (autoPlay || wakingUp) {
           setStatus('busy');
           await mounted.play();
           if (!disposed) setStatus('on-air');
@@ -318,7 +359,7 @@ function LivePlayer({
       playerRef.current = null;
       void mounted?.dispose().catch(() => undefined);
     };
-  }, [visible, playerUrl, manifestUrl, autoPlay, slug]);
+  }, [visible, asleep, playerUrl, manifestUrl, autoPlay, slug]);
 
   const run = useCallback(async (action: (player: OGrafPlayer) => Promise<unknown>, after: Status) => {
     const player = playerRef.current;
@@ -335,7 +376,28 @@ function LivePlayer({
     }
   }, []);
 
+  // Fullscreen lifts the frame out of the page, so where the figure sits says nothing then.
+  const away = offscreen && !fullscreen;
+
+  // Off screen a graphic only burns CPU, and its frame loop keeps going even off air, so after a moment it
+  // unmounts and comes back in when the visitor does. Only one nobody has changed: starting over would
+  // lose a running timer or a score.
+  useEffect(() => {
+    if (!away) {
+      setAsleep(false);
+      return undefined;
+    }
+    if (status !== 'on-air' || touched.current) return undefined;
+    const timer = window.setTimeout(() => {
+      waking.current = true;
+      setAsleep(true);
+      setStatus('returning');
+    }, PARK_AFTER_MS);
+    return () => window.clearTimeout(timer);
+  }, [away, status]);
+
   const change = (key: string, value: FieldValue) => {
+    touched.current = true;
     const next = {...values, [key]: value};
     setValues(next);
     window.clearTimeout(updateTimer.current);
@@ -360,6 +422,7 @@ function LivePlayer({
   const runAction = (id: string) => {
     const player = playerRef.current;
     if (!player) return;
+    touched.current = true;
     const stepped = fieldStep(id);
     if (stepped) {
       const [key, by] = stepped;
@@ -423,6 +486,7 @@ function LivePlayer({
           className="button button--primary button--sm"
           disabled={status !== 'on-air' || lastStep}
           onClick={() => {
+            touched.current = true;
             setStep((current) => current + 1);
             void run((p) => p.next(), 'on-air');
           }}>
@@ -444,7 +508,7 @@ function LivePlayer({
   );
 
   return (
-    <figure className={styles.example} aria-label={label ?? `${entry.name}, live OGraf graphic`}>
+    <figure ref={figureRef} className={styles.example} aria-label={label ?? `${entry.name}, live OGraf graphic`}>
       <div
         ref={frameRef}
         className={styles.frame}
@@ -521,7 +585,7 @@ function LivePlayer({
               ))}
             </fieldset>
           )}
-          <fieldset className={styles.data} disabled={status === 'error' || status === 'loading'}>
+          <fieldset className={styles.data} disabled={status === 'error' || status === 'loading' || status === 'returning'}>
             <legend>{DATA_LEGEND}</legend>
             {(actions.length > 0 || stepCount > 1) && (
               <div className={styles.actions}>{actionButtons}</div>
@@ -537,7 +601,7 @@ function LivePlayer({
                 </div>
               );
             })}
-            {fields.length === 0 && actions.length === 0 && stepCount === 1 && (status === 'on-air' || status === 'off-air' || status === 'busy') && (
+            {fields.length === 0 && actions.length === 0 && stepCount === 1 && (status === 'on-air' || status === 'off-air' || status === 'busy' || status === 'returning') && (
               <p className={styles.noData}>
                 This graphic has no operator data. Use Take in and Take out to control it.
               </p>
