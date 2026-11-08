@@ -51,8 +51,21 @@ const ZOOM = 2.4;
 const MAP_LAG = (i) => i * 0.61;
 const CARD_LAG = (j) => 0.37 + j * 0.53;
 
-// The five steps, at 50 frames a second. Each number is the frame the step is reached on.
-const F = { open: 60, today: 125, tonight: 165, tomorrow: 205, outlook: 285, end: 315 };
+// The five steps, at 50 frames a second. Each number is the frame the step is reached on. The map's
+// three days come one frame apart, because rules change the day, not the timeline: the steps only
+// tell the rules which day to show, and so do the day buttons.
+const F = { open: 60, today: 125, next: 126, after: 127, outlook: 207, end: 237 };
+/** A frame of the move from the map to the outlook, counted from its start. */
+const T = (n) => F.after + n;
+// The day buttons: where the row starts, each button's size, and the tray's margin round them.
+const DAY = { x: 96, y: 326, w: 188, h: 52, pad: 4 };
+const dayX = (d) => DAY.x + DAY.pad + d * DAY.w;
+// The map's days, in order, as the `view` field names them, with their title and sub layers.
+const MAP_DAYS = [
+  ['today', 'Today', 'Title today', 'Sub today'],
+  ['tomorrow', 'Tomorrow', 'Title tomorrow', 'Sub tomorrow'],
+  ['after', 'Day after', 'Title after', 'Sub after'],
+];
 
 const add = (kind, name, box, element) => ({
   type: 'add_layer',
@@ -146,7 +159,9 @@ const FONTS = [
 ];
 
 /** The shader's data fields, by parameter name. Studio makes one per `#pragma ograf` line. */
-const PARAMS = ['today_a', 'today_b', 'tonight_a', 'tonight_b', 'next_a', 'next_b', 'stage', 'focus', 'edge', 'world'];
+const PARAMS = ['today_a', 'today_b', 'next_a', 'next_b', 'after_a', 'after_b', 'w_today', 'w_next', 'w_after', 'stage', 'focus', 'edge', 'world'];
+/** The shader's weather for each day, which the Weather function writes. */
+const KINDS = ['today_a', 'today_b', 'next_a', 'next_b', 'after_a', 'after_b', 'focus'];
 function shaderFields(composition, layerName) {
   const layer = composition.layers.find((item) => item.name === layerName);
   const tag = layer.id.replace(/\W/g, '_').replace(/^layer_/, '');
@@ -215,15 +230,20 @@ export async function weather({ apply, scene, addField, bind, option }) {
       addField('boolean', 'tour', 'Tour cities', 'The outlook moves on to the next city every eight seconds or so.', false),
       addField('text', 'credit', 'Credit', 'Where the forecast comes from, at the bottom right.', CREDIT),
       addField('object', 'ui', 'Display', 'Written by the Weather function.', look.ui, { ...INTERNAL, ...objectOf(look.ui) }),
+      // The steps and the day buttons write this, and rules show what it names.
+      addField('select', 'view', 'View', 'What the graphic shows: the opening, one of the map\'s days, or the outlook.', 'open', {
+        ...INTERNAL,
+        options: [option('open', 'Open'), ...MAP_DAYS.map(([value, label]) => option(value, label)), option('outlook', 'Outlook')],
+      }),
     ],
     'Fonts and fields',
   );
-  await lifecycle(apply, scene, ['Open', 'Today', 'Tonight', 'Tomorrow', 'Outlook'], [
+  await lifecycle(apply, scene, ['Open', ...MAP_DAYS.map(([, label]) => label), 'Outlook'], [
     F.open,
     F.today - F.open,
-    F.tonight - F.today,
-    F.tomorrow - F.tonight,
-    F.outlook - F.tomorrow,
+    F.next - F.today,
+    F.after - F.next,
+    F.outlook - F.after,
     F.end - F.outlook,
   ]);
 
@@ -290,14 +310,30 @@ export async function weather({ apply, scene, addField, bind, option }) {
     text('Kicker', [96, 76, 760, 36], 'EUROPE WEATHER', { size: 22, weight: 700, ls: 5.7, color: ACCENT }),
     text('Kicker outlook', [96, 76, 760, 36], 'FIVE-DAY OUTLOOK', { size: 22, weight: 700, ls: 5.7, color: ACCENT }),
     text('Title today', [92, 114, 760, 112], 'TODAY', { font: DISPLAY, size: 76.6, weight: 600 }),
-    text('Title tonight', [92, 114, 760, 112], 'TONIGHT', { font: DISPLAY, size: 76.6, weight: 600 }),
     text('Title tomorrow', [92, 114, 760, 112], 'TOMORROW', { font: DISPLAY, size: 76.6, weight: 600 }),
+    text('Title after', [92, 114, 760, 112], look.ui.title_after, { font: DISPLAY, size: 76.6, weight: 600 }),
     text('Title outlook', [92, 114, 760, 112], look.ui.city, { font: DISPLAY, size: 76.6, weight: 600 }),
     rect('Title bar', [96, 236, 96, 6], ACCENT),
     text('Sub today', [96, 252, 760, 40], look.ui.sub_today, { size: 30, weight: 500, color: SOFT }),
-    text('Sub tonight', [96, 252, 760, 40], look.ui.sub_tonight, { size: 30, weight: 500, color: SOFT }),
-    text('Sub tomorrow', [96, 252, 760, 40], look.ui.sub_tomorrow, { size: 30, weight: 500, color: SOFT }),
+    text('Sub tomorrow', [96, 252, 760, 40], look.ui.sub_next, { size: 30, weight: 500, color: SOFT }),
+    text('Sub after', [96, 252, 760, 40], look.ui.sub_after, { size: 30, weight: 500, color: SOFT }),
     text('Sub outlook', [96, 252, 760, 40], look.ui.sub_outlook, { size: 30, weight: 500, color: SOFT }),
+  ];
+
+  // The presenter's day buttons, under the titles: a tray, a pill under the day shown, a label for
+  // each day, and on top the see-through areas a touch or a click lands on.
+  const buttons = [
+    add('rectangle', 'Day tray', [DAY.x, DAY.y, DAY.w * 3 + DAY.pad * 2, DAY.h + DAY.pad * 2], {
+      fill: '#0c1f3de6',
+      borderRadius: DAY.h / 2 + DAY.pad,
+      strokeColor: '#ffffff33',
+      strokeWidth: 1.5,
+    }),
+    rect('Day pill', [dayX(0), DAY.y + DAY.pad, DAY.w, DAY.h], ACCENT, DAY.h / 2),
+    ...['TODAY', 'TOMORROW', look.ui.title_after].map((label, d) =>
+      text(`Day ${d}`, [dayX(d), DAY.y + DAY.pad, DAY.w, DAY.h], label, { size: 19, weight: 700, ls: 2.4, align: 'center' }),
+    ),
+    ...[0, 1, 2].map((d) => rect(`Day ${d} hit`, [dayX(d), DAY.y + DAY.pad, DAY.w, DAY.h], '#00000000', DAY.h / 2)),
   ];
 
   const FOCUS = { x: 660, y: 640 };
@@ -336,7 +372,7 @@ export async function weather({ apply, scene, addField, bind, option }) {
   // which stalled a city change for a sixth of a second. The Oswald sizes are the ones it used to
   // settle on: Oswald's tall line box made it shrink those to fit their boxes.
   const fixedSize = (op) => (op.element?.autoFit ? { ...op, element: { ...op.element, autoFit: 'fixed' } } : op);
-  await apply([...ground, ...dots, ...cityLayers, ...titles, ...outlook, ...cards, credit].map(fixedSize), 'Layers');
+  await apply([...ground, ...dots, ...cityLayers, ...titles, ...buttons, ...outlook, ...cards, credit].map(fixedSize), 'Layers');
 
   const { composition, field } = await scene();
   const sky = shaderFields(composition, 'Sky');
@@ -354,9 +390,11 @@ export async function weather({ apply, scene, addField, bind, option }) {
     ui('Map close-up', { 'layer.x': 'zoom_x', 'layer.y': 'zoom_y' }),
     ui('Date', { content: 'date' }),
     ui('Title outlook', { content: 'city' }),
+    ui('Title after', { content: 'title_after' }),
+    ui('Day 2', { content: 'title_after' }),
     ui('Sub today', { content: 'sub_today' }),
-    ui('Sub tonight', { content: 'sub_tonight' }),
-    ui('Sub tomorrow', { content: 'sub_tomorrow' }),
+    ui('Sub tomorrow', { content: 'sub_next' }),
+    ui('Sub after', { content: 'sub_after' }),
     ui('Sub outlook', { content: 'sub_outlook' }),
     skyIcon('Now icon', 'now_icon', 0),
     ui('Now temp', { content: 'now_temp' }),
@@ -389,17 +427,18 @@ export async function weather({ apply, scene, addField, bind, option }) {
 
   // Open: the sea and the map slide in from the right, the title arrives, the dots come up west to east.
   k(fade('Sea', [[0, 0], [20, 1, 'sine-out'], [F.outlook, 1], [F.end, 0, 'cubic-in']]));
-  k(fade('Map', [[0, 0], [30, 1, 'sine-out'], [207, 1], [247, 0, 'sine-in'], [F.end, 0]]));
-  k(track('Map', 'x', [[0, MAP.x + 260], [45, MAP.x], [207, MAP.x], [250, 960 - (960 - MAP.x) * 1.15, 'cubic-in'], [300, MAP.x, 'linear']]));
-  k(track('Map', 'y', [[207, MAP.y], [250, 540 - (540 - MAP.y) * 1.15, 'cubic-in'], [300, MAP.y, 'linear']]));
-  k(track('Map', 'width', [[207, MAP.w], [250, MAP.w * 1.15, 'cubic-in'], [300, MAP.w, 'linear']]));
-  k(track('Map', 'height', [[207, MAP.h], [250, MAP.h * 1.15, 'cubic-in'], [300, MAP.h, 'linear']]));
+  k(fade('Map', [[0, 0], [30, 1, 'sine-out'], [T(2), 1], [T(42), 0, 'sine-in'], [F.end, 0]]));
+  k(track('Map', 'x', [[0, MAP.x + 260], [45, MAP.x], [T(2), MAP.x], [T(45), 960 - (960 - MAP.x) * 1.15, 'cubic-in'], [T(95), MAP.x, 'linear']]));
+  k(track('Map', 'y', [[T(2), MAP.y], [T(45), 540 - (540 - MAP.y) * 1.15, 'cubic-in'], [T(95), MAP.y, 'linear']]));
+  k(track('Map', 'width', [[T(2), MAP.w], [T(45), MAP.w * 1.15, 'cubic-in'], [T(95), MAP.w, 'linear']]));
+  k(track('Map', 'height', [[T(2), MAP.h], [T(45), MAP.h * 1.15, 'cubic-in'], [T(95), MAP.h, 'linear']]));
   // The close-up already sits on the featured city; it comes up as the overview pushes in and goes.
-  k(fade('Map close-up', [[0, 0], [222, 0], [262, 1, 'sine-in-out'], [F.outlook, 1], [F.end, 0, 'cubic-in']]));
-  // Night dims the map; the outlook dims it a little more for the cards.
-  k(fade('Shade', [[0, 0], [127, 0], [157, 0.36, 'sine-in-out'], [167, 0.36], [197, 0, 'sine-in-out'], [225, 0], [255, 0.42, 'sine-in-out'], [F.outlook, 0.42], [F.end, 0, 'cubic-in']]));
+  k(fade('Map close-up', [[0, 0], [T(17), 0], [T(57), 1, 'sine-in-out'], [F.outlook, 1], [F.end, 0, 'cubic-in']]));
+  // The outlook dims the map a little for the cards.
+  k(fade('Shade', [[0, 0], [T(20), 0], [T(50), 0.42, 'sine-in-out'], [F.outlook, 0.42], [F.end, 0, 'cubic-in']]));
   k(fade('Sky', [[0, 0], [70, 0], [110, 1, 'sine-in-out'], [F.outlook, 1], [F.end, 0, 'cubic-in']]));
-  k(track('Sky', 'fill.parameters.stage', [[0, 0], [127, 0], [157, 1, 'sine-in-out'], [167, 1], [197, 2, 'sine-in-out'], [215, 2], [255, 3, 'sine-in-out']]));
+  // The weather round the cities gives way to the close-up's.
+  k(track('Sky', 'fill.parameters.stage', [[0, 0], [T(10), 0], [T(50), 1, 'sine-in-out']]));
   k(fade('Title shade', [[0, 0], [24, 1, 'sine-out'], [F.outlook, 1], [F.end, 0, 'cubic-in']]));
   k(fade('Credit', [[0, 0], [30, 1, 'sine-out'], [F.outlook, 1], [F.end, 0, 'cubic-in']]));
 
@@ -418,89 +457,70 @@ export async function weather({ apply, scene, addField, bind, option }) {
   k(...titleSpan('Kicker open', 76, 4, 62));
   k(...titleSpan('Title open', 116, 8, 64));
   k(...titleSpan('Date', 314, 14, 66));
-  k(...titleSpan('Kicker', 76, 72, 207));
-  k(...titleSpan('Title today', 114, 74, 127));
-  k(...titleSpan('Sub today', 252, 78, 129));
-  k(...titleSpan('Title tonight', 114, 133, 167));
-  k(...titleSpan('Sub tonight', 252, 137, 169));
-  k(...titleSpan('Title tomorrow', 114, 173, 207));
-  k(...titleSpan('Sub tomorrow', 252, 177, 209));
-  k(...titleSpan('Kicker outlook', 76, 217));
-  k(...titleSpan('Title outlook', 114, 219));
-  k(...titleSpan('Sub outlook', 252, 223));
+  k(...titleSpan('Kicker', 76, 72, T(2)));
+  // The map's three days share one place and arrive together; rules show the one picked (below).
+  for (const [, , title, sub] of MAP_DAYS) {
+    k(...titleSpan(title, 114, 74, T(2)));
+    k(...titleSpan(sub, 252, 78, T(4)));
+  }
+  k(...titleSpan('Kicker outlook', 76, T(12)));
+  k(...titleSpan('Title outlook', 114, T(14)));
+  k(...titleSpan('Sub outlook', 252, T(18)));
   // The bar sits under the big title at Open and under the step titles after it.
   k(fade('Title bar', [[0, 0], [10, 0], [24, 1], [F.outlook, 1], [F.end, 0, 'cubic-in']]));
   k(track('Title bar', 'y', [[0, 296], [62, 296], [80, 236, 'cubic-in-out']]));
   k(track('Title bar', 'width', [[10, 0], [30, 96]]));
+  // The day buttons rise in under the titles and leave with them.
+  for (const name of ['Day tray', 'Day pill', 'Day 0', 'Day 1', 'Day 2', 'Day 0 hit', 'Day 1 hit', 'Day 2 hit']) {
+    const y = name === 'Day tray' ? DAY.y : DAY.y + DAY.pad;
+    k(fade(name, [[0, 0], [84, 0], [98, 1], [T(2), 1], [T(12), 0, 'cubic-in'], [F.end, 0]]));
+    k(track(name, 'y', [[84, y + 14], [102, y], [T(2), y], [T(12), y - 12, 'cubic-in']]));
+  }
 
-  // Cities, west to east.
+  // Cities, west to east. All three of the map's days arrive together, and rules hide the two not shown.
   const westToEast = [...cityNames].sort((a, b) => PLACES[a][0] - PLACES[b][0]);
   for (const name of cityNames) {
     const order = westToEast.indexOf(name);
     const [, y, side] = PLACES[name];
     const by = y + SIDE[side][1];
-    const gone = 207 + order; // they leave for the outlook
+    const ty = by + 4;
+    const gone = T(2) + order; // they leave for the outlook
     k(fade(`${name} dot`, [[0, 0], [24 + 2 * order, 0], [36 + 2 * order, 1], [gone, 1], [gone + 12, 0, 'cubic-in']]));
-
-    // Today: the icon drops in with a small bounce, the number rises into its chip.
+    // The icon drops in with a small bounce, the number rises into its chip.
     const s = 66 + 4 * order;
     k(fade(name, [[0, 0], [s + 4, 0], [s + 12, 1], [gone, 1], [gone + 12, 0, 'cubic-in']]));
-    k(track(`${name} icon a`, 'y', [[s, by - 18], [s + 14, by, 'back-out']]));
-    // Tonight: the icons swap in place and the numbers roll down to the lows.
-    const n = 127 + 2 * order;
-    // Tomorrow: they roll back up to the highs.
-    const m = 167 + 2 * order;
-    k(fade(`${name} icon a`, [[0, 0], [s, 0], [s + 8, 1], [n, 1], [n + 8, 0]]));
-    k(fade(`${name} icon b`, [[0, 0], [n + 2, 0], [n + 12, 1], [m, 1], [m + 8, 0]]));
-    k(fade(`${name} icon c`, [[0, 0], [m + 2, 0], [m + 12, 1], [gone, 1], [gone + 12, 0, 'cubic-in']]));
-    k(fade(`${name} chip a`, [[0, 0], [s + 3, 0], [s + 11, 1], [n, 1], [n + 10, 0, 'sine-in-out']]));
-    k(fade(`${name} chip b`, [[0, 0], [n, 0], [n + 10, 1, 'sine-in-out'], [m, 1], [m + 10, 0, 'sine-in-out']]));
-    k(fade(`${name} chip c`, [[0, 0], [m, 0], [m + 10, 1, 'sine-in-out'], [gone, 1], [gone + 12, 0, 'cubic-in']]));
-    const ty = by + 4;
-    // The old number is gone before the new one arrives, so the two never read as one.
-    k(fade(`${name} temp a`, [[0, 0], [s + 3, 0], [s + 11, 1], [n, 1], [n + 6, 0, 'cubic-in']]));
-    k(track(`${name} temp a`, 'y', [[s + 3, ty + 12], [s + 13, ty], [n, ty], [n + 6, ty + 14, 'cubic-in']]));
-    k(fade(`${name} temp b`, [[0, 0], [n + 5, 0], [n + 12, 1], [m, 1], [m + 6, 0, 'cubic-in']]));
-    k(track(`${name} temp b`, 'y', [[n + 5, ty - 14], [n + 14, ty], [m, ty], [m + 6, ty - 14, 'cubic-in']]));
-    k(fade(`${name} temp c`, [[0, 0], [m + 5, 0], [m + 12, 1], [gone, 1], [gone + 12, 0, 'cubic-in']]));
-    k(track(`${name} temp c`, 'y', [[m + 5, ty + 14], [m + 14, ty]]));
+    for (const part of ['a', 'b', 'c']) {
+      k(track(`${name} icon ${part}`, 'y', [[s, by - 18], [s + 14, by, 'back-out']]));
+      k(fade(`${name} icon ${part}`, [[0, 0], [s, 0], [s + 8, 1], [gone, 1], [gone + 12, 0, 'cubic-in']]));
+      k(fade(`${name} chip ${part}`, [[0, 0], [s + 3, 0], [s + 11, 1], [gone, 1], [gone + 12, 0, 'cubic-in']]));
+      k(fade(`${name} temp ${part}`, [[0, 0], [s + 3, 0], [s + 11, 1], [gone, 1], [gone + 12, 0, 'cubic-in']]));
+      k(track(`${name} temp ${part}`, 'y', [[s + 3, ty + 12], [s + 13, ty]]));
+    }
   }
 
   // Outlook: the city marker lands, the Now panel wipes on, the cards follow 80 ms apart.
-  k(fade('Focus ring', [[0, 0], [250, 0], [262, 1], [F.outlook, 1], [F.end, 0, 'cubic-in']]));
-  k(fade('Focus dot', [[0, 0], [246, 0], [256, 1], [F.outlook, 1], [F.end, 0, 'cubic-in']]));
+  k(fade('Focus ring', [[0, 0], [T(45), 0], [T(57), 1], [F.outlook, 1], [F.end, 0, 'cubic-in']]));
+  k(fade('Focus dot', [[0, 0], [T(41), 0], [T(51), 1], [F.outlook, 1], [F.end, 0, 'cubic-in']]));
   const slideIn = (layerName, x, at, distance = 60) => [
     fade(layerName, [[0, 0], [at, 0], [at + 14, 1], [F.outlook, 1], [F.end, 0, 'cubic-in']]),
     track(layerName, 'x', [[at, x + distance], [at + 18, x]]),
   ];
-  k(...slideIn('Now panel', 760, 236));
-  k(...slideIn('Now icon', 796, 240));
-  k(...slideIn('Now temp', 966, 242));
-  k(...slideIn('Now label', 1232, 244));
-  k(...slideIn('Now sky', 1232, 245));
-  k(...slideIn('Now info', 1232, 246));
+  k(...slideIn('Now panel', 760, T(31)));
+  k(...slideIn('Now icon', 796, T(35)));
+  k(...slideIn('Now temp', 966, T(37)));
+  k(...slideIn('Now label', 1232, T(39)));
+  k(...slideIn('Now sky', 1232, T(40)));
+  k(...slideIn('Now info', 1232, T(41)));
   for (const j of [0, 1, 2, 3, 4]) {
-    const at = 248 + 4 * j;
+    const at = T(43) + 4 * j;
     const x = CARD(j);
     for (const [suffix, dx] of [['', 0], [' strip', 14], [' day', 0], [' date', 0], [' icon', 46], [' high', 0], [' low', 0], [' drop', 54], [' rain', 78], [' track', 28], [' bar', 28]])
       k(...slideIn(`Card ${j}${suffix}`, x + dx, at, 90));
   }
 
-  // A data update rolls the numbers that change and cross-fades the rest.
-  const rolling = [
-    ...cityNames.flatMap((name) => ['a', 'b', 'c'].map((part) => `${name} temp ${part}`)),
-    'Now temp',
-    ...[0, 1, 2, 3, 4].flatMap((j) => [`Card ${j} high`, `Card ${j} low`]),
-  ];
-  const updates = rolling.map((layerName) => ({
-    type: 'set_layer_layout',
-    layerName,
-    updateTransition: { style: 'slide-up', durationFrames: 14, distance: 22 },
-  }));
-
   const shaderSetup = [
     ...Object.values(sky).map((item) => ({ type: 'update_data_field', fieldId: item.id, exposeToOgraf: false })),
-    ...['today_a', 'today_b', 'tonight_a', 'tonight_b', 'next_a', 'next_b', 'focus'].map((param) => ({
+    ...KINDS.map((param) => ({
       type: 'update_data_field',
       fieldId: sky[param].id,
       defaultValue: look[param],
@@ -512,7 +532,6 @@ export async function weather({ apply, scene, addField, bind, option }) {
   for (let i = 0; i < keys.length; i += 120) await apply(keys.slice(i, i + 120), `Motion ${i / 120 + 1}`);
   await apply(
     [
-      ...updates,
       {
         type: 'set_logic_functions',
         compositionId: composition.id,
@@ -530,7 +549,7 @@ export async function weather({ apply, scene, addField, bind, option }) {
               featured: field('featured').id,
               ui: field('ui').id,
               ...Object.fromEntries(
-                ['today_a', 'today_b', 'tonight_a', 'tonight_b', 'next_a', 'next_b', 'focus'].map((param) => [param, sky[param].id]),
+                KINDS.map((param) => [param, sky[param].id]),
               ),
             },
             actions: [],
@@ -548,10 +567,11 @@ export async function weather({ apply, scene, addField, bind, option }) {
   // changes `featured`, and the Weather function's tour, gets the same move.
   //
   // A rule's move starts again, from a standstill, whenever anything else in the graphic changes
-  // while it runs: another rule firing, or new data. So nothing else happens until the camera stops.
-  // The outlook's numbers and the marker go down as it leaves, and come back up when the Weather
-  // function counts the landing (`ui.landed`), with the new city's numbers already in place. A zoom
-  // out and back in on long trips would take two moves in a row, and the second would stop the first.
+  // while it runs: another rule firing, or new data. So nothing else happens while the camera moves.
+  // First the outlook's rain, snow or fog clears and its numbers and marker go down; the camera
+  // waits for that (CLEAR), then sets off. They all come back when the Weather function counts the
+  // landing (`ui.landed`), with the new city's weather and numbers already in place. A zoom out and
+  // back in on long trips would take two moves in a row, and the second would stop the first.
   //
   // A move's length depends on where the camera leaves from too, so there is a rule for every pair of
   // cities: the function tells the rules which city the camera is on (`ui.shown`), and keeps it on the
@@ -560,6 +580,9 @@ export async function weather({ apply, scene, addField, bind, option }) {
   // even arrives.
   const featured = field('featured').id;
   const uiField = field('ui').id;
+  const view = field('view').id;
+  // Frames the camera waits for the weather to clear. Keep in step with CLEAR_MS in weather-logic.js.
+  const CLEAR = 16;
   // Frames at 50 a second. Keep in step with flightFrames in weather-logic.js.
   const flightFrames = (from, to) => {
     const [ax, ay] = PLACES[from];
@@ -601,6 +624,7 @@ export async function weather({ apply, scene, addField, bind, option }) {
           { fieldId: featured, sourcePath: [], operator: 'equals', value: to },
           { fieldId: uiField, sourcePath: ['shown'], operator: 'equals', value: from },
         ]),
+        delayFrames: CLEAR,
         actions: glide(to, flightFrames(from, to)),
       }),
     ),
@@ -623,7 +647,112 @@ export async function weather({ apply, scene, addField, bind, option }) {
     ...props(frames, dot).map((action) => ({ ...action, targetLayerId: layerId('Focus dot') })),
     ...props(frames + 6, ring).map((action) => ({ ...action, targetLayerId: layerId('Focus ring') })),
   ];
-  const moved = ['Map close-up', 'Focus dot', 'Focus ring', ...columns.flat()];
+  // The map's days. `view` names what shows: the opening, a day, or the outlook. A day out of view
+  // waits above its place if it's earlier than the one shown and below if it's later, so a later day
+  // rolls up into place and an earlier one rolls down. Each city takes a little longer than the one
+  // to its west, so the change ripples across the map.
+  const ROLL = 14;
+  const rank = { open: 0, today: 0, tomorrow: 1, after: 2, outlook: 3 };
+  const views = (test) => Object.keys(rank).filter((name) => test(rank[name]));
+  const each2 = (names, frames, values) =>
+    names.flatMap((name) => props(frames, values).map((action) => ({ ...action, targetLayerId: layerId(name) })));
+  const dayAway = (d, dir) => {
+    const part = 'abc'[d];
+    const [, , title, sub] = MAP_DAYS[d];
+    return [
+      ...westToEast.flatMap((name, order) => [
+        ...each2([`${name} icon ${part}`, `${name} chip ${part}`], 10 + order, { 'layer.opacity': 0 }),
+        ...each2([`${name} temp ${part}`], 10 + order, { 'layer.opacity': 0, 'layer.offsetY': dir * ROLL }),
+      ]),
+      ...each2([title, sub], 10, { 'layer.opacity': 0, 'layer.offsetY': dir * 12 }),
+    ];
+  };
+  const dayRules = MAP_DAYS.flatMap(([, label], d) =>
+    [
+      ['above', -1, views((r) => r > d)],
+      ['below', 1, views((r) => r < d)],
+    ]
+      .filter(([, , list]) => list.length)
+      .map(([where, dir, list]) =>
+        rule(`day-${d}-${where}`, `${label} waits ${where}`, {
+          fieldId: view,
+          sourcePath: [],
+          operator: 'one-of',
+          value: list,
+          actions: dayAway(d, dir),
+        }),
+      ),
+  );
+  const isView = (value) => ({ fieldId: view, sourcePath: [], operator: Array.isArray(value) ? 'one-of' : 'equals', value });
+  // The pill slides under the day shown, whose label turns dark on it. The rain, snow and fog round
+  // the cities cross-fade to the new day's.
+  const pickedRules = [
+    rule('pill-1', 'Pill on tomorrow', { ...isView('tomorrow'), actions: each2(['Day pill'], 14, { 'layer.offsetX': DAY.w }) }),
+    rule('pill-2', 'Pill on the day after', { ...isView('after'), actions: each2(['Day pill'], 14, { 'layer.offsetX': 2 * DAY.w }) }),
+    ...MAP_DAYS.map(([value, label], d) =>
+      rule(`label-${d}`, `${label} label on the pill`, {
+        ...isView(d === 0 ? ['open', 'today'] : value),
+        actions: each2([`Day ${d}`], 10, { color: INK }),
+      }),
+    ),
+    rule('sky-1', 'Tomorrow\'s weather', {
+      ...isView('tomorrow'),
+      actions: each2(['Sky'], 20, { 'fill.parameters.w_today': 0, 'fill.parameters.w_next': 1 }),
+    }),
+    rule('sky-2', 'The day after\'s weather', {
+      ...isView('after'),
+      actions: each2(['Sky'], 20, { 'fill.parameters.w_today': 0, 'fill.parameters.w_after': 1 }),
+    }),
+  ];
+  // The steps say which day to show, and so do the buttons, but only while the map is up.
+  const stepId = (name) => composition.keyframes.find((keyframe) => keyframe.name === name).id;
+  const setView = (value) => ({ type: 'set-data', fieldId: view, mode: 'set', value });
+  const stepRules = [
+    rule('view-open', 'Start at the opening', { trigger: 'play', actions: [setView('open')] }),
+    ...[...MAP_DAYS, ['outlook', 'Outlook']].map(([value, label]) =>
+      rule(`step-${value}`, `${label} step`, { trigger: 'step', eventId: stepId(label), actions: [setView(value)] }),
+    ),
+  ];
+  const tapRules = MAP_DAYS.map(([value, label], d) => ({
+    type: 'set_layer_visual_rules',
+    layerName: `Day ${d} hit`,
+    rules: [
+      rule(`tap-${d}`, `Show ${label.toLowerCase()}`, {
+        trigger: 'click',
+        conditions: [isView(MAP_DAYS.map(([name]) => name))],
+        actions: [setView(value)],
+      }),
+    ],
+  }));
+  const ruleTargets = (rules) => rules.flatMap((item) => item.actions.map((action) => action.targetLayerId).filter(Boolean));
+  const outlookRules = [
+    rule('leave', 'Leave for a new city', {
+      ...onChange([isView('outlook')]),
+      actions: [
+        ...each((k) => 6 + k, { 'layer.opacity': 0, 'layer.offsetY': DIP }),
+        ...marker(8, { 'layer.opacity': 0 }, { 'layer.opacity': 0, 'layer.scale': 1.8 }),
+        ...each2(['Sky'], 14, { 'layer.opacity': 0 }),
+      ],
+    }),
+    rule('land', 'Land on the new city', {
+      fieldId: uiField,
+      sourcePath: ['landed'],
+      operator: 'changed',
+      actions: [
+        ...each((k) => 14 + 4 * k, { 'layer.opacity': 1, 'layer.offsetY': 0 }),
+        ...marker(10, { 'layer.opacity': 1 }, { 'layer.opacity': 1, 'layer.scale': 1 }),
+        ...each2(['Sky'], 24, { 'layer.opacity': 1 }),
+      ],
+    }),
+  ];
+  // Layers that rules change have no update transition: an update fades such a layer out before the
+  // new data even arrives.
+  const moved = [
+    ...new Set([
+      'Map close-up',
+      ...ruleTargets([...outlookRules, ...dayRules, ...pickedRules]).map((id) => composition.layers.find((layer) => layer.id === id).name),
+    ]),
+  ];
   await apply(
     [
       ...moved.map((layerName) => ({
@@ -632,30 +761,11 @@ export async function weather({ apply, scene, addField, bind, option }) {
         updateTransition: { style: 'none', durationFrames: 0, distance: 0 },
       })),
       { type: 'set_layer_visual_rules', layerName: 'Map close-up', rules: cityMoves },
-      {
-        type: 'set_layer_visual_rules',
-        layerName: 'Now panel',
-        rules: [
-          rule('leave', 'Leave for a new city', {
-            ...onChange(),
-            actions: [
-              ...each((k) => 8 + 2 * k, { 'layer.opacity': 0, 'layer.offsetY': DIP }),
-              ...marker(8, { 'layer.opacity': 0 }, { 'layer.opacity': 0, 'layer.scale': 1.8 }),
-            ],
-          }),
-          rule('land', 'Land on the new city', {
-            fieldId: uiField,
-            sourcePath: ['landed'],
-            operator: 'changed',
-            actions: [
-              ...each((k) => 14 + 4 * k, { 'layer.opacity': 1, 'layer.offsetY': 0 }),
-              ...marker(10, { 'layer.opacity': 1 }, { 'layer.opacity': 1, 'layer.scale': 1 }),
-            ],
-          }),
-        ],
-      },
+      { type: 'set_layer_visual_rules', layerName: 'Now panel', rules: outlookRules },
+      { type: 'set_layer_visual_rules', layerName: 'Day tray', rules: [...stepRules, ...dayRules, ...pickedRules] },
+      ...tapRules,
     ],
-    'The camera follows a new city',
+    'The camera, and the map\'s days',
   );
 }
 
@@ -673,7 +783,7 @@ export async function weatherStrap({ apply, scene, addField, bind, option }) {
 
   // The same sky, always filling its layer: an icon box 160 px square.
   const boxSky = read('weather-sky.glsl')
-    .replace('const float stage = 0.0;', 'const float stage = 3.0;')
+    .replace('const float stage = 0.0;', 'const float stage = 1.0;')
     .replace('const float edge = 0.26;', 'const float edge = 0.0;')
     .replace('const vec2 world = vec2(1920.0, 1080.0);', 'const vec2 world = vec2(160.0, 160.0);');
 

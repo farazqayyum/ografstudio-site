@@ -47,7 +47,8 @@ forecast to the graphic. A few things to know before changing them:
   `weather-logic.js` and `weather-sky.glsl` come from the same script's `project(lon, lat)`. Change the
   projection and you must update both.
 - Studio names a shader's fields after its layer, as `shader_layer_<id>_<name>`, and `weather.mjs`
-  finds them that way. The Weather function packs each step's weather for six cities into one number.
+  finds them that way. The Weather function packs each day's weather for six cities into one number,
+  and `w_today`, `w_next` and `w_after` say how much of each day shows, so rules can cross-fade them.
 - The icons are drawn in `weather-icons.mjs`, each moving inside its own picture. The functions only
   name the sky, and each icon layer's binding turns the name into its picture. Pictures in the
   function's output would pass the 64 KiB a function may return, with twelve cities on screen.
@@ -55,11 +56,17 @@ forecast to the graphic. A few things to know before changing them:
   `node examples-src/weather-closeup.mjs`. A picture moves and zooms for nothing, while the map's own
   paths took about 30 ms a frame. Draw it again after changing the map. `CLOSE_UP` in `weather-map.mjs`
   says where it starts, and `weather-logic.js` keeps a copy.
-- A new outlook city is rules in `weather.mjs`: one camera glide for each pair of cities, timed by how
-  far apart they are, then one rule to leave and one to land for the numbers and the marker. A rule's
-  move starts again from a standstill whenever anything else changes while it runs, another rule firing
-  or new data, so nothing else happens until the camera stops. The Weather function waits out the glide
-  (`flightFrames`, in both files), then changes the numbers and counts the landing in `ui.landed`,
+- The map's three days are all on their layers at once, and the `view` field says which shows: the
+  steps set it on arrival, and so do the day buttons' see-through `Day N hit` layers, but only while
+  the map is up. Rules on `view` hide the other two days above or below their place, so a later day
+  rolls up and an earlier one down. The steps between the days are one frame long, because rules do
+  the change, not the timeline.
+- A new outlook city is rules in `weather.mjs`: one rule to leave, which clears the weather and dips the
+  numbers and the marker, one camera glide for each pair of cities, timed by how far apart they are and
+  waiting `CLEAR` frames for the leave to finish, and one rule to land. A rule's move starts again from a
+  standstill whenever anything else changes while it runs, another rule firing or new data, so nothing
+  else happens while the camera moves. The Weather function waits out the glide (`CLEAR_MS` and
+  `flightFrames`, in both files), then changes the numbers and counts the landing in `ui.landed`,
   which brings them back up. It reports the city the camera is on in `ui.shown`, for the glides to
   start from, and runs the tour on the same timer. Each rule that fires redraws the whole graphic once,
   so keep them few. Layers that rules move have no update transition, or an update fades them out

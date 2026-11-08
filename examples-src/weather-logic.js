@@ -3,14 +3,15 @@
 // It runs in a sandbox inside the graphic. Whoever plays the graphic sends the forecast, `cities`,
 // and the operator picks the `featured` city for the five-day outlook, or turns on `tour` to visit
 // every city in turn. This turns that into what the layers show: one object, `ui`, with every sky,
-// number, colour and date, and the weather codes the see-through rain and snow shader reads. Each
-// step's numbers are already on their layers, so the steps themselves are plain animation and need
-// nothing from here.
+// number, colour and date, and the weather codes the see-through rain and snow shader reads. The map
+// has all three of its days on their layers at once, today, tomorrow and the day after, and rules
+// show the one the presenter picked (weather.mjs), so a change of day needs nothing from here.
 //
-// A new outlook city sends the camera gliding to it and dips the outlook's numbers (rules in
-// weather.mjs). The outlook keeps the old city while the camera moves: this wakes itself once the
-// camera has stopped, changes the numbers and counts a landing, and the landing brings them back up.
-// It wakes again to move a tour on. `state` remembers where it is.
+// A new outlook city clears the outlook's weather and dips its numbers, then sends the camera gliding
+// to it (rules in weather.mjs). The outlook keeps the old city while the camera moves: this wakes
+// itself once the camera has stopped, changes the numbers and counts a landing, and the landing
+// brings the numbers and the new city's weather back. It wakes again to move a tour on. `state`
+// remembers where it is.
 ({ data, state, event, nowMs }) => {
   // Where each slot sits on the map, in the order of the cities' layers. Keep these in step with
   // weather.mjs and weather-sky.glsl.
@@ -32,10 +33,13 @@
     const b = SLOTS.find(([name]) => name === to);
     return from === to || !a || !b ? 40 : Math.round(26 + 1.8 * Math.sqrt(Math.hypot(b[1] - a[1], b[2] - a[2])));
   };
+  // The camera waits this long for the weather to clear before it sets off. Keep in step with CLEAR
+  // in weather.mjs.
+  const CLEAR_MS = 320;
   // The numbers change this long after the camera stops. Anything that changes while the camera
   // moves would make it start its move again, from a standstill.
   const LAND_MS = 100;
-  const landAt = (now, from, to) => now + flightFrames(from, to) * 20 + LAND_MS;
+  const landAt = (now, from, to) => now + CLEAR_MS + flightFrames(from, to) * 20 + LAND_MS;
   const STAY_MS = 7000; // a tour's time on each city, from the landing to the next move
   // A tour goes round the map rather than down the list.
   const TOUR = ['Lisbon', 'Madrid', 'Rome', 'Athens', 'Istanbul', 'Vienna', 'Warsaw', 'Stockholm', 'Berlin', 'Paris', 'London', 'Dublin'];
@@ -109,30 +113,25 @@
   const ui = {};
   const kinds = { a: [], b: [], c: [] };
   cities.forEach((city, i) => {
-    const today = dayOf(city, 0);
-    const next = dayOf(city, 1);
     ui[`name${i}`] = String(city.name ?? SLOTS[i][0]).toUpperCase();
-    // a today's high, b tonight's low, c tomorrow's high.
-    const shown = {
-      a: [today.code, today.high, true],
-      b: [city.night_code, city.night_low, false],
-      c: [next.code, next.high, true],
-    };
-    for (const [part, [code, value, day]] of Object.entries(shown)) {
-      ui[`icon${i}${part}`] = skyOf(num(code, 3), day);
-      ui[`temp${i}${part}`] = degrees(value);
-      ui[`chip${i}${part}`] = chipOf(value);
-      kinds[part].push(kindOf(num(code, 0)));
-    }
+    // The map's three days, by their highs: a today, b tomorrow, c the day after.
+    ['a', 'b', 'c'].forEach((part, d) => {
+      const day = dayOf(city, d);
+      ui[`icon${i}${part}`] = skyOf(num(day.code, 3), true);
+      ui[`temp${i}${part}`] = degrees(day.high);
+      ui[`chip${i}${part}`] = chipOf(day.high);
+      kinds[part].push(kindOf(num(day.code, 0)));
+    });
   });
 
-  // The titles.
-  const first = dateOf(dayOf(cities[0], 0).date);
-  const second = dateOf(dayOf(cities[0], 1).date);
-  ui.date = first ? `${first.weekday} ${first.day} ${first.month}` : '';
-  ui.sub_today = first ? `${ui.date} · highs` : 'Highs';
-  ui.sub_tonight = first ? `${first.weekday} night · lows` : 'Lows';
-  ui.sub_tomorrow = second ? `${second.weekday} ${second.day} ${second.month} · highs` : 'Highs';
+  // The titles, and the day buttons: the third is named after its weekday.
+  const [first, second, third] = [0, 1, 2].map((d) => dateOf(dayOf(cities[0], d).date));
+  const long = (when) => `${when.weekday} ${when.day} ${when.month}`;
+  ui.date = first ? long(first) : '';
+  ui.sub_today = first ? `${long(first)} · highs` : 'Highs';
+  ui.sub_next = second ? `${long(second)} · highs` : 'Highs';
+  ui.sub_after = third ? `${long(third)} · highs` : 'Highs';
+  ui.title_after = third ? third.weekday.toUpperCase() : 'LATER';
 
   // Which city the outlook shows, and when that changes.
   const nameOf = (value) => SLOTS.find(([name]) => name.toLowerCase() === String(value ?? '').toLowerCase())?.[0];
@@ -221,10 +220,10 @@
       ui,
       today_a: pack(kinds.a.slice(0, 6)),
       today_b: pack(kinds.a.slice(6)),
-      tonight_a: pack(kinds.b.slice(0, 6)),
-      tonight_b: pack(kinds.b.slice(6)),
-      next_a: pack(kinds.c.slice(0, 6)),
-      next_b: pack(kinds.c.slice(6)),
+      next_a: pack(kinds.b.slice(0, 6)),
+      next_b: pack(kinds.b.slice(6)),
+      after_a: pack(kinds.c.slice(0, 6)),
+      after_b: pack(kinds.c.slice(6)),
       focus,
     },
   };

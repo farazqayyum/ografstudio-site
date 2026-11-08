@@ -4,9 +4,10 @@
 // which kind falls where. Each city's kind is a digit from 0 to 7, packed six cities to a number:
 // city 0 is today_a % 8, city 1 is (today_a / 8) % 8, and so on; cities 6 to 11 use today_b.
 //   0 none   1 fog   2 drizzle   3 rain   4 heavy rain   5 thunder   6 light snow   7 snow
-// stage moves from today (0) to tonight (1) and tomorrow (2), each drawn round the cities on the
-// map. At 3 the kind in focus fills the whole layer instead, fading in from `edge` (a share of the
-// width) so the presenter's side stays dry. `world` is the layer's size in pixels.
+// The map shows three days, round the cities: today, next (tomorrow) and after (the day after).
+// w_today, w_next and w_after say how much of each day shows, so a change of day cross-fades. As
+// stage goes from 0 to 1 the kind in focus fills the whole layer instead, fading in from `edge` (a
+// share of the width) so the presenter's side stays dry. `world` is the layer's size in pixels.
 //
 // Dedicated to the public domain under CC0-1.0.
 
@@ -14,15 +15,21 @@
 const float today_a = 0.0;
 #pragma ograf today_b slider min(0) max(262143) step(1)
 const float today_b = 0.0;
-#pragma ograf tonight_a slider min(0) max(262143) step(1)
-const float tonight_a = 0.0;
-#pragma ograf tonight_b slider min(0) max(262143) step(1)
-const float tonight_b = 0.0;
 #pragma ograf next_a slider min(0) max(262143) step(1)
 const float next_a = 0.0;
 #pragma ograf next_b slider min(0) max(262143) step(1)
 const float next_b = 0.0;
-#pragma ograf stage slider min(0) max(3) step(0.01)
+#pragma ograf after_a slider min(0) max(262143) step(1)
+const float after_a = 0.0;
+#pragma ograf after_b slider min(0) max(262143) step(1)
+const float after_b = 0.0;
+#pragma ograf w_today slider min(0) max(1) step(0.01)
+const float w_today = 1.0;
+#pragma ograf w_next slider min(0) max(1) step(0.01)
+const float w_next = 0.0;
+#pragma ograf w_after slider min(0) max(1) step(0.01)
+const float w_after = 0.0;
+#pragma ograf stage slider min(0) max(1) step(0.01)
 const float stage = 0.0;
 #pragma ograf focus slider min(0) max(7) step(1)
 const float focus = 0.0;
@@ -72,10 +79,11 @@ vec4 amounts(float kind) {
   return vec4(0.0, 0.0, 0.0, 1.0);
 }
 
-vec4 amountsAt(int day, int city) {
-  if (day == 0) return amounts(kindOf(today_a, today_b, city));
-  if (day == 1) return amounts(kindOf(tonight_a, tonight_b, city));
-  return amounts(kindOf(next_a, next_b, city));
+// The three days in their shares; while the day changes, the two blend.
+vec4 amountsAt(int city) {
+  return amounts(kindOf(today_a, today_b, city)) * w_today
+    + amounts(kindOf(next_a, next_b, city)) * w_next
+    + amounts(kindOf(after_a, after_b, city)) * w_after;
 }
 
 // Thin slanted streaks falling down and a little to the left, in two depths.
@@ -87,7 +95,7 @@ float rain(vec2 p, float amount, float t) {
     float scale = 1.0 - 0.35 * depth;
     vec2 q = p;
     q.x -= q.y * 0.25;
-    q.y += t * (950.0 - 250.0 * depth);
+    q.y += t * (400.0 - 110.0 * depth);
     vec2 cell = vec2(17.0, 76.0) * scale;
     vec2 id = floor(q / cell) + depth * 37.0;
     vec2 f = fract(q / cell);
@@ -147,12 +155,8 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   // Wrapping time every ten minutes keeps the drops sharp on a long show.
   float t = mod(iTime, 600.0);
 
-  float s = clamp(stage, 0.0, 3.0);
-  float byCity = clamp(3.0 - s, 0.0, 1.0);
-  float whole = clamp(s - 2.0, 0.0, 1.0);
-  float day = min(s, 2.0);
-  int first = int(min(floor(day), 1.0));
-  float mixDay = smoothstep(0.0, 1.0, day - float(first));
+  float whole = clamp(stage, 0.0, 1.0);
+  float byCity = 1.0 - whole;
 
   vec4 amount = vec4(0.0);
   float flash = 0.0;
@@ -160,7 +164,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     for (int i = 0; i < 12; i++) {
       float near = 1.0 - smoothstep(55.0, 175.0, distance(onMap, CITY[i]));
       if (near <= 0.0) continue;
-      vec4 here = mix(amountsAt(first, i), amountsAt(first + 1, i), mixDay) * near * byCity;
+      vec4 here = amountsAt(i) * near * byCity;
       amount = max(amount, here);
       flash = max(flash, here.z * lightning(t, float(i) * 0.37));
     }
