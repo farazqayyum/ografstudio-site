@@ -7,9 +7,10 @@
 // step's numbers are already on their layers, so the steps themselves are plain animation and need
 // nothing from here.
 //
-// A new outlook city moves the camera and dips the outlook's numbers (rules in weather.mjs). The
-// outlook keeps the old city while its numbers are down: this wakes itself to change them before
-// they come back up, and wakes again to move a tour on. `state` remembers where it is.
+// A new outlook city sends the camera gliding to it and dips the outlook's numbers (rules in
+// weather.mjs). The outlook keeps the old city while the camera moves: this wakes itself once the
+// camera has stopped, changes the numbers and counts a landing, and the landing brings them back up.
+// It wakes again to move a tour on. `state` remembers where it is.
 ({ data, state, event, nowMs }) => {
   // Where each slot sits on the map, in the order of the cities' layers. Keep these in step with
   // weather.mjs and weather-sky.glsl.
@@ -24,10 +25,18 @@
   // Where the close-up's picture of the map starts. Keep in step with CLOSE_UP in weather-map.mjs.
   const CLOSE_UP = { x: 330, y: -130 };
   const BAR_W = 140; // the rain chance bar on each outlook card
-  // In step with the rules in weather.mjs: the outlook's numbers are down from 0.4 s after a new
-  // city until 0.92 s, so they change at 0.6 s.
-  const SWAP_MS = 600;
-  const STAY_MS = 7000; // a tour's time on each city, from that change to the next move
+  // How long the camera takes from one city to another, in frames at 50 a second: longer trips take
+  // longer, though not in proportion. Keep in step with flightFrames in weather.mjs.
+  const flightFrames = (from, to) => {
+    const a = SLOTS.find(([name]) => name === from);
+    const b = SLOTS.find(([name]) => name === to);
+    return from === to || !a || !b ? 40 : Math.round(26 + 1.8 * Math.sqrt(Math.hypot(b[1] - a[1], b[2] - a[2])));
+  };
+  // The numbers change this long after the camera stops. Anything that changes while the camera
+  // moves would make it start its move again, from a standstill.
+  const LAND_MS = 100;
+  const landAt = (now, from, to) => now + flightFrames(from, to) * 20 + LAND_MS;
+  const STAY_MS = 7000; // a tour's time on each city, from the landing to the next move
   // A tour goes round the map rather than down the list.
   const TOUR = ['Lisbon', 'Madrid', 'Rome', 'Athens', 'Istanbul', 'Vienna', 'Warsaw', 'Stockholm', 'Berlin', 'Paris', 'London', 'Dublin'];
 
@@ -135,6 +144,7 @@
   let showing = nameOf(kept.showing) ?? featured;
   let swapAt = typeof kept.swapAt === 'number' ? kept.swapAt : null; // when the numbers change
   let nextAt = typeof kept.nextAt === 'number' ? kept.nextAt : null; // when a tour moves on
+  let landed = typeof kept.landed === 'number' ? kept.landed : 0; // landings so far
   let moveTo = null;
   if (event?.type === 'load' || event?.type === 'play' || event?.type === 'out') {
     // Nothing moves off air, so start from the featured city.
@@ -143,7 +153,8 @@
     nextAt = null;
   }
   if ('featured' in changed) {
-    swapAt = featured === showing ? null : now + SWAP_MS;
+    // Even back to the city it shows, the camera has a way to go and the numbers are down.
+    swapAt = landAt(now, showing, featured);
     nextAt = null;
   }
   // Turned on, a tour sets off at once.
@@ -151,26 +162,31 @@
   if (swapAt !== null && now >= swapAt) {
     showing = featured;
     swapAt = null;
+    landed += 1;
   }
   if (!touring) nextAt = null;
   else if (swapAt === null && nextAt === null) nextAt = now + STAY_MS;
   else if (swapAt === null && now >= nextAt) {
     // Writing `featured` moves the camera, the same as an operator's pick.
     moveTo = TOUR[(TOUR.indexOf(featured) + 1) % TOUR.length];
+    swapAt = landAt(now, showing, moveTo);
     featured = moveTo;
-    swapAt = now + SWAP_MS;
     nextAt = null;
   }
   const due = [swapAt, nextAt].filter((at) => at !== null);
 
-  // Where the close-up rests before any move: on the featured city.
+  // Where the close-up rests before any move: on the city the outlook shows. Rules move it from
+  // there, so a pick changes nothing here until the landing.
   const slotOf = (name) => SLOTS.findIndex(([slotName]) => slotName === name);
-  const [, fx, fy] = SLOTS[slotOf(featured)];
+  const slot = slotOf(showing);
+  const [, fx, fy] = SLOTS[slot];
   ui.zoom_x = Math.round(FOCUS.x - ZOOM * (fx - CLOSE_UP.x));
   ui.zoom_y = Math.round(FOCUS.y - ZOOM * (fy - CLOSE_UP.y));
+  // The rules read these: which city the camera leaves from, and when it has landed.
+  ui.shown = showing;
+  ui.landed = landed;
 
   // The five-day outlook.
-  const slot = slotOf(showing);
   const here = cities[slot];
   ui.city = ui[`name${slot}`];
   ui.now_icon = skyOf(num(here.code, 3), here.is_day !== false);
@@ -198,7 +214,7 @@
   const focus = kindOf(num(here.code, 0)) || kindOf(num(days[0].code, 0));
 
   return {
-    state: { showing, swapAt, nextAt },
+    state: { showing, swapAt, nextAt, landed },
     wakeAt: due.length ? Math.min(...due) : null,
     data: {
       ...(moveTo ? { featured: moveTo } : {}),

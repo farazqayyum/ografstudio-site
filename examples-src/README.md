@@ -55,11 +55,15 @@ forecast to the graphic. A few things to know before changing them:
   `node examples-src/weather-closeup.mjs`. A picture moves and zooms for nothing, while the map's own
   paths took about 30 ms a frame. Draw it again after changing the map. `CLOSE_UP` in `weather-map.mjs`
   says where it starts, and `weather-logic.js` keeps a copy.
-- A new outlook city is rules in `weather.mjs`: one pair of camera moves per city, the marker, and one
-  dip and one rise for the numbers. The Weather function changes the numbers between the two, at
-  `SWAP_MS`, and runs the tour on its own timer. Each rule that fires redraws the whole graphic once, so
-  keep them few. Layers that rules move have no update transition, or an update fades them out before
-  the new city even arrives.
+- A new outlook city is rules in `weather.mjs`: one camera glide for each pair of cities, timed by how
+  far apart they are, then one rule to leave and one to land for the numbers and the marker. A rule's
+  move starts again from a standstill whenever anything else changes while it runs, another rule firing
+  or new data, so nothing else happens until the camera stops. The Weather function waits out the glide
+  (`flightFrames`, in both files), then changes the numbers and counts the landing in `ui.landed`,
+  which brings them back up. It reports the city the camera is on in `ui.shown`, for the glides to
+  start from, and runs the tour on the same timer. Each rule that fires redraws the whole graphic once,
+  so keep them few. Layers that rules move have no update transition, or an update fades them out
+  before the new city even arrives.
 - Text has a fixed size. Shrink-to-fit measures every label on every frame that something moves, which
   stalled a city change. Oswald's sizes are the ones shrink-to-fit used to settle on.
 - Studio stores every key of every layer, so `weather.ogs` is about 6 MB. The package is about 2.7 MB.

@@ -121,11 +121,11 @@
   },
   "weather": {
     "name": "Europe weather",
-    "manifest": "/graphics/weather/project-e1bac236-9168-4847-88ff-bac4623c4313-rt.ograf.json",
+    "manifest": "/graphics/weather/project-b4b167db-fccf-49b2-8baf-619692e33305-rt.ograf.json",
     "download": "/graphics/weather.ograf.zip",
-    "bytes": 2734290,
+    "bytes": 2743023,
     "source": "/graphics/weather.ogs",
-    "sourceBytes": 6026803,
+    "sourceBytes": 6183660,
     "fields": 3,
     "actions": 1
   }

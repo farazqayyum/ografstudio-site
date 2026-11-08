@@ -543,16 +543,29 @@ export async function weather({ apply, scene, addField, bind, option }) {
     'Updates and function',
   );
 
-  // A new outlook city moves the camera: the map pulls back a little while it travels to the city,
-  // then pushes in on it, and the marker lands again. Rules do it inside the graphic, so any
-  // controller that changes `featured`, and the Weather function's tour, gets the same move. Each
-  // city has its own pair of moves, because a zoom centred on the city depends on where the city is.
-  // The close-up's bound position stays as the pose before any change. Layers that rules move have
-  // no update transition: an update fades such a layer out before the new data even arrives.
+  // A new outlook city moves the camera: the map glides to the city in one move, at the close-up's
+  // zoom, taking longer for longer trips. Rules do it inside the graphic, so any controller that
+  // changes `featured`, and the Weather function's tour, gets the same move.
+  //
+  // A rule's move starts again, from a standstill, whenever anything else in the graphic changes
+  // while it runs: another rule firing, or new data. So nothing else happens until the camera stops.
+  // The outlook's numbers and the marker go down as it leaves, and come back up when the Weather
+  // function counts the landing (`ui.landed`), with the new city's numbers already in place. A zoom
+  // out and back in on long trips would take two moves in a row, and the second would stop the first.
+  //
+  // A move's length depends on where the camera leaves from too, so there is a rule for every pair of
+  // cities: the function tells the rules which city the camera is on (`ui.shown`), and keeps it on the
+  // old one until the landing. The close-up's bound position is that city's, for before any move. Layers
+  // that rules move have no update transition: an update fades such a layer out before the new data
+  // even arrives.
   const featured = field('featured').id;
-  const PULL = 36; // frames to pull back and travel
-  const PUSH = 30; // frames to push back in
-  const WIDE = 1.8; // how far out the travel goes, against the close-up's 2.4
+  const uiField = field('ui').id;
+  // Frames at 50 a second. Keep in step with flightFrames in weather-logic.js.
+  const flightFrames = (from, to) => {
+    const [ax, ay] = PLACES[from];
+    const [bx, by] = PLACES[to];
+    return from === to ? 40 : Math.round(26 + 1.8 * Math.sqrt(Math.hypot(bx - ax, by - ay)));
+  };
   const rule = (id, name, fields) => ({ id, name, enabled: true, trigger: 'data', ...fields });
   const onChange = (extra = []) => ({
     fieldId: featured,
@@ -560,45 +573,43 @@ export async function weather({ apply, scene, addField, bind, option }) {
     operator: 'changed',
     ...(extra.length ? { conditions: extra, match: 'all' } : {}),
   });
-  // The close-up's picture must reach past every edge of the frame, at either zoom and for every city.
-  // A move between two poses changes all four numbers together, so its frames stay inside the two ends.
+  // The close-up's picture must reach past every edge of the frame for every city. A glide between two
+  // cities keeps the zoom, so its frames stay inside the two ends.
   if (CLOSE_UP.scale !== ZOOM) throw new Error('weather-closeup.webp is drawn for another zoom: run weather-closeup.mjs.');
-  for (const [name, [x, y]] of Object.entries(PLACES))
-    for (const zoom of [WIDE, ZOOM]) {
-      const left = x - FOCUS.x / zoom;
-      const right = x + (1920 - FOCUS.x) / zoom;
-      const top = y - FOCUS.y / zoom;
-      const bottom = y + (1080 - FOCUS.y) / zoom;
-      const mapRight = MAP.x + MAP.w; // nothing is drawn past the map's own edge
-      if (left < CLOSE_UP.x || top < CLOSE_UP.y || bottom > CLOSE_UP.y + CLOSE_UP.h || Math.min(right, mapRight) > CLOSE_UP.x + CLOSE_UP.w)
-        throw new Error(`The close-up doesn't cover ${name} at ${zoom}: widen CLOSE_UP in weather-map.mjs.`);
-    }
-  const pose = (name, zoom, frames) => {
+  for (const [name, [x, y]] of Object.entries(PLACES)) {
+    const left = x - FOCUS.x / ZOOM;
+    const right = x + (1920 - FOCUS.x) / ZOOM;
+    const top = y - FOCUS.y / ZOOM;
+    const bottom = y + (1080 - FOCUS.y) / ZOOM;
+    const mapRight = MAP.x + MAP.w; // nothing is drawn past the map's own edge
+    if (left < CLOSE_UP.x || top < CLOSE_UP.y || bottom > CLOSE_UP.y + CLOSE_UP.h || Math.min(right, mapRight) > CLOSE_UP.x + CLOSE_UP.w)
+      throw new Error(`The close-up doesn't cover ${name}: widen CLOSE_UP in weather-map.mjs.`);
+  }
+  const glide = (name, frames) => {
     const [x, y] = PLACES[name];
     return [
-      ['layer.x', FOCUS.x - zoom * (x - CLOSE_UP.x)],
-      ['layer.y', FOCUS.y - zoom * (y - CLOSE_UP.y)],
-      ['layer.width', CLOSE_UP.w * zoom],
-      ['layer.height', CLOSE_UP.h * zoom],
+      ['layer.x', FOCUS.x - ZOOM * (x - CLOSE_UP.x)],
+      ['layer.y', FOCUS.y - ZOOM * (y - CLOSE_UP.y)],
     ].map(([targetProperty, value]) => ({ type: 'property', targetProperty, value: Math.round(value), transitionFrames: frames }));
   };
   const props = (frames, values) =>
     Object.entries(values).map(([targetProperty, value]) => ({ type: 'property', targetProperty, value, transitionFrames: frames }));
-  const cityMoves = cityNames.flatMap((name) => {
-    const slug = name.toLowerCase();
-    const isCity = [{ fieldId: featured, sourcePath: [], operator: 'equals', value: name }];
-    return [
-      rule(`travel-${slug}`, `Travel to ${name}`, { ...onChange(isCity), actions: pose(name, WIDE, PULL) }),
-      rule(`land-${slug}`, `Land on ${name}`, { ...onChange(isCity), delayFrames: PULL, actions: pose(name, ZOOM, PUSH) }),
-    ];
-  });
-  // Meanwhile the outlook's numbers dip and come back up on the new city, rippling from left to
-  // right. The Weather function changes them while they're down, at SWAP_MS in weather-logic.js.
-  // Every rule that fires redraws the whole graphic once, so the ripple comes from each column
-  // taking a little longer, not from a rule per column.
+  const cityMoves = cityNames.flatMap((to) =>
+    cityNames.map((from) =>
+      rule(`fly-${from.toLowerCase()}-${to.toLowerCase()}`, `${from} to ${to}`, {
+        ...onChange([
+          { fieldId: featured, sourcePath: [], operator: 'equals', value: to },
+          { fieldId: uiField, sourcePath: ['shown'], operator: 'equals', value: from },
+        ]),
+        actions: glide(to, flightFrames(from, to)),
+      }),
+    ),
+  );
+  // The outlook's numbers dip and come back up on the new city, rippling from left to right. Every
+  // rule that fires redraws the whole graphic once, so the ripple comes from each column taking a
+  // little longer, not from a rule per column.
   const layerId = (name) => composition.layers.find((layer) => layer.name === name).id;
   const DIP = 16; // how far the numbers drop
-  const RISE = 46; // frames from the change until the numbers start back up
   const columns = [
     ['Title outlook'],
     ['Now icon', 'Now temp', 'Now sky', 'Now info'],
@@ -609,7 +620,7 @@ export async function weather({ apply, scene, addField, bind, option }) {
       names.flatMap((name) => props(frames(k), values).map((action) => ({ ...action, targetLayerId: layerId(name) }))),
     );
   const marker = (frames, dot, ring) => [
-    ...props(frames, dot),
+    ...props(frames, dot).map((action) => ({ ...action, targetLayerId: layerId('Focus dot') })),
     ...props(frames + 6, ring).map((action) => ({ ...action, targetLayerId: layerId('Focus ring') })),
   ];
   const moved = ['Map close-up', 'Focus dot', 'Focus ring', ...columns.flat()];
@@ -625,26 +636,21 @@ export async function weather({ apply, scene, addField, bind, option }) {
         type: 'set_layer_visual_rules',
         layerName: 'Now panel',
         rules: [
-          rule('dip', 'Dip for a new city', { ...onChange(), actions: each((k) => 8 + 2 * k, { 'layer.opacity': 0, 'layer.offsetY': DIP }) }),
-          rule('rise', 'Rise on the new city', {
+          rule('leave', 'Leave for a new city', {
             ...onChange(),
-            delayFrames: RISE,
-            actions: each((k) => 14 + 4 * k, { 'layer.opacity': 1, 'layer.offsetY': 0 }),
+            actions: [
+              ...each((k) => 8 + 2 * k, { 'layer.opacity': 0, 'layer.offsetY': DIP }),
+              ...marker(8, { 'layer.opacity': 0 }, { 'layer.opacity': 0, 'layer.scale': 1.8 }),
+            ],
           }),
-        ],
-      },
-      {
-        type: 'set_layer_visual_rules',
-        layerName: 'Focus dot',
-        rules: [
-          rule('marker-lift', 'Lift while travelling', {
-            ...onChange(),
-            actions: marker(8, { 'layer.opacity': 0 }, { 'layer.opacity': 0, 'layer.scale': 1.8 }),
-          }),
-          rule('marker-land', 'Land with the map', {
-            ...onChange(),
-            delayFrames: PULL + PUSH - 8,
-            actions: marker(10, { 'layer.opacity': 1 }, { 'layer.opacity': 1, 'layer.scale': 1 }),
+          rule('land', 'Land on the new city', {
+            fieldId: uiField,
+            sourcePath: ['landed'],
+            operator: 'changed',
+            actions: [
+              ...each((k) => 14 + 4 * k, { 'layer.opacity': 1, 'layer.offsetY': 0 }),
+              ...marker(10, { 'layer.opacity': 1 }, { 'layer.opacity': 1, 'layer.scale': 1 }),
+            ],
           }),
         ],
       },
