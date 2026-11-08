@@ -206,22 +206,33 @@
 }
 
 /* Fullscreen: the stage keeps 16:9, so its marks and links stay on the graphic, and the backdrop
-   fills whatever the screen leaves over. */
-.stageShell:fullscreen {
+   fills whatever the screen leaves over. iPhones can't put an element in fullscreen, so there the
+   shell fills the window instead (`data-filling`). Dynamic viewport units leave out the browser bars. */
+.stageShell[data-filling='true'] {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+}
+
+.stageShell:fullscreen,
+.stageShell[data-filling='true'] {
   display: flex;
   align-items: center;
   justify-content: center;
   background: #0a0f1f;
 }
 
-.stageShell:fullscreen .stage {
-  width: min(100vw, calc(100vh * 16 / 9));
+.stageShell:fullscreen .stage,
+.stageShell[data-filling='true'] .stage {
+  width: min(100vw, calc(100dvh * 16 / 9));
   border-radius: 0;
   box-shadow: none;
 }
 
 .stageShell:fullscreen[data-bar-awake='false'],
-.stageShell:fullscreen[data-bar-awake='false'] .stage {
+.stageShell:fullscreen[data-bar-awake='false'] .stage,
+.stageShell[data-filling='true'][data-bar-awake='false'],
+.stageShell[data-filling='true'][data-bar-awake='false'] .stage {
   cursor: none !important;
 }
 

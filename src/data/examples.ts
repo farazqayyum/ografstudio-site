@@ -148,16 +148,19 @@ export const examples: Example[] = [
   {
     slug: 'weather',
     title: 'Europe weather',
-    summary: 'A five-step weather show for a presenter, on a live forecast, with see-through rain and snow.',
+    summary: 'A five-step weather show for a presenter on a live forecast, with touch buttons and see-through rain and snow.',
     image: '/img/examples/weather.png',
     level: 'Advanced',
-    tags: ['Live data', 'Steps', 'Shader', 'Function'],
-    unlisted: true,
+    tags: ['Live data', 'Steps', 'Shader', 'Function', 'Interactive'],
+    notOnHomepage: true,
     origin: {
       model: MODEL,
-      generationTime: 'About 45 minutes',
+      generationTime: 'About 1 hour 30 minutes',
       prompts: [
         'Build a broadcast weather report graphics example. Make it Europe, and live: the full sequence plus a strap. A clean, flat look, but with see-through shaders for the rain, snow and so on. First draw a concept storyboard, then build it.',
+        'When the outlook city changes, zoom out a little and back in to the new city, so the map feels interactive. Animate the small icons in the city view, update the statistics for the new city, and add an automatic tour of the cities.',
+        'Make the move from city to city one smooth move: no zoom out for a nearby city, and only for a long trip if at all. Make it clear to viewers that they are seeing the real weather, live.',
+        'Add three touch buttons: Today, Tomorrow, and the day after with its name, such as Tuesday. Slow the rain down. When the map moves from a foggy or rainy city to a clear one, clear the effect before it moves.',
       ],
     },
   },
@@ -168,7 +171,7 @@ export const examples: Example[] = [
     image: '/img/examples/weather-strap.png',
     level: 'Intermediate',
     tags: ['Live data', 'Shader', 'Function'],
-    unlisted: true,
+    notOnHomepage: true,
     origin: {
       model: MODEL,
       generationTime: 'Part of Europe weather',

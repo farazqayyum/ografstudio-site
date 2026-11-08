@@ -277,6 +277,9 @@ function LivePlayer({
   const [stepCount, setStepCount] = useState(1);
   const [step, setStep] = useState(0);
   const [fullscreen, setFullscreen] = useState(false);
+  /** iPhones can't put an element in fullscreen, so there the frame fills the window instead. */
+  const [filling, setFilling] = useState(false);
+  const expanded = fullscreen || filling;
   /** The browser couldn't turn the screen to landscape, so the picture turns instead. */
   const [turned, setTurned] = useState(false);
   const [barAwake, setBarAwake] = useState(true);
@@ -306,8 +309,8 @@ function LivePlayer({
   }, []);
 
   useEffect(() => {
-    if (fullscreen) wakeBar();
-  }, [fullscreen, wakeBar]);
+    if (expanded) wakeBar();
+  }, [expanded, wakeBar]);
 
   const onPhone = landscapeFullscreen && window.matchMedia('(pointer: coarse)').matches;
 
@@ -322,13 +325,39 @@ function LivePlayer({
   };
 
   const toggleFullscreen = () => {
-    const request = document.fullscreenElement
-      ? document.exitFullscreen()
-      : frameRef.current?.requestFullscreen().then(turnToLandscape);
-    request?.catch((cause: unknown) => {
-      setError(cause instanceof Error ? cause.message : String(cause));
-    });
+    if (filling || !document.fullscreenEnabled) {
+      setFilling(!filling);
+      return;
+    }
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => undefined);
+      return;
+    }
+    // A browser that refuses fullscreen gets the frame filling the window instead.
+    frameRef.current
+      ?.requestFullscreen()
+      .then(turnToLandscape)
+      .catch(() => setFilling(true));
   };
+
+  // Filling the window: the page behind stays still, Esc leaves, and a phone held upright gets the
+  // picture on its side, since only fullscreen can turn the screen.
+  useEffect(() => {
+    if (!filling) return undefined;
+    const root = document.documentElement;
+    const overflow = root.style.overflow;
+    root.style.overflow = 'hidden';
+    if (onPhone) setTurned(true);
+    const leave = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setFilling(false);
+    };
+    document.addEventListener('keydown', leave);
+    return () => {
+      root.style.overflow = overflow;
+      document.removeEventListener('keydown', leave);
+      setTurned(false);
+    };
+  }, [filling, onPhone]);
 
   // Load the graphic once it's really on screen, or once the visitor scrolls towards it. On the homepage
   // it sits just under the fold, so being close doesn't count until they start to scroll.
@@ -465,7 +494,7 @@ function LivePlayer({
   }, []);
 
   // Fullscreen lifts the frame out of the page, so where the figure sits says nothing then.
-  const away = offscreen && !fullscreen;
+  const away = offscreen && !expanded;
 
   // Off screen a graphic only burns CPU, and its frame loop keeps going even off air, so after a moment it
   // unmounts and comes back in when the visitor does. Only one nobody has changed: starting over would
@@ -611,8 +640,9 @@ function LivePlayer({
         data-bar-awake={barAwake}
         data-turned={turned}
         data-letterbox={landscapeFullscreen}
-        onPointerDown={fullscreen ? wakeBar : undefined}
-        onPointerMove={fullscreen ? wakeBar : undefined}>
+        data-filling={filling}
+        onPointerDown={expanded ? wakeBar : undefined}
+        onPointerMove={expanded ? wakeBar : undefined}>
         <BackdropCamera />
         <div ref={viewportRef} className={styles.viewport} />
         {status === 'loading' && (
@@ -629,7 +659,7 @@ function LivePlayer({
             </p>
           </div>
         )}
-        {fullscreen && (
+        {expanded && (
           <div className={styles.fullscreenBar}>
             {/* On a phone the bar would cover half the graphic, which has its own controls. */}
             {!onPhone && takeButtons}
@@ -647,15 +677,12 @@ function LivePlayer({
       <div className={styles.controls}>
         <div className={styles.buttons}>
           {takeButtons}
-          {/* iPhones can't put an element in fullscreen, so they don't get the button. */}
-          {document.fullscreenEnabled && (
-            <button
-              type="button"
-              className="button button--secondary button--sm"
-              onClick={toggleFullscreen}>
-              <FullscreenIcon exit={false} /> Fullscreen
-            </button>
-          )}
+          <button
+            type="button"
+            className="button button--secondary button--sm"
+            onClick={toggleFullscreen}>
+            <FullscreenIcon exit={false} /> Fullscreen
+          </button>
         </div>
         <BackdropPicker />
         <span className={styles.status} data-status={status} role="status">

@@ -209,6 +209,9 @@ function Reel(): ReactNode {
   const [folded, setFolded] = useState(false);
   const [progressKey, setProgressKey] = useState(0);
   const [fullscreen, setFullscreen] = useState(false);
+  /** iPhones can't put an element in fullscreen, so there the reel fills the window instead. */
+  const [filling, setFilling] = useState(false);
+  const expanded = fullscreen || filling;
   const [barAwake, setBarAwake] = useState(true);
   const backdrop = useBackdropStyle();
   const camera = useMonitorCamera();
@@ -463,15 +466,39 @@ function Reel(): ReactNode {
   }, []);
 
   useEffect(() => {
-    if (fullscreen) wakeBar();
-  }, [fullscreen, wakeBar]);
+    if (expanded) wakeBar();
+  }, [expanded, wakeBar]);
 
   const toggleFullscreen = useCallback(() => {
-    const request = document.fullscreenElement
-      ? document.exitFullscreen()
-      : shellRef.current?.requestFullscreen();
-    request?.catch((error: unknown) => console.error('Feature reel fullscreen failed', error));
-  }, []);
+    if (filling || !document.fullscreenEnabled) {
+      setFilling(!filling);
+      return;
+    }
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => undefined);
+      return;
+    }
+    // A browser that refuses fullscreen gets the reel filling the window instead.
+    shellRef.current?.requestFullscreen().catch(() => setFilling(true));
+  }, [filling]);
+
+  // Filling the window: the page behind stays still and Esc leaves. As in fullscreen, hovering
+  // doesn't hold the slide.
+  useEffect(() => {
+    if (!filling) return undefined;
+    const root = document.documentElement;
+    const overflow = root.style.overflow;
+    root.style.overflow = 'hidden';
+    setHold('pointer', false);
+    const leave = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setFilling(false);
+    };
+    document.addEventListener('keydown', leave);
+    return () => {
+      root.style.overflow = overflow;
+      document.removeEventListener('keydown', leave);
+    };
+  }, [filling, setHold]);
 
   // A touch has no hover, so a tap on the stage holds the slide for a while.
   const touchTimer = useRef<number | undefined>(undefined);
@@ -598,15 +625,12 @@ function Reel(): ReactNode {
               )}
             </div>
             <div className={styles.actions}>
-              {/* iPhones can't put an element in fullscreen, so they don't get the button. */}
-              {document.fullscreenEnabled && (
-                <Toggle
-                  icon="fullscreen"
-                  label="Fullscreen"
-                  title="Shows the reel fullscreen"
-                  onClick={toggleFullscreen}
-                />
-              )}
+              <Toggle
+                icon="fullscreen"
+                label="Fullscreen"
+                title="Shows the reel fullscreen"
+                onClick={toggleFullscreen}
+              />
               <Toggle
                 icon="info"
                 label="How it was made"
@@ -638,16 +662,17 @@ function Reel(): ReactNode {
         <div
           ref={shellRef}
           className={styles.stageShell}
-          style={fullscreen ? backdrop : undefined}
+          style={expanded ? backdrop : undefined}
           data-bar-awake={barAwake}
-          onPointerMove={fullscreen ? wakeBar : undefined}>
+          data-filling={filling}
+          onPointerMove={expanded ? wakeBar : undefined}>
         <div
           ref={stageRef}
           className={styles.stage}
           style={backdrop}
           role="group"
           aria-label={`OGraf Studio feature reel, showing ${SLIDES[active].name}`}
-          onPointerEnter={(event) => event.pointerType === 'mouse' && !fullscreen && setHold('pointer', true)}
+          onPointerEnter={(event) => event.pointerType === 'mouse' && !expanded && setHold('pointer', true)}
           onPointerLeave={(event) => event.pointerType === 'mouse' && setHold('pointer', false)}
           onPointerMove={onStagePointerMove}
           onPointerDown={onStagePointerDown}>
@@ -715,7 +740,7 @@ function Reel(): ReactNode {
             </p>
           )}
         </div>
-          {fullscreen && (
+          {expanded && (
             <div className={styles.fullscreenBar} role="group" aria-label="Reel controls">
               {SLIDES.map((slide, index) => (
                 <button
