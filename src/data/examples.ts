@@ -152,7 +152,6 @@ export const examples: Example[] = [
     image: '/img/examples/weather.png',
     level: 'Advanced',
     tags: ['Live data', 'Steps', 'Shader', 'Function', 'Interactive'],
-    notOnHomepage: true,
     origin: {
       model: MODEL,
       generationTime: 'About 1 hour 30 minutes',
@@ -171,7 +170,6 @@ export const examples: Example[] = [
     image: '/img/examples/weather-strap.png',
     level: 'Intermediate',
     tags: ['Live data', 'Shader', 'Function'],
-    notOnHomepage: true,
     origin: {
       model: MODEL,
       generationTime: 'Part of Europe weather',

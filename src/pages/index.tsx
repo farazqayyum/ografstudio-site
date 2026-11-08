@@ -7,6 +7,7 @@ import {LevelTag} from '@site/src/components/ExampleTags';
 import HeroReel from '@site/src/components/HeroReel';
 import OGrafExample from '@site/src/components/OGrafExample';
 import {LIVE_MARKETS} from '@site/src/components/OGrafExample/liveMarkets';
+import {WEATHER, WEATHER_STRAP} from '@site/src/components/OGrafExample/weather';
 import {examples} from '@site/src/data/examples';
 import graphics from '@site/src/data/graphics.json';
 import info from '@site/src/data/importInfo.json';
@@ -165,6 +166,8 @@ const controls = examples.filter((item) => !item.notOnHomepage && !item.unlisted
 /** What an example needs from its player beyond its name. */
 const PLAYER_PROPS: Record<string, Partial<ComponentProps<typeof OGrafExample>>> = {
   'live-markets': LIVE_MARKETS,
+  weather: WEATHER,
+  'weather-strap': WEATHER_STRAP,
 };
 /**
  * The longest example's form, so switching examples doesn't change the page's height. One that picks its
