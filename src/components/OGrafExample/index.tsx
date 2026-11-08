@@ -193,6 +193,8 @@ function FieldInput({
 
 const DATA_LEGEND = 'Operator controls — changes update the graphic live';
 const BAR_IDLE_MS = 2500;
+/** Width a phone's fullscreen controls need beside the picture, with a margin: see `.phoneControls`. */
+const PHONE_CONTROLS_PX = 66;
 /** Share of the frame on screen that loads the graphic without any scrolling. */
 const LOAD_WHEN_SEEN = 0.25;
 /** Share of the graphic and its form that counts as on screen. */
@@ -214,6 +216,30 @@ function FullscreenIcon({exit}: {exit: boolean}): ReactNode {
         stroke="currentColor"
         strokeWidth="2"
       />
+    </svg>
+  );
+}
+
+const CONTROL_ICONS = {
+  takeIn: <path d="M4.5 2.5v11l9-5.5z" fill="currentColor" />,
+  takeOut: <rect x="3.5" y="3.5" width="9" height="9" rx="1" fill="currentColor" />,
+  replay: (
+    <path
+      d="M12.9 9.6A5 5 0 1 1 11.5 4.4M12.5 1.5v3.4H9.1"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  ),
+  next: <path d="M2.5 3v10l7-5zM9.5 3v10l5-5z" fill="currentColor" />,
+};
+
+function ControlIcon({kind}: {kind: keyof typeof CONTROL_ICONS}): ReactNode {
+  return (
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      {CONTROL_ICONS[kind]}
     </svg>
   );
 }
@@ -313,6 +339,34 @@ function LivePlayer({
   }, [expanded, wakeBar]);
 
   const onPhone = landscapeFullscreen && window.matchMedia('(pointer: coarse)').matches;
+  /**
+   * A phone's screen is too small for the bar of named buttons, so in fullscreen these graphics get a slim
+   * column of round ones instead. A tablet has room for the bar.
+   */
+  const compact = onPhone && window.matchMedia('(max-width: 500px), (max-height: 500px)').matches;
+  /** The column fits in a black band beside the picture, so it needn't get out of the way. */
+  const [besidePicture, setBesidePicture] = useState(false);
+
+  useEffect(() => {
+    if (!expanded || !compact) {
+      setBesidePicture(false);
+      return undefined;
+    }
+    const measure = () => {
+      const {innerWidth: width, innerHeight: height} = window;
+      // Sideways the bands are left and right of the picture; upright, with the picture turned, above and below.
+      const band =
+        width > height
+          ? (width - (height * 16) / 9) / 2
+          : turned
+            ? (height - Math.min(height, (width * 16) / 9)) / 2
+            : 0;
+      setBesidePicture(band >= PHONE_CONTROLS_PX);
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [expanded, compact, turned]);
 
   // Android browsers can turn the screen during fullscreen, and give it back when fullscreen ends.
   const turnToLandscape = async () => {
@@ -567,36 +621,34 @@ function LivePlayer({
       ? `${Math.max(1, Math.round(entry.sourceBytes / 1024))} KB`
       : `${(entry.sourceBytes / 1024 / 1024).toFixed(1)} MB`;
 
+  const takeIn = () => {
+    setStep(0);
+    void run((p) => p.play(), 'on-air');
+  };
+  const takeOut = () => void run((p) => p.stop(), 'off-air');
+  const replay = () => {
+    setStep(0);
+    void run(async (p) => {
+      await p.stop({skipAnimation: true});
+      await p.play();
+    }, 'on-air');
+  };
+  const nextStep = () => {
+    touched.current = true;
+    setStep((current) => current + 1);
+    void run((p) => p.next(), 'on-air');
+  };
+  const stepText = `${Math.min(step + 1, stepCount)}/${stepCount}`;
+
   const takeButtons = (
     <>
-      <button
-        type="button"
-        className="button button--primary button--sm"
-        disabled={status !== 'off-air'}
-        onClick={() => {
-          setStep(0);
-          void run((p) => p.play(), 'on-air');
-        }}>
+      <button type="button" className="button button--primary button--sm" disabled={status !== 'off-air'} onClick={takeIn}>
         ▶ Take in
       </button>
-      <button
-        type="button"
-        className="button button--secondary button--sm"
-        disabled={status !== 'on-air'}
-        onClick={() => void run((p) => p.stop(), 'off-air')}>
+      <button type="button" className="button button--secondary button--sm" disabled={status !== 'on-air'} onClick={takeOut}>
         ■ Take out
       </button>
-      <button
-        type="button"
-        className="button button--secondary button--sm"
-        disabled={!ready}
-        onClick={() => {
-          setStep(0);
-          void run(async (p) => {
-            await p.stop({skipAnimation: true});
-            await p.play();
-          }, 'on-air');
-        }}>
+      <button type="button" className="button button--secondary button--sm" disabled={!ready} onClick={replay}>
         ↻ Replay
       </button>
     </>
@@ -609,12 +661,8 @@ function LivePlayer({
           type="button"
           className="button button--primary button--sm"
           disabled={status !== 'on-air' || lastStep}
-          onClick={() => {
-            touched.current = true;
-            setStep((current) => current + 1);
-            void run((p) => p.next(), 'on-air');
-          }}>
-          Next step ({Math.min(step + 1, stepCount)}/{stepCount})
+          onClick={nextStep}>
+          Next step ({stepText})
         </button>
       )}
       {actions.map((action) => (
@@ -637,7 +685,7 @@ function LivePlayer({
         ref={frameRef}
         className={styles.frame}
         style={backdrop}
-        data-bar-awake={barAwake}
+        data-bar-awake={barAwake || besidePicture}
         data-turned={turned}
         data-letterbox={landscapeFullscreen}
         data-filling={filling}
@@ -659,11 +707,38 @@ function LivePlayer({
             </p>
           </div>
         )}
-        {expanded && (
+        {expanded && compact && (
+          // The actions these graphics publish are buttons in the picture too, so the column leaves them out.
+          <div className={styles.phoneControls} role="group" aria-label="Controls">
+            <button type="button" aria-label="Take in" data-primary disabled={status !== 'off-air'} onClick={takeIn}>
+              <ControlIcon kind="takeIn" />
+            </button>
+            <button type="button" aria-label="Take out" disabled={status !== 'on-air'} onClick={takeOut}>
+              <ControlIcon kind="takeOut" />
+            </button>
+            <button type="button" aria-label="Replay" disabled={!ready} onClick={replay}>
+              <ControlIcon kind="replay" />
+            </button>
+            {stepCount > 1 && (
+              <button
+                type="button"
+                aria-label={`Next step (${stepText})`}
+                data-primary
+                disabled={status !== 'on-air' || lastStep}
+                onClick={nextStep}>
+                <ControlIcon kind="next" />
+                <span>{stepText}</span>
+              </button>
+            )}
+            <button type="button" aria-label="Exit fullscreen" onClick={toggleFullscreen}>
+              <FullscreenIcon exit />
+            </button>
+          </div>
+        )}
+        {expanded && !compact && (
           <div className={styles.fullscreenBar}>
-            {/* On a phone the bar would cover half the graphic, which has its own controls. */}
-            {!onPhone && takeButtons}
-            {!onPhone && actionButtons}
+            {takeButtons}
+            {actionButtons}
             <button
               type="button"
               className="button button--secondary button--sm"

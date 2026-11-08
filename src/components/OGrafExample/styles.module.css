@@ -85,6 +85,77 @@
 }
 
 /*
+ * A phone's fullscreen controls: a slim column of round buttons at the picture's right. Held sideways, it
+ * sits in the middle of the black band beside the picture and stays there; over the picture it fades like
+ * the bar. Its width plus a margin is PHONE_CONTROLS_PX in index.tsx.
+ */
+.phoneControls {
+  --button: 2.75rem;
+
+  position: absolute;
+  top: 50%;
+  right: max(0.5rem, calc((100vw - 100dvh * 16 / 9) / 4 - var(--button) / 2 - 0.3rem));
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.3rem;
+  transform: translateY(-50%);
+  transition: opacity 200ms;
+  border-radius: 2rem;
+  background: rgb(5 7 13 / 72%);
+}
+
+.phoneControls button {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  align-items: center;
+  justify-content: center;
+  width: var(--button);
+  height: var(--button);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 14%);
+  color: #fff;
+  font-family: var(--site-font-mono);
+  font-size: 0.6rem;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.phoneControls button[data-primary] {
+  background: var(--ifm-color-primary);
+  color: var(--ifm-font-color-base-inverse);
+}
+
+.phoneControls button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.phoneControls svg {
+  width: 1.05rem;
+  height: 1.05rem;
+  margin: 0;
+  vertical-align: 0;
+}
+
+.phoneControls button:has(span) svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+/* A tap leaves focus on the button it pressed, so only a keyboard's focus keeps the column up. */
+.frame[data-bar-awake='false'] .phoneControls:not(:has(:focus-visible)) {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/*
  * The picture on its side, for a phone held upright whose browser can't turn the screen. Held sideways,
  * this no longer applies. The frame itself can't turn: browsers forbid transforms on a fullscreen element.
  */
@@ -118,6 +189,21 @@
     left: 0;
     max-width: calc(100dvh - 3rem);
     transform: translate(-50%, -50%) rotate(90deg) translateY(calc(-50% - 1rem));
+  }
+
+  /*
+   * The column turns with the picture and keeps to its right, which is now the bottom of the screen: in the
+   * band below the picture when there's room, as when the phone is held sideways. `top` is its centre.
+   */
+  .frame:fullscreen[data-turned='true'] .phoneControls,
+  .frame[data-filling='true'][data-turned='true'] .phoneControls {
+    top: min(
+      calc(100dvh - 0.5rem - (var(--button) + 0.6rem) / 2),
+      calc(50dvh + var(--long) / 2 + (100dvh - var(--long)) / 4)
+    );
+    right: auto;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(90deg);
   }
 }
 
