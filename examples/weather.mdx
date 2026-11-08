@@ -26,11 +26,16 @@ player and stand there yourself.
 
 ## Try it
 
-1. Press **Next step**. Each city gets its sky and the day's high, west to east.
+1. Press **Next step**. Each city gets its sky and the day's high, west to east, and the icons move:
+   rain falls, clouds drift, the sun turns.
 2. Press it again for tonight. The map dims, the icons turn to night, and the numbers roll down to the
    lows. Once more for tomorrow.
-3. Pick an **Outlook city**, then press **Next step** for its five days. The map pushes in to it.
-4. Press **Take out** at any step. Everything plays off together.
+3. Press **Next step** for five days in one city. The map pushes in to it.
+4. Pick another **Outlook city**. The map pulls back, flies over and pushes in on it, while the five
+   days dip and come back up with the new city's numbers.
+5. Tick **Tour cities**. The outlook moves on to the next city every eight seconds or so, round the
+   map. The city menu waits until you untick it.
+6. Press **Take out** at any step. Everything plays off together.
 
 ## What you get
 
@@ -41,7 +46,12 @@ player and stand there yourself.
 - **A see-through shader:** one layer draws the weather over the whole map. The forecast tells it what
   falls where, and it stays off the presenter's side.
 - **Functions:** one function, Weather, turns the forecast into every icon, number, colour and date on
-  screen, and into the shader's weather.
+  screen, and into the shader's weather. It also keeps time: it wakes itself to change the outlook's
+  numbers while they're down, and to move a tour on to the next city.
+- **Rules:** a new outlook city moves the camera and dips the numbers inside the graphic, so any
+  controller that changes `featured`, and the tour, gets the same move.
+- **Moving icons:** each icon is a small picture that moves by itself, so the graphic draws nothing
+  more for it. The function only names the sky, and the icon layer finds its picture.
 - **Data updates:** a new forecast rolls the numbers that change and swaps the icons in place, without
   starting the show again.
 - **A saved sample:** the template holds a real forecast from the day it was built, so it never starts
@@ -58,6 +68,7 @@ these fields can drive the same package:
 | --- | --- |
 | `cities` | One entry per city: the temperature now, how it feels, the wind and humidity, tonight's low and sky, and five days of highs, lows, sky and chance of rain. Skies are WMO weather codes, as most forecast services send them |
 | `featured` | The city of the five-day outlook |
+| `tour` | Whether the outlook visits every city in turn. While it's on, the graphic changes `featured` itself |
 | `credit` | Where the forecast comes from, at the bottom right |
 
 Each city keeps its place on the map by its name, so the order of `cities` doesn't matter. The forecast

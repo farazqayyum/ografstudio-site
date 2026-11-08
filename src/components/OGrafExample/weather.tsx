@@ -12,7 +12,8 @@ const SOURCES = (
 /** How the Europe weather sequence plays: on the live forecast, with the outlook city to choose. */
 export const WEATHER: Partial<ComponentProps<typeof OGrafExample>> = {
   feed: 'weather',
-  formFields: ['featured'],
+  formFields: ['featured', 'tour'],
+  lockedBy: {featured: 'tour'},
   landscapeFullscreen: true,
   sources: SOURCES,
 };

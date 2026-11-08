@@ -47,6 +47,11 @@ interface Props {
   reserveActions?: number;
   /** Which fields the form offers, when a package has fields a visitor shouldn't type into. */
   formFields?: string[];
+  /**
+   * Fields the form greys out while a switch is on, by switch, because the graphic changes them
+   * itself then and the form can't follow: the weather tour picks its own outlook city.
+   */
+  lockedBy?: Record<string, string>;
   /** Keep the graphic supplied with live data while it's mounted. */
   feed?: 'markets' | 'weather';
   /** In fullscreen on a phone, show the graphic in landscape however the phone is held. */
@@ -105,20 +110,22 @@ function FieldInput({
   field,
   value,
   onChange,
+  disabled,
 }: {
   id: string;
   field: FieldSchema;
   value: FieldValue;
   onChange: (value: FieldValue) => void;
+  disabled?: boolean;
 }): ReactNode {
   if (field.type === 'boolean') {
     return (
-      <input id={id} type="checkbox" checked={Boolean(value)} onChange={(e) => onChange(e.target.checked)} />
+      <input id={id} type="checkbox" checked={Boolean(value)} disabled={disabled} onChange={(e) => onChange(e.target.checked)} />
     );
   }
   if (field.enum) {
     return (
-      <select id={id} value={String(value)} onChange={(e) => onChange(e.target.value)}>
+      <select id={id} value={String(value)} disabled={disabled} onChange={(e) => onChange(e.target.value)}>
         {field.enum.map((option) => (
           <option key={String(option)} value={String(option)}>
             {field.gddOptions?.labels?.[String(option)] ?? String(option)}
@@ -234,6 +241,7 @@ function LivePlayer({
   reserveFields = 0,
   reserveActions = 0,
   formFields,
+  lockedBy,
   feed,
   landscapeFullscreen = false,
   sources,
@@ -476,7 +484,8 @@ function LivePlayer({
     return () => window.clearTimeout(timer);
   }, [away, status]);
 
-  const change = (key: string, value: FieldValue) => {
+  /** `now` sends at once: only typing waits, so one update carries the whole word. */
+  const change = (key: string, value: FieldValue, now = false) => {
     touched.current = true;
     const next = {...values, [key]: value};
     setValues(next);
@@ -496,7 +505,7 @@ function LivePlayer({
         .catch((cause: unknown) => {
           setError(cause instanceof Error ? cause.message : String(cause));
         });
-    }, 200);
+    }, now ? 0 : 200);
   };
 
   const runAction = (id: string) => {
@@ -688,7 +697,13 @@ function LivePlayer({
                   <label htmlFor={id} title={field.description}>
                     {field.title ?? key}
                   </label>
-                  <FieldInput id={id} field={field} value={values[key] ?? ''} onChange={(v) => change(key, v)} />
+                  <FieldInput
+                    id={id}
+                    field={field}
+                    value={values[key] ?? ''}
+                    disabled={Boolean(lockedBy?.[key] && values[lockedBy[key]!])}
+                    onChange={(v) => change(key, v, field.type === 'boolean' || Boolean(field.enum))}
+                  />
                 </div>
               );
             })}

@@ -48,7 +48,21 @@ forecast to the graphic. A few things to know before changing them:
   projection and you must update both.
 - Studio names a shader's fields after its layer, as `shader_layer_<id>_<name>`, and `weather.mjs`
   finds them that way. The Weather function packs each step's weather for six cities into one number.
-- Studio stores every key of every layer, so `weather.ogs` is about 5 MB. The package is about 2 MB.
+- The icons are drawn in `weather-icons.mjs`, each moving inside its own picture. The functions only
+  name the sky, and each icon layer's binding turns the name into its picture. Pictures in the
+  function's output would pass the 64 KiB a function may return, with twelve cities on screen.
+- The outlook's close-up is a picture, `weather-closeup.webp`: the map drawn 2.4 times larger by
+  `node examples-src/weather-closeup.mjs`. A picture moves and zooms for nothing, while the map's own
+  paths took about 30 ms a frame. Draw it again after changing the map. `CLOSE_UP` in `weather-map.mjs`
+  says where it starts, and `weather-logic.js` keeps a copy.
+- A new outlook city is rules in `weather.mjs`: one pair of camera moves per city, the marker, and one
+  dip and one rise for the numbers. The Weather function changes the numbers between the two, at
+  `SWAP_MS`, and runs the tour on its own timer. Each rule that fires redraws the whole graphic once, so
+  keep them few. Layers that rules move have no update transition, or an update fades them out before
+  the new city even arrives.
+- Text has a fixed size. Shrink-to-fit measures every label on every frame that something moves, which
+  stalled a city change. Oswald's sizes are the ones shrink-to-fit used to settle on.
+- Studio stores every key of every layer, so `weather.ogs` is about 6 MB. The package is about 2.7 MB.
 
 ## Fonts
 

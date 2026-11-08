@@ -1,11 +1,16 @@
 // The Weather example: Studio's Functions pane shows this same source.
 //
 // It runs in a sandbox inside the graphic. Whoever plays the graphic sends the forecast, `cities`,
-// and the operator picks the `featured` city for the five-day outlook. This turns that into what the
-// layers show: one object, `ui`, with every icon, number, colour and date, and the weather codes the
-// see-through rain and snow shader reads. Each step's numbers are already on their layers, so the
-// steps themselves are plain animation and need nothing from here.
-({ data }) => {
+// and the operator picks the `featured` city for the five-day outlook, or turns on `tour` to visit
+// every city in turn. This turns that into what the layers show: one object, `ui`, with every sky,
+// number, colour and date, and the weather codes the see-through rain and snow shader reads. Each
+// step's numbers are already on their layers, so the steps themselves are plain animation and need
+// nothing from here.
+//
+// A new outlook city moves the camera and dips the outlook's numbers (rules in weather.mjs). The
+// outlook keeps the old city while its numbers are down: this wakes itself to change them before
+// they come back up, and wakes again to move a tour on. `state` remembers where it is.
+({ data, state, event, nowMs }) => {
   // Where each slot sits on the map, in the order of the cities' layers. Keep these in step with
   // weather.mjs and weather-sky.glsl.
   const SLOTS = [
@@ -16,37 +21,22 @@
   // The close-up: the map drawn 2.4 times larger, with the featured city here.
   const ZOOM = 2.4;
   const FOCUS = { x: 660, y: 640 };
-  const MARGIN = 300; // the map is drawn this far past every edge of the frame
+  // Where the close-up's picture of the map starts. Keep in step with CLOSE_UP in weather-map.mjs.
+  const CLOSE_UP = { x: 330, y: -130 };
   const BAR_W = 140; // the rain chance bar on each outlook card
+  // In step with the rules in weather.mjs: the outlook's numbers are down from 0.4 s after a new
+  // city until 0.92 s, so they change at 0.6 s.
+  const SWAP_MS = 600;
+  const STAY_MS = 7000; // a tour's time on each city, from that change to the next move
+  // A tour goes round the map rather than down the list.
+  const TOUR = ['Lisbon', 'Madrid', 'Rome', 'Athens', 'Istanbul', 'Vienna', 'Warsaw', 'Stockholm', 'Berlin', 'Paris', 'London', 'Dublin'];
 
   const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-  // The icons, drawn on a 64 x 64 grid.
-  const CLOUD = (y, fill = '#E8EFF8') =>
-    `<path d='M17 ${y}h31a11 11 0 0 0 1.6-21.9A15 15 0 0 0 21 ${y - 26.5}A11.5 11.5 0 0 0 17 ${y}Z' fill='${fill}'/>`;
-  const SMALL_CLOUD = `<path d='M23 54h28a10 10 0 0 0 1.4-19.9A13.5 13.5 0 0 0 26.8 30A10.4 10.4 0 0 0 23 54Z' fill='#E8EFF8'/>`;
-  const ICONS = {
-    sun: `<g stroke='#FFC53D' stroke-width='4.5' stroke-linecap='round'><path d='M32 5v8M32 51v8M5 32h8M51 32h8M12.9 12.9l5.7 5.7M45.4 45.4l5.7 5.7M12.9 51.1l5.7-5.7M45.4 18.6l5.7-5.7'/></g><circle cx='32' cy='32' r='12.5' fill='#FFC53D'/>`,
-    moon: `<path d='M38 8A24 24 0 1 0 56 42A21 21 0 0 1 38 8Z' fill='#F3E3A2'/>`,
-    partly: `<g stroke='#FFC53D' stroke-width='3.5' stroke-linecap='round'><path d='M24 4v6M7 21h6M11.3 8.3l4.2 4.2M36.7 8.3l-4.2 4.2M11.3 33.7l4.2-4.2'/></g><circle cx='24' cy='21' r='9.5' fill='#FFC53D'/>${SMALL_CLOUD}`,
-    'partly-night': `<path d='M27 5A17 17 0 1 0 40 29A15 15 0 0 1 27 5Z' fill='#F3E3A2'/>${SMALL_CLOUD}`,
-    cloud: CLOUD(48),
-    fog: `${CLOUD(36)}<g stroke='#B9C8DB' stroke-width='4.5' stroke-linecap='round'><path d='M10 44h44M16 53h38'/></g>`,
-    drizzle: `${CLOUD(40)}<g stroke='#7FD0FF' stroke-width='3.5' stroke-linecap='round'><path d='M24 47l-1.5 4M34 47l-1.5 4M44 47l-1.5 4M29 55l-1.5 4M39 55l-1.5 4'/></g>`,
-    rain: `${CLOUD(40)}<g stroke='#4FB3FF' stroke-width='4' stroke-linecap='round'><path d='M23 46l-4 10M34 46l-4 10M45 46l-4 10'/></g>`,
-    snow: `${CLOUD(40)}<g fill='#FFFFFF'><circle cx='22' cy='49' r='3'/><circle cx='34' cy='52' r='3'/><circle cx='46' cy='49' r='3'/><circle cx='28' cy='59' r='3'/><circle cx='40' cy='59' r='3'/></g>`,
-    thunder: `${CLOUD(40, '#C9D4E3')}<path d='M34 37l-9 13h7l-4 11 13-16h-7l4-8Z' fill='#FFD23D'/>`,
-  };
-  const picture = (body) =>
-    `data:image/svg+xml,${`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>${body}</svg>`
-      .replace(/#/g, '%23')
-      .replace(/</g, '%3C')
-      .replace(/>/g, '%3E')}`;
-  const drawn = {};
-  const iconFor = (name) => (drawn[name] ??= picture(ICONS[name]));
-
-  // WMO weather codes, as Open-Meteo sends them.
+  // WMO weather codes, as Open-Meteo sends them, to the sky an icon shows. Icons are named here, not
+  // drawn: each icon layer turns the name into its picture (examples-src/weather-icons.mjs on
+  // ografstudio.org).
   const skyOf = (code, day) => {
     if (code <= 1) return day ? 'sun' : 'moon';
     if (code === 2) return day ? 'partly' : 'partly-night';
@@ -120,7 +110,7 @@
       c: [next.code, next.high, true],
     };
     for (const [part, [code, value, day]] of Object.entries(shown)) {
-      ui[`icon${i}${part}`] = iconFor(skyOf(num(code, 3), day));
+      ui[`icon${i}${part}`] = skyOf(num(code, 3), day);
       ui[`temp${i}${part}`] = degrees(value);
       ui[`chip${i}${part}`] = chipOf(value);
       kinds[part].push(kindOf(num(code, 0)));
@@ -135,19 +125,59 @@
   ui.sub_tonight = first ? `${first.weekday} night · lows` : 'Lows';
   ui.sub_tomorrow = second ? `${second.weekday} ${second.day} ${second.month} · highs` : 'Highs';
 
-  // The five-day outlook for the featured city.
-  const wanted = String(data.featured ?? '').toLowerCase();
-  const slot = Math.max(0, SLOTS.findIndex(([name]) => name.toLowerCase() === wanted));
-  const featured = cities[slot];
-  const [, fx, fy] = SLOTS[slot];
+  // Which city the outlook shows, and when that changes.
+  const nameOf = (value) => SLOTS.find(([name]) => name.toLowerCase() === String(value ?? '').toLowerCase())?.[0];
+  const kept = state && typeof state === 'object' && !Array.isArray(state) ? state : {};
+  const now = num(nowMs);
+  const touring = data.tour === true;
+  const changed = (event?.type === 'data' && event.changed) || {};
+  let featured = nameOf(data.featured) ?? SLOTS[0][0];
+  let showing = nameOf(kept.showing) ?? featured;
+  let swapAt = typeof kept.swapAt === 'number' ? kept.swapAt : null; // when the numbers change
+  let nextAt = typeof kept.nextAt === 'number' ? kept.nextAt : null; // when a tour moves on
+  let moveTo = null;
+  if (event?.type === 'load' || event?.type === 'play' || event?.type === 'out') {
+    // Nothing moves off air, so start from the featured city.
+    showing = featured;
+    swapAt = null;
+    nextAt = null;
+  }
+  if ('featured' in changed) {
+    swapAt = featured === showing ? null : now + SWAP_MS;
+    nextAt = null;
+  }
+  // Turned on, a tour sets off at once.
+  if ('tour' in changed) nextAt = touring && swapAt === null ? now + 300 : null;
+  if (swapAt !== null && now >= swapAt) {
+    showing = featured;
+    swapAt = null;
+  }
+  if (!touring) nextAt = null;
+  else if (swapAt === null && nextAt === null) nextAt = now + STAY_MS;
+  else if (swapAt === null && now >= nextAt) {
+    // Writing `featured` moves the camera, the same as an operator's pick.
+    moveTo = TOUR[(TOUR.indexOf(featured) + 1) % TOUR.length];
+    featured = moveTo;
+    swapAt = now + SWAP_MS;
+    nextAt = null;
+  }
+  const due = [swapAt, nextAt].filter((at) => at !== null);
+
+  // Where the close-up rests before any move: on the featured city.
+  const slotOf = (name) => SLOTS.findIndex(([slotName]) => slotName === name);
+  const [, fx, fy] = SLOTS[slotOf(featured)];
+  ui.zoom_x = Math.round(FOCUS.x - ZOOM * (fx - CLOSE_UP.x));
+  ui.zoom_y = Math.round(FOCUS.y - ZOOM * (fy - CLOSE_UP.y));
+
+  // The five-day outlook.
+  const slot = slotOf(showing);
+  const here = cities[slot];
   ui.city = ui[`name${slot}`];
-  ui.zoom_x = Math.round(FOCUS.x - ZOOM * (fx + MARGIN));
-  ui.zoom_y = Math.round(FOCUS.y - ZOOM * (fy + MARGIN));
-  ui.now_icon = iconFor(skyOf(num(featured.code, 3), featured.is_day !== false));
-  ui.now_temp = degrees(featured.temp);
-  ui.now_sky = WORDS[num(featured.code, 3)] ?? 'Cloudy';
-  ui.now_info = `Feels like ${degrees(featured.feels ?? featured.temp)} · Wind ${Math.round(num(featured.wind))} km/h · Humidity ${Math.round(num(featured.humidity))}%`;
-  const days = Array.from({ length: 5 }, (_, j) => dayOf(featured, j));
+  ui.now_icon = skyOf(num(here.code, 3), here.is_day !== false);
+  ui.now_temp = degrees(here.temp);
+  ui.now_sky = WORDS[num(here.code, 3)] ?? 'Cloudy';
+  ui.now_info = `Feels like ${degrees(here.feels ?? here.temp)} · Wind ${Math.round(num(here.wind))} km/h · Humidity ${Math.round(num(here.humidity))}%`;
+  const days = Array.from({ length: 5 }, (_, j) => dayOf(here, j));
   const firstDay = dateOf(days[0].date);
   const lastDay = dateOf(days[4].date);
   ui.sub_outlook = firstDay && lastDay ? `${firstDay.weekday} ${firstDay.day} to ${lastDay.weekday} ${lastDay.day}` : '';
@@ -156,7 +186,7 @@
     const rain = Math.max(0, Math.min(100, Math.round(num(day.rain))));
     ui[`day${j}`] = when ? when.weekday.slice(0, 3).toUpperCase() : '';
     ui[`date${j}`] = when ? `${when.day} ${when.month.slice(0, 3)}` : '';
-    ui[`dicon${j}`] = iconFor(skyOf(num(day.code, 3), true));
+    ui[`dicon${j}`] = skyOf(num(day.code, 3), true);
     ui[`high${j}`] = degrees(day.high);
     ui[`low${j}`] = degrees(day.low);
     ui[`rain${j}`] = `${rain}%`;
@@ -165,10 +195,13 @@
   });
 
   // Rain and snow fill the close-up when it's falling there now, or forecast for today.
-  const focus = kindOf(num(featured.code, 0)) || kindOf(num(days[0].code, 0));
+  const focus = kindOf(num(here.code, 0)) || kindOf(num(days[0].code, 0));
 
   return {
+    state: { showing, swapAt, nextAt },
+    wakeAt: due.length ? Math.min(...due) : null,
     data: {
+      ...(moveTo ? { featured: moveTo } : {}),
       ui,
       today_a: pack(kinds.a.slice(0, 6)),
       today_b: pack(kinds.a.slice(6)),

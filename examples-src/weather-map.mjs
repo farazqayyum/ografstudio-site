@@ -8,8 +8,11 @@
  * in the five-day outlook still has land to show.
  */
 import { readFileSync, writeFileSync } from 'node:fs';
+import { pathToFileURL } from 'node:url';
 
-const [source] = process.argv.slice(2);
+// Imported by the other scripts for `project` and CLOSE_UP; it draws only when run itself.
+const ownRun = Boolean(process.argv[1]) && import.meta.url === pathToFileURL(process.argv[1]).href;
+const [source] = ownRun ? process.argv.slice(2) : [];
 const W = 1920;
 const H = 1080;
 const MARGIN = 300;
@@ -40,6 +43,12 @@ export const project = (lon, lat) => {
   const [x, y] = laea(lon, lat);
   return [offX + x * scale, offY - y * scale];
 };
+
+/**
+ * The part of the map the outlook's close-up can show, in the same coordinates, and the scale it's
+ * drawn at. weather-closeup.mjs draws it as a picture; weather.mjs checks every city still fits.
+ */
+export const CLOSE_UP = { x: 330, y: -130, w: 1890, h: 1300, scale: 2.4 };
 
 if (source) {
   // Rings to path data, a point every 1.2 px, and only rings that reach the drawing.

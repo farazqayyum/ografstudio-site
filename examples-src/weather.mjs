@@ -10,6 +10,8 @@
 import { readFileSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
 import { CITIES, CREDIT } from '../src/data/weatherData.mjs';
+import { iconsFor } from './weather-icons.mjs';
+import { CLOSE_UP } from './weather-map.mjs';
 
 const here = new URL('.', import.meta.url);
 const read = (file) => readFileSync(new URL(file, here), 'utf8');
@@ -45,6 +47,9 @@ const SIDE = { right: [14, -40], left: [-182, -40], above: [-84, -124], below: [
 // The map is drawn 300 px past every edge, so the close-up never runs out of land.
 const MAP = { x: -300, y: -300, w: 2520, h: 1680 };
 const ZOOM = 2.4;
+// Where each icon starts in its loops, in seconds, so the same weather doesn't move in step.
+const MAP_LAG = (i) => i * 0.61;
+const CARD_LAG = (j) => 0.37 + j * 0.53;
 
 // The five steps, at 50 frames a second. Each number is the frame the step is reached on.
 const F = { open: 60, today: 125, tonight: 165, tomorrow: 205, outlook: 285, end: 315 };
@@ -196,6 +201,7 @@ export async function weather({ apply, scene, addField, bind, option }) {
   const look = firstLook('weather-logic.js', inputs);
   const INTERNAL = { exposeToOgraf: false };
   const mapSrc = svgData(read('weather-map.svg'));
+  const closeUpSrc = `data:image/webp;base64,${readFileSync(new URL('weather-closeup.webp', here)).toString('base64')}`;
   const drop = svgData(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 22'><path d='M8 1C8 1 1 10 1 14a7 7 0 0 0 14 0C15 10 8 1 8 1Z' fill='#5fd0ff'/></svg>`);
 
   await apply(
@@ -206,6 +212,7 @@ export async function weather({ apply, scene, addField, bind, option }) {
       addField('select', 'featured', 'Outlook city', 'Whose five days the last step shows.', 'Lisbon', {
         options: CITIES.map(({ name }) => option(name, name)),
       }),
+      addField('boolean', 'tour', 'Tour cities', 'The outlook moves on to the next city every eight seconds or so.', false),
       addField('text', 'credit', 'Credit', 'Where the forecast comes from, at the bottom right.', CREDIT),
       addField('object', 'ui', 'Display', 'Written by the Weather function.', look.ui, { ...INTERNAL, ...objectOf(look.ui) }),
     ],
@@ -234,7 +241,8 @@ export async function weather({ apply, scene, addField, bind, option }) {
       ],
     }),
     image('Map', [MAP.x, MAP.y, MAP.w, MAP.h], mapSrc),
-    image('Map close-up', [look.ui.zoom_x, look.ui.zoom_y, MAP.w * ZOOM, MAP.h * ZOOM], mapSrc),
+    // A picture of the map rather than its paths, so moving and zooming it costs nothing (weather-closeup.mjs).
+    image('Map close-up', [look.ui.zoom_x, look.ui.zoom_y, CLOSE_UP.w * ZOOM, CLOSE_UP.h * ZOOM], closeUpSrc),
     rect('Shade', [0, 0, 1920, 1080], '#040a16'),
     rect('Sky', [0, 0, 1920, 1080], shaderFill()),
     // Keeps the titles readable over the presenter's side.
@@ -262,11 +270,11 @@ export async function weather({ apply, scene, addField, bind, option }) {
     cityLayers.push(text(`${name}`, [bx + 4, by + 66, 200, 24], look.ui[`name${i}`], { size: 17, weight: 700, ls: 2 }));
     for (const part of ['a', 'b', 'c']) {
       cityLayers.push(
-        image(`${name} icon ${part}`, [bx, by, 64, 64], look.ui[`icon${i}${part}`]),
+        image(`${name} icon ${part}`, [bx, by, 64, 64], iconsFor(MAP_LAG(i))[look.ui[`icon${i}${part}`]]),
         rect(`${name} chip ${part}`, [bx + 70, by + 4, 98, 56], look.ui[`chip${i}${part}`], 10),
         text(`${name} temp ${part}`, [bx + 70, by + 4, 98, 56], look.ui[`temp${i}${part}`], {
           font: DISPLAY,
-          size: 44,
+          size: 39.7,
           weight: 600,
           color: INK,
           align: 'center',
@@ -277,14 +285,14 @@ export async function weather({ apply, scene, addField, bind, option }) {
 
   const titles = [
     text('Kicker open', [96, 76, 760, 40], 'EUROPE', { size: 26, weight: 700, ls: 6.8, color: ACCENT }),
-    text('Title open', [90, 116, 900, 172], 'WEATHER', { font: DISPLAY, size: 168, weight: 600 }),
+    text('Title open', [90, 116, 900, 172], 'WEATHER', { font: DISPLAY, size: 117.7, weight: 600 }),
     text('Date', [96, 314, 760, 44], look.ui.date, { size: 30, weight: 500, color: SOFT }),
     text('Kicker', [96, 76, 760, 36], 'EUROPE WEATHER', { size: 22, weight: 700, ls: 5.7, color: ACCENT }),
     text('Kicker outlook', [96, 76, 760, 36], 'FIVE-DAY OUTLOOK', { size: 22, weight: 700, ls: 5.7, color: ACCENT }),
-    text('Title today', [92, 114, 760, 112], 'TODAY', { font: DISPLAY, size: 104, weight: 600 }),
-    text('Title tonight', [92, 114, 760, 112], 'TONIGHT', { font: DISPLAY, size: 104, weight: 600 }),
-    text('Title tomorrow', [92, 114, 760, 112], 'TOMORROW', { font: DISPLAY, size: 104, weight: 600 }),
-    text('Title outlook', [92, 114, 760, 112], look.ui.city, { font: DISPLAY, size: 104, weight: 600 }),
+    text('Title today', [92, 114, 760, 112], 'TODAY', { font: DISPLAY, size: 76.6, weight: 600 }),
+    text('Title tonight', [92, 114, 760, 112], 'TONIGHT', { font: DISPLAY, size: 76.6, weight: 600 }),
+    text('Title tomorrow', [92, 114, 760, 112], 'TOMORROW', { font: DISPLAY, size: 76.6, weight: 600 }),
+    text('Title outlook', [92, 114, 760, 112], look.ui.city, { font: DISPLAY, size: 76.6, weight: 600 }),
     rect('Title bar', [96, 236, 96, 6], ACCENT),
     text('Sub today', [96, 252, 760, 40], look.ui.sub_today, { size: 30, weight: 500, color: SOFT }),
     text('Sub tonight', [96, 252, 760, 40], look.ui.sub_tonight, { size: 30, weight: 500, color: SOFT }),
@@ -297,8 +305,8 @@ export async function weather({ apply, scene, addField, bind, option }) {
     add('ellipse', 'Focus ring', [FOCUS.x - 20, FOCUS.y - 20, 40, 40], { fill: '#5fd0ff59', strokeWidth: 0 }),
     add('ellipse', 'Focus dot', [FOCUS.x - 9, FOCUS.y - 9, 18, 18], { fill: '#ffffff', strokeColor: SEA, strokeWidth: 4 }),
     rect('Now panel', [760, 96, 1064, 250], PANEL, 14),
-    image('Now icon', [796, 146, 150, 150], look.ui.now_icon),
-    text('Now temp', [966, 110, 250, 220], look.ui.now_temp, { font: DISPLAY, size: 156, weight: 600 }),
+    image('Now icon', [796, 146, 150, 150], iconsFor()[look.ui.now_icon]),
+    text('Now temp', [966, 110, 250, 220], look.ui.now_temp, { font: DISPLAY, size: 149.9, weight: 600 }),
     text('Now label', [1232, 136, 560, 30], 'NOW', { size: 20, weight: 700, ls: 4, color: ACCENT }),
     text('Now sky', [1232, 168, 560, 58], look.ui.now_sky, { size: 44, weight: 700 }),
     text('Now info', [1232, 234, 560, 36], look.ui.now_info, { size: 24, weight: 500, color: SOFT }),
@@ -311,9 +319,9 @@ export async function weather({ apply, scene, addField, bind, option }) {
       rect(`Card ${j} strip`, [x + 14, 396, 168, 6], look.ui[`strip${j}`], 3),
       text(`Card ${j} day`, [x, 424, 196, 32], look.ui[`day${j}`], { size: 24, weight: 700, ls: 3.8, color: ACCENT, align: 'center' }),
       text(`Card ${j} date`, [x, 458, 196, 28], look.ui[`date${j}`], { size: 20, weight: 500, color: QUIET, align: 'center' }),
-      image(`Card ${j} icon`, [x + 46, 500, 104, 104], look.ui[`dicon${j}`]),
-      text(`Card ${j} high`, [x, 614, 196, 84], look.ui[`high${j}`], { font: DISPLAY, size: 76, weight: 600, align: 'center' }),
-      text(`Card ${j} low`, [x, 696, 196, 48], look.ui[`low${j}`], { font: DISPLAY, size: 40, weight: 500, color: QUIET, align: 'center' }),
+      image(`Card ${j} icon`, [x + 46, 500, 104, 104], iconsFor(CARD_LAG(j))[look.ui[`dicon${j}`]]),
+      text(`Card ${j} high`, [x, 614, 196, 84], look.ui[`high${j}`], { font: DISPLAY, size: 58.2, weight: 600, align: 'center' }),
+      text(`Card ${j} low`, [x, 696, 196, 48], look.ui[`low${j}`], { font: DISPLAY, size: 33.3, weight: 500, color: QUIET, align: 'center' }),
       image(`Card ${j} drop`, [x + 54, 768, 16, 22], drop),
       text(`Card ${j} rain`, [x + 78, 762, 90, 34], look.ui[`rain${j}`], { size: 24, weight: 600 }),
       rect(`Card ${j} track`, [x + 28, 806, 140, 8], '#ffffff1f', 4),
@@ -323,7 +331,12 @@ export async function weather({ apply, scene, addField, bind, option }) {
   const cards = [0, 1, 2, 3, 4].flatMap(card);
   const credit = text('Credit', [1224, 994, 600, 32], CREDIT, { size: 19, weight: 500, color: QUIET, align: 'right' });
 
-  await apply([...ground, ...dots, ...cityLayers, ...titles, ...outlook, ...cards, credit], 'Layers');
+  // Every value here fits its box, so the text keeps its size. Shrink-to-fit would measure each
+  // label on every frame that anything moves, and again from the start whenever its value changes,
+  // which stalled a city change for a sixth of a second. The Oswald sizes are the ones it used to
+  // settle on: Oswald's tall line box made it shrink those to fit their boxes.
+  const fixedSize = (op) => (op.element?.autoFit ? { ...op, element: { ...op.element, autoFit: 'fixed' } } : op);
+  await apply([...ground, ...dots, ...cityLayers, ...titles, ...outlook, ...cards, credit].map(fixedSize), 'Layers');
 
   const { composition, field } = await scene();
   const sky = shaderFields(composition, 'Sky');
@@ -333,6 +346,10 @@ export async function weather({ apply, scene, addField, bind, option }) {
       Object.entries(map).map(([targetProperty, key]) => ({ fieldKey: 'ui', targetProperty, sourcePath: [key] })),
     );
 
+  // The function names each sky; the icon layer looks up its moving picture.
+  const skyIcon = (layerName, key, lag) =>
+    bind(layerName, [{ fieldKey: 'ui', targetProperty: 'src', sourcePath: [key], valueMap: iconsFor(lag) }]);
+
   const bindings = [
     ui('Map close-up', { 'layer.x': 'zoom_x', 'layer.y': 'zoom_y' }),
     ui('Date', { content: 'date' }),
@@ -341,7 +358,7 @@ export async function weather({ apply, scene, addField, bind, option }) {
     ui('Sub tonight', { content: 'sub_tonight' }),
     ui('Sub tomorrow', { content: 'sub_tomorrow' }),
     ui('Sub outlook', { content: 'sub_outlook' }),
-    ui('Now icon', { src: 'now_icon' }),
+    skyIcon('Now icon', 'now_icon', 0),
     ui('Now temp', { content: 'now_temp' }),
     ui('Now sky', { content: 'now_sky' }),
     ui('Now info', { content: 'now_info' }),
@@ -349,7 +366,7 @@ export async function weather({ apply, scene, addField, bind, option }) {
     ...cityNames.flatMap((name, i) => [
       ui(name, { content: `name${i}` }),
       ...['a', 'b', 'c'].flatMap((part) => [
-        ui(`${name} icon ${part}`, { src: `icon${i}${part}` }),
+        skyIcon(`${name} icon ${part}`, `icon${i}${part}`, MAP_LAG(i)),
         ui(`${name} chip ${part}`, { fill: `chip${i}${part}` }),
         ui(`${name} temp ${part}`, { content: `temp${i}${part}` }),
       ]),
@@ -358,7 +375,7 @@ export async function weather({ apply, scene, addField, bind, option }) {
       ui(`Card ${j} strip`, { fill: `strip${j}` }),
       ui(`Card ${j} day`, { content: `day${j}` }),
       ui(`Card ${j} date`, { content: `date${j}` }),
-      ui(`Card ${j} icon`, { src: `dicon${j}` }),
+      skyIcon(`Card ${j} icon`, `dicon${j}`, CARD_LAG(j)),
       ui(`Card ${j} high`, { content: `high${j}` }),
       ui(`Card ${j} low`, { content: `low${j}` }),
       ui(`Card ${j} rain`, { content: `rain${j}` }),
@@ -507,8 +524,10 @@ export async function weather({ apply, scene, addField, bind, option }) {
             name: 'Weather',
             enabled: true,
             source: source('weather-logic.js'),
-            inputs: { cities: field('cities').id, featured: field('featured').id },
+            inputs: { cities: field('cities').id, featured: field('featured').id, tour: field('tour').id },
             outputs: {
+              // A tour writes `featured` itself, the same as an operator's pick.
+              featured: field('featured').id,
               ui: field('ui').id,
               ...Object.fromEntries(
                 ['today_a', 'today_b', 'tonight_a', 'tonight_b', 'next_a', 'next_b', 'focus'].map((param) => [param, sky[param].id]),
@@ -522,6 +541,115 @@ export async function weather({ apply, scene, addField, bind, option }) {
       },
     ],
     'Updates and function',
+  );
+
+  // A new outlook city moves the camera: the map pulls back a little while it travels to the city,
+  // then pushes in on it, and the marker lands again. Rules do it inside the graphic, so any
+  // controller that changes `featured`, and the Weather function's tour, gets the same move. Each
+  // city has its own pair of moves, because a zoom centred on the city depends on where the city is.
+  // The close-up's bound position stays as the pose before any change. Layers that rules move have
+  // no update transition: an update fades such a layer out before the new data even arrives.
+  const featured = field('featured').id;
+  const PULL = 36; // frames to pull back and travel
+  const PUSH = 30; // frames to push back in
+  const WIDE = 1.8; // how far out the travel goes, against the close-up's 2.4
+  const rule = (id, name, fields) => ({ id, name, enabled: true, trigger: 'data', ...fields });
+  const onChange = (extra = []) => ({
+    fieldId: featured,
+    sourcePath: [],
+    operator: 'changed',
+    ...(extra.length ? { conditions: extra, match: 'all' } : {}),
+  });
+  // The close-up's picture must reach past every edge of the frame, at either zoom and for every city.
+  // A move between two poses changes all four numbers together, so its frames stay inside the two ends.
+  if (CLOSE_UP.scale !== ZOOM) throw new Error('weather-closeup.webp is drawn for another zoom: run weather-closeup.mjs.');
+  for (const [name, [x, y]] of Object.entries(PLACES))
+    for (const zoom of [WIDE, ZOOM]) {
+      const left = x - FOCUS.x / zoom;
+      const right = x + (1920 - FOCUS.x) / zoom;
+      const top = y - FOCUS.y / zoom;
+      const bottom = y + (1080 - FOCUS.y) / zoom;
+      const mapRight = MAP.x + MAP.w; // nothing is drawn past the map's own edge
+      if (left < CLOSE_UP.x || top < CLOSE_UP.y || bottom > CLOSE_UP.y + CLOSE_UP.h || Math.min(right, mapRight) > CLOSE_UP.x + CLOSE_UP.w)
+        throw new Error(`The close-up doesn't cover ${name} at ${zoom}: widen CLOSE_UP in weather-map.mjs.`);
+    }
+  const pose = (name, zoom, frames) => {
+    const [x, y] = PLACES[name];
+    return [
+      ['layer.x', FOCUS.x - zoom * (x - CLOSE_UP.x)],
+      ['layer.y', FOCUS.y - zoom * (y - CLOSE_UP.y)],
+      ['layer.width', CLOSE_UP.w * zoom],
+      ['layer.height', CLOSE_UP.h * zoom],
+    ].map(([targetProperty, value]) => ({ type: 'property', targetProperty, value: Math.round(value), transitionFrames: frames }));
+  };
+  const props = (frames, values) =>
+    Object.entries(values).map(([targetProperty, value]) => ({ type: 'property', targetProperty, value, transitionFrames: frames }));
+  const cityMoves = cityNames.flatMap((name) => {
+    const slug = name.toLowerCase();
+    const isCity = [{ fieldId: featured, sourcePath: [], operator: 'equals', value: name }];
+    return [
+      rule(`travel-${slug}`, `Travel to ${name}`, { ...onChange(isCity), actions: pose(name, WIDE, PULL) }),
+      rule(`land-${slug}`, `Land on ${name}`, { ...onChange(isCity), delayFrames: PULL, actions: pose(name, ZOOM, PUSH) }),
+    ];
+  });
+  // Meanwhile the outlook's numbers dip and come back up on the new city, rippling from left to
+  // right. The Weather function changes them while they're down, at SWAP_MS in weather-logic.js.
+  // Every rule that fires redraws the whole graphic once, so the ripple comes from each column
+  // taking a little longer, not from a rule per column.
+  const layerId = (name) => composition.layers.find((layer) => layer.name === name).id;
+  const DIP = 16; // how far the numbers drop
+  const RISE = 46; // frames from the change until the numbers start back up
+  const columns = [
+    ['Title outlook'],
+    ['Now icon', 'Now temp', 'Now sky', 'Now info'],
+    ...[0, 1, 2, 3, 4].map((j) => ['strip', 'icon', 'high', 'low', 'drop', 'rain', 'bar'].map((part) => `Card ${j} ${part}`)),
+  ];
+  const each = (frames, values) =>
+    columns.flatMap((names, k) =>
+      names.flatMap((name) => props(frames(k), values).map((action) => ({ ...action, targetLayerId: layerId(name) }))),
+    );
+  const marker = (frames, dot, ring) => [
+    ...props(frames, dot),
+    ...props(frames + 6, ring).map((action) => ({ ...action, targetLayerId: layerId('Focus ring') })),
+  ];
+  const moved = ['Map close-up', 'Focus dot', 'Focus ring', ...columns.flat()];
+  await apply(
+    [
+      ...moved.map((layerName) => ({
+        type: 'set_layer_layout',
+        layerName,
+        updateTransition: { style: 'none', durationFrames: 0, distance: 0 },
+      })),
+      { type: 'set_layer_visual_rules', layerName: 'Map close-up', rules: cityMoves },
+      {
+        type: 'set_layer_visual_rules',
+        layerName: 'Now panel',
+        rules: [
+          rule('dip', 'Dip for a new city', { ...onChange(), actions: each((k) => 8 + 2 * k, { 'layer.opacity': 0, 'layer.offsetY': DIP }) }),
+          rule('rise', 'Rise on the new city', {
+            ...onChange(),
+            delayFrames: RISE,
+            actions: each((k) => 14 + 4 * k, { 'layer.opacity': 1, 'layer.offsetY': 0 }),
+          }),
+        ],
+      },
+      {
+        type: 'set_layer_visual_rules',
+        layerName: 'Focus dot',
+        rules: [
+          rule('marker-lift', 'Lift while travelling', {
+            ...onChange(),
+            actions: marker(8, { 'layer.opacity': 0 }, { 'layer.opacity': 0, 'layer.scale': 1.8 }),
+          }),
+          rule('marker-land', 'Land with the map', {
+            ...onChange(),
+            delayFrames: PULL + PUSH - 8,
+            actions: marker(10, { 'layer.opacity': 1 }, { 'layer.opacity': 1, 'layer.scale': 1 }),
+          }),
+        ],
+      },
+    ],
+    'The camera follows a new city',
   );
 }
 
@@ -578,7 +706,7 @@ export async function weatherStrap({ apply, scene, addField, bind, option }) {
       rect('Box', [X, Y, 160, 160], BOX, 12),
       rect('Box join', [X + 140, Y, 20, 160], BOX),
       rect('Sky', [X, Y, 160, 160], shaderFill(boxSky), 12),
-      image('Icon', [X + 24, Y + 24, 112, 112], look.ui.icon),
+      image('Icon', [X + 24, Y + 24, 112, 112], iconsFor()[look.ui.icon]),
       text('Label', [X + 196, Y + 26, 560, 28], look.ui.label, { size: 20, weight: 700, ls: 4, color: '#1478c8' }),
       text('Headline', [X + 196, Y + 58, 560, 72], look.ui.headline, { size: 54, weight: 700, color: NAVY }),
       text('Temp', [X + 760, Y, 176, 160], look.ui.temp, { font: DISPLAY, size: 120, weight: 600, color: NAVY, align: 'right' }),
@@ -609,7 +737,7 @@ export async function weatherStrap({ apply, scene, addField, bind, option }) {
   ];
   await apply(
     [
-      ui('Icon', { src: 'icon' }),
+      bind('Icon', [{ fieldKey: 'ui', targetProperty: 'src', sourcePath: ['icon'], valueMap: iconsFor() }]),
       ui('Label', { content: 'label' }),
       ui('Headline', { content: 'headline' }),
       ui('Temp', { content: 'temp' }),
