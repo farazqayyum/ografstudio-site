@@ -1,7 +1,7 @@
 ---
 title: Export and test an OGraf package
 sidebar_label: Export and test
-sidebar_position: 8
+sidebar_position: 9
 description: Export a checked .ograf.zip for playout, and test it before it goes on air.
 ---
 

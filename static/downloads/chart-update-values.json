@@ -1,0 +1,3 @@
+{
+  "chart_data": "{\"labels\":[\"TEAM TOTAL\"],\"datasets\":[{\"label\":\"FALCONS\",\"data\":[50],\"backgroundColor\":\"#2563eb\",\"borderColor\":\"#2563eb\"},{\"label\":\"COMETS\",\"data\":[60],\"backgroundColor\":\"#f472b6\",\"borderColor\":\"#f472b6\"},{\"label\":\"WAVES\",\"data\":[40],\"backgroundColor\":\"#34d399\",\"borderColor\":\"#34d399\"},{\"label\":\"WOLVES\",\"data\":[20],\"backgroundColor\":\"#fbbf24\",\"borderColor\":\"#fbbf24\"}]}"
+}

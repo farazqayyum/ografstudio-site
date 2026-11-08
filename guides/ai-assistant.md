@@ -1,7 +1,7 @@
 ---
 title: Connect an AI assistant
 sidebar_label: Connect an AI assistant
-sidebar_position: 10
+sidebar_position: 11
 description: Use Studio's built-in AI Assistant, or drive Studio from an MCP client such as Claude Desktop or Codex.
 ---
 

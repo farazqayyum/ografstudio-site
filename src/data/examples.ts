@@ -179,6 +179,23 @@ export const examples: Example[] = [
     },
   },
   {
+    slug: 'charts',
+    title: 'Chart set',
+    summary: "Nine chart templates sharing four team values, with bars that grow in order and circular charts that sweep from 12 o'clock.",
+    image: '/img/examples/charts.png',
+    level: 'Intermediate',
+    tags: ['Charts', 'Shared controls', 'Template set'],
+    origin: {
+      model: 'GPT-6 Astra',
+      generationTime: 'About 6 minutes, for all nine',
+      prompts: [
+        "Build a set of nine chart templates, one per Chart.js type, that share four numeric team controls. Give each a 2-second In and a 1-second Out: bars grow from the baseline with a stagger, lines and areas trace left to right, and circular charts sweep clockwise from 12 o'clock through editable masks.",
+      ],
+      writtenAfterwards: true,
+    },
+    notOnHomepage: true,
+  },
+  {
     slug: 'shader-background',
     title: 'Shader background',
     summary: 'Animated GLSL light streaks with speed, tint and glow controls for the operator.',

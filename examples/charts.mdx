@@ -1,0 +1,99 @@
+---
+title: Chart set
+sidebar_position: 7.8
+description: Nine chart templates sharing four team values, with bars that grow in order and circular charts that sweep from 12 o'clock.
+---
+
+import ExampleOrigin from '@site/src/components/ExampleOrigin';
+import ExampleTags from '@site/src/components/ExampleTags';
+import OGrafExample from '@site/src/components/OGrafExample';
+
+<ExampleTags slug="charts" />
+
+<OGrafExample slug="charts" />
+
+<ExampleOrigin slug="charts" />
+
+A set of nine templates draws the same four teams as horizontal and vertical bars, a stacked bar,
+a line, an area, a pie, a doughnut, a radar and a polar area. The values are shared controls, so
+one number changes every template in the set. All nine play on this page: the bar above, then the
+other eight in the order they sit in the set. The download above is the whole set.
+
+## 01 Horizontal bar
+
+Bars grow to the right, staggered from the top row down, with room beyond the longest bar for its
+value.
+
+<OGrafExample slug="charts-horizontal" />
+
+## 03 Stacked bar
+
+One column, four segments. They reveal upward through the stack while the axis and legend stay
+fixed.
+
+<OGrafExample slug="charts-stacked" />
+
+## 04 Line
+
+The categories are drawn in the order they were entered, and the line traces from left to right
+while the plot stays still.
+
+<OGrafExample slug="charts-line" />
+
+## 05 Area
+
+The same trace as the line, with the fill following it rather than appearing ahead of it.
+
+<OGrafExample slug="charts-area" />
+
+## 06 Pie
+
+The slices sweep in clockwise from 12 o'clock through editable masks, and sweep out the same way.
+Change a value and the shares redraw.
+
+<OGrafExample slug="charts-pie" />
+
+## 07 Doughnut
+
+The same sweep as the pie, around an open centre.
+
+<OGrafExample slug="charts-doughnut" />
+
+## 08 Radar
+
+Each team is a spoke, and the profile reveals clockwise around a fixed centre.
+
+<OGrafExample slug="charts-radar" />
+
+## 09 Polar area
+
+Equal-angle sectors of different radius, swept in clockwise from 12 o'clock.
+
+<OGrafExample slug="charts-polar" />
+
+## Try it
+
+- Change a team's value in any player. The mark and its readout move together, because both read
+  the same field.
+- Download the `.ogs` from the first player's caption and open it in Studio. The **Templates** tab
+  lists all nine; select one and click **Take In** in **Preview & Export**.
+- [Make your first chart](/guides/first-chart) builds the bar from a blank template, then uses the
+  set to try the prepared motion.
+
+## What you get
+
+- **Layers:** a Chart layer, a title block, a readout for each team and a mask for the exit. All of
+  them are ordinary layers.
+- **Fields:** headline, subtitle and four integers, one per team. Across the set they are shared
+  controls, so a value set once applies to all nine templates.
+- **Motion:** a 2-second In and a 1-second Out. Bars grow from the baseline with a stagger, lines
+  and areas trace left to right, and the circular charts sweep clockwise from 12 o'clock.
+
+## Make it yours
+
+- Rename the teams in the chart's rows in **Properties → Chart** and in the readout layers.
+- In the circular templates, change the numbers and leave the masks and bindings as they are.
+- The templates in the set have an opaque navy background. The players here were exported with a
+  transparent one, so the backdrop swatches show through; set **Background** to **Transparent** in
+  the composition if you want the same.
+- Apply your Brand Kit for colours and type, so the set matches the rest of your package.

@@ -9,6 +9,96 @@
     "fields": 2,
     "actions": 0
   },
+  "charts-area": {
+    "name": "05 - Area",
+    "manifest": "/graphics/charts-area/project-99464805-a35e-4db7-ae46-6d5440111e8a-rt.ograf.json",
+    "download": "/graphics/charts-area.ograf.zip",
+    "bytes": 1373635,
+    "source": null,
+    "sourceBytes": 0,
+    "fields": 6,
+    "actions": 0
+  },
+  "charts-doughnut": {
+    "name": "07 - Doughnut",
+    "manifest": "/graphics/charts-doughnut/project-e57c528d-0501-494e-9870-0c9db0dc3a56-rt.ograf.json",
+    "download": "/graphics/charts-doughnut.ograf.zip",
+    "bytes": 1386311,
+    "source": null,
+    "sourceBytes": 0,
+    "fields": 6,
+    "actions": 0
+  },
+  "charts-horizontal": {
+    "name": "01 - Horizontal Bar",
+    "manifest": "/graphics/charts-horizontal/project-11944bc4-25e5-4e67-b743-ac20e93b2ae3-rt.ograf.json",
+    "download": "/graphics/charts-horizontal.ograf.zip",
+    "bytes": 1374665,
+    "source": null,
+    "sourceBytes": 0,
+    "fields": 6,
+    "actions": 0
+  },
+  "charts-line": {
+    "name": "04 - Line",
+    "manifest": "/graphics/charts-line/project-3fc48af0-4fdd-4453-b53b-2a79706a60e2-rt.ograf.json",
+    "download": "/graphics/charts-line.ograf.zip",
+    "bytes": 1374122,
+    "source": null,
+    "sourceBytes": 0,
+    "fields": 6,
+    "actions": 0
+  },
+  "charts-pie": {
+    "name": "06 - Pie",
+    "manifest": "/graphics/charts-pie/project-24867404-98c0-4d7c-a8ca-ee21f435abb2-rt.ograf.json",
+    "download": "/graphics/charts-pie.ograf.zip",
+    "bytes": 1385136,
+    "source": null,
+    "sourceBytes": 0,
+    "fields": 6,
+    "actions": 0
+  },
+  "charts-polar": {
+    "name": "09 - Polar Area",
+    "manifest": "/graphics/charts-polar/project-44d2083c-add7-41e8-a1d9-7ab6513db150-rt.ograf.json",
+    "download": "/graphics/charts-polar.ograf.zip",
+    "bytes": 1386934,
+    "source": null,
+    "sourceBytes": 0,
+    "fields": 6,
+    "actions": 0
+  },
+  "charts-radar": {
+    "name": "08 - Radar",
+    "manifest": "/graphics/charts-radar/project-ead96e30-8cf6-41d3-aaf1-ea5b7f1f0533-rt.ograf.json",
+    "download": "/graphics/charts-radar.ograf.zip",
+    "bytes": 1390669,
+    "source": null,
+    "sourceBytes": 0,
+    "fields": 6,
+    "actions": 0
+  },
+  "charts-stacked": {
+    "name": "03 - Stacked Bar",
+    "manifest": "/graphics/charts-stacked/project-830b7904-34e4-4890-95df-3a7b10ccbe96-rt.ograf.json",
+    "download": "/graphics/charts-stacked.ograf.zip",
+    "bytes": 1372297,
+    "source": null,
+    "sourceBytes": 0,
+    "fields": 6,
+    "actions": 0
+  },
+  "charts": {
+    "name": "02 - Bar",
+    "manifest": "/graphics/charts/project-39e42d0f-050c-4ff9-9500-8e0e1fe1293a-rt.ograf.json",
+    "download": "/graphics/charts.ograf.zip",
+    "bytes": 1374473,
+    "source": "/graphics/charts.ogs",
+    "sourceBytes": 1837546,
+    "fields": 6,
+    "actions": 0
+  },
   "clock": {
     "name": "Clock",
     "manifest": "/graphics/clock/project-ebb6f596-33d4-47ea-9991-9dee4a6f4493-rt.ograf.json",

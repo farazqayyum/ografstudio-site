@@ -1,0 +1,327 @@
+---
+title: Make your first chart
+sidebar_label: Your first chart
+sidebar_position: 8
+description: Build an editable bar chart from a blank template, animate it, try the other eight chart types, and update a chart from a data file.
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+A chart is an ordinary layer drawn by the Chart.js plugin, so it stays editable: its values are rows
+in **Properties**, its type is a tile you click, and its motion is a few timing fields. This guide
+builds a four-value bar chart from a blank template, then shows what changes for the other eight
+chart types and how to feed a chart from a file.
+
+It follows Studio 0.30 at 1920 × 1080 and 50 fps. The values are fictional team data, so your
+canvas matches the screenshots. Replace them with your own afterwards.
+
+## 1. Start a blank template
+
+1. Save anything you have open with **File → Save Template**.
+2. Choose **File → New…**, pick **1920 × 1080** and **50 fps**, and click **Blank template**.
+3. Pick **Essentials** from the **Layout** selector at the top: Layers on the left, the canvas in
+   the centre, Properties on the right and the Timeline below.
+4. Click the template name at the top and call it **My First Bar Chart**.
+
+![File → New: choose the canvas size and frame rate, then Blank template](/img/guides/charts/new-document.webp)
+
+The checkerboard behind the canvas is an editor guide and is never exported. For a full-screen
+chart, give the composition an opaque background in **Properties** with nothing selected. For an
+overlay, keep it transparent and test on real video.
+
+## 2. Add a chart
+
+1. Choose **Window → Plugins** and open the **Chart** category.
+2. Click **Bar**. Studio adds a Chart layer to the composition. Close the Plugins panel.
+3. Select the layer. **Properties** now has a **Chart** section with the same gallery of types.
+
+![Window → Plugins → Chart adds a chart. The gallery in Properties changes the one you have.](/img/guides/charts/plugins-chart-gallery.webp)
+
+A tile in the Plugins panel adds a new chart. The same tile in **Properties** changes the selected
+one, so switch type there rather than stacking layers. If no provider is listed, check
+**File → Preferences → OGraf Studio → Plugins**.
+
+## 3. Enter the values
+
+A chart takes its values from rows in **Properties**. No JSON is needed.
+
+| Category | Value |
+| -------- | ----- |
+| FALCONS  | 72    |
+| COMETS   | 58    |
+| WAVES    | 46    |
+| WOLVES   | 33    |
+
+1. In **Properties → Chart**, set **Data mode** to **Independent metrics**.
+2. Under **Data series**, keep one series. Use **+ Add row** until there are four rows, and **×**
+   to remove any extra.
+3. Type each label and value. Press **Tab** after each edit to commit it.
+4. Click a swatch to give each category its colour.
+
+![The rows editor takes names, values and colours directly](/img/guides/charts/data-rows.webp)
+
+The **+** beside **Data series** adds another dataset, not another category. Use it for several
+lines, or for the parts of a stacked bar.
+
+**Independent metrics** keeps raw values. **Counts → share (%)** turns non-negative counts into
+shares and needs a positive total. **Percentage distribution** expects values that already add up
+to 100.
+
+## 4. Size the plot
+
+1. In the layer's **Transform**, set X 300, Y 280, Width 1000 and Height 550. That leaves room for
+   a title and a legend; adjust it to your layout.
+2. Keep **Auto-keyframe** off while you lay the chart out.
+3. Expand **Presentation & updates**. Set the axis to a minimum of 0, a maximum of 100 and a step
+   of 20, and **Maximum bar thickness** to 160.
+4. Turn on **Value labels**, with the precision and suffix your units need.
+5. Set **Data update** to **Animate changed values**, so a new number moves the bar instead of
+   redrawing it.
+
+![Presentation & updates: axis range, type, bar thickness, value labels and update mode](/img/guides/charts/presentation-updates.webp)
+
+Readability comes before filling the frame. If four bars look lost, narrow the plot instead of
+spreading them out. Maximum bar thickness is a cap, not a gap setting.
+
+## 5. Animate the bars
+
+A chart has three places its motion can come from. Knowing which one you are editing stops the
+whole chart from sliding when you meant to grow its bars.
+
+| Control                            | What it moves                                             | Use it for                                                |
+| ---------------------------------- | --------------------------------------------------------- | --------------------------------------------------------- |
+| **Chart → Animation**              | The marks, with the renderer's own Grow, Reveal and Fade  | Bars growing from the baseline, a line tracing left to right |
+| **Chart → Bars / slices animation** | Individual bars or slices, with a plugin preset           | A separate In or Out for each mark                        |
+| **Animate In / Out**               | The whole chart layer                                     | A deliberate exit or framing move for the entire plot     |
+
+1. In the **Timeline**, set **Length → In** to **2s** and **Out** to **1s**: 100 frames in and 50
+   out at 50 fps.
+2. Set **Chart animation** to **Grow**, with a duration of 0.72 s, a delay of 0.24 s and a stagger
+   of 0.24 s. Four bars finish at 1.68 s, inside the 2-second entrance.
+3. Leave **Bars / slices In** on **Use chart animation**. A mark preset replaces the native
+   entrance; the two do not play together.
+4. For the exit, set **Animate Out** to **Wipe**, **To bottom**, 1 s. It wipes the whole plot away,
+   axes included.
+5. Scrub early, middle and settled frames, then play it with **Take In** and **Take Out** in
+   **Preview & Export**.
+
+![Chart animation: Grow, with its duration, delay and stagger](/img/guides/charts/chart-animation-grow.webp)
+
+**Bars / slices animation** works on bars, stacked bars and the sectors of pie, doughnut and
+polar-area charts, with presets such as Slide & Settle, Pulse Pop and Curtain Reveal. Pick one,
+adjust it and click **Apply**. Lines, areas and radars are left out.
+
+[Animate with steps and keyframes](/guides/animate) covers the timeline itself.
+
+## 6. Preview and save
+
+1. Open **Window → Preview & Export**. Click **Take In**, change a value, and click **Take Out**.
+   **Fullscreen** shows the chart at the output ratio.
+2. Click **Run broadcast QA** for layout and text checks, choose the export profile and click
+   **Run compatibility test**.
+3. Choose **File → Save Template**, name it **My First Bar Chart**, pick a thumbnail frame with the
+   chart fully visible, and click **Save .ogs…**.
+
+![Save Template keeps the editable .ogs source](/img/guides/charts/save-template.webp)
+
+Keep the `.ogs`: it is what you reopen to make changes. [Export an OGraf package](/guides/export)
+when the chart is ready for playout, and test it in the renderer that will play it.
+
+## 7. Try the other chart types
+
+Reopen your saved bar chart and set **Chart → Animation** to **None** to see each type at rest,
+then choose a tile in **Properties → Chart**. The data stays; only the drawing changes. Save each
+variation under its own name.
+
+<Tabs>
+<TabItem value="bar" label="Bar" default>
+
+Compare category values.
+
+- Keep one series and four rows. Axis 0 to 100 in steps of 20, bar thickness 160.
+- **Grow**, 0.72 s, delay 0.24 s, stagger 0.24 s. Each bar rises from the baseline, left to right.
+
+Four bars of 72, 58, 46 and 33, the first the tallest.
+
+![Bar in Studio 0.30](/img/guides/charts/type-bar.webp)
+
+</TabItem>
+<TabItem value="horizontal" label="Horizontal">
+
+Compare values when the category names need room.
+
+- Same rows and axis. Start with a bar thickness of 68, and reduce the plot height if the rows drift
+  apart.
+- **Grow** with stagger: bars grow to the right, top to bottom. Leave room beyond the longest bar
+  for its value.
+
+FALCONS is the longest bar and WOLVES the shortest.
+
+![Horizontal bar in Studio 0.30](/img/guides/charts/type-horizontal.webp)
+
+</TabItem>
+<TabItem value="stacked" label="Stacked">
+
+Show a total made of several series.
+
+- Remove rows 4, 3 and 2, and rename the one left **TEAM TOTAL**.
+- Rename Series 1 **FALCONS** and keep 72. Click **+** beside **Data series** three times for
+  COMETS 58, WAVES 46 and WOLVES 33.
+- Turn on **Legend**, and set the axis to 0 to 400 in steps of 100.
+
+One column of four segments, totalling 209. Four rows in one series would give four separate bars,
+not one stack.
+
+![Stacked bar in Studio 0.30](/img/guides/charts/type-stacked.webp)
+
+</TabItem>
+<TabItem value="line" label="Line">
+
+Show an ordered progression, usually time.
+
+- One series per line. Enter the categories in time order, and never sort them by value.
+- **Reveal**, 1.44 s, delay 0.24 s, no stagger. Linear easing gives a steady trace.
+
+The line draws from left to right while the plot stays put.
+
+![Line in Studio 0.30](/img/guides/charts/type-line.webp)
+
+</TabItem>
+<TabItem value="area" label="Area">
+
+Emphasise the size of an ordered series.
+
+- Same order and **Reveal** timing as Line. The fill follows the trace.
+- Check that the fill does not cover labels, and whether an axis that does not start at zero
+  exaggerates the story.
+
+The same trace as Line, with a filled region beneath it.
+
+![Area in Studio 0.30](/img/guides/charts/type-area.webp)
+
+</TabItem>
+<TabItem value="pie" label="Pie">
+
+Compare positive parts of one whole.
+
+- One series, one row per slice, positive raw values. For percentages, choose **Percentage
+  distribution** and make them total 100.
+- Turn on **Legend**, or add Text layers. Keep values out of crowded slices.
+
+Four slices of a 209 total. 72 is a raw value, not 72%. For a clockwise sweep, see the prepared
+set below.
+
+![Pie in Studio 0.30](/img/guides/charts/type-pie.webp)
+
+</TabItem>
+<TabItem value="doughnut" label="Doughnut">
+
+Parts of a whole, with an open centre.
+
+- The same one-series structure as Pie. Keep it circular, with the legend beside it.
+- A total in the centre is a Text layer. Bind it to the data so it follows changes.
+
+Four segments around an open centre, sharing the 209 total.
+
+![Doughnut in Studio 0.30](/img/guides/charts/type-doughnut.webp)
+
+</TabItem>
+<TabItem value="radar" label="Radar">
+
+Compare a profile across several dimensions.
+
+- Rows become spokes and each series a profile. Use one unit and one scale.
+- Leave room around the plot for the spoke labels.
+
+Four spokes, with the profile reaching 72, 58, 46 and 33.
+
+![Radar in Studio 0.30](/img/guides/charts/type-radar.webp)
+
+</TabItem>
+<TabItem value="polar" label="Polar">
+
+Compare values as equal-angle sectors of different radius.
+
+- One series, one row per category. Check the radial scale at full size, and use a side legend
+  when sectors cover its numbers.
+- Test large, small, equal and zero values.
+
+FALCONS reaches farthest and WOLVES least.
+
+![Polar area in Studio 0.30](/img/guides/charts/type-polar-area.webp)
+
+</TabItem>
+</Tabs>
+
+## Customise the prepared chart set
+
+The [Chart set example](/examples/charts) is the same four teams across all nine types, styled and
+animated, with the values as operator controls. Play it there, or download its source from that
+page and open it in Studio to use its motion with your own numbers.
+
+1. Choose **File → Open…** and open `charts.ogs`. In the **Templates** tab at the top left, select
+   **02 - Bar**.
+2. Open **Window → Preview & Export** and click **Take In**.
+3. Click the **FALCONS** field, replace 72 with **80** and press **Tab**. The bar and its readout
+   change; the other three stay. **Take Out**, then **Take In** replays the entrance.
+4. Select **06 - Pie**, click **Take Out**, then **Take In**: a clockwise sweep from 12 o'clock,
+   with its own exit. **07 - Doughnut** and **09 - Polar Area** work the same way.
+5. Choose **File → Save Template Set…** and save **My Chart Set.ogs**. **Save Template** would
+   keep only one template.
+
+![The prepared set in fullscreen preview, with its four numeric controls](/img/guides/charts/chart-set-controls.webp)
+
+The circular templates are masks, chart copies and bindings working together. Change the exposed
+numbers, not the layers. If you do change them, reopen the original and start again.
+
+To make new values the saved defaults for every template, open **Scene Outliner → Shared controls
+and asset slots**, expand **FALCONS** and edit its shared value. Keep the template fields on
+**Inherit**, then save the set again.
+
+![Shared controls are separate from the preview's test values](/img/guides/charts/shared-controls.webp)
+
+## Update a chart from a data file
+
+A chart's data can also arrive as one JSON field. This exercise uses a practice template with the
+binding and connection already in place.
+
+1. Download [chart-stacked-practice.ogs](pathname:///downloads/chart-stacked-practice.ogs) and
+   [chart-update-values.json](pathname:///downloads/chart-update-values.json).
+2. Open the template with **File → Open…**. Choose **Window → Data → Connections** and select
+   **Data connection 1**: format JSON, source Imported / pasted. **Take In** shows a stack of 80,
+   65, 40 and 20.
+3. Turn the connection's **Enabled** off while you edit. Click **Import CSV / JSON…** and choose
+   the downloaded JSON file.
+4. Keep the **Chart data (JSON)** field mapped to `chart_data` and the update target on
+   **Editor preview**. Press **Tab**, enable the connection and click **Refresh now**.
+5. The stack now reads FALCONS 50, COMETS 60, WAVES 40 and WOLVES 20, a total of 170, and COMETS
+   is the largest segment. Save it as **My Imported Chart.ogs**.
+
+![An Imported / pasted connection, with chart_data mapped](/img/guides/charts/imported-connection.webp)
+
+The file is the chart's data as Chart.js expects it, inside one `chart_data` string:
+
+```json
+{
+  "chart_data": "{\"labels\":[\"TEAM TOTAL\"],\"datasets\":[{\"label\":\"FALCONS\",\"data\":[50],\"backgroundColor\":\"#2563eb\",\"borderColor\":\"#2563eb\"},{\"label\":\"COMETS\",\"data\":[60],\"backgroundColor\":\"#f472b6\",\"borderColor\":\"#f472b6\"},{\"label\":\"WAVES\",\"data\":[40],\"backgroundColor\":\"#34d399\",\"borderColor\":\"#34d399\"},{\"label\":\"WOLVES\",\"data\":[20],\"backgroundColor\":\"#fbbf24\",\"borderColor\":\"#fbbf24\"}]}"
+}
+```
+
+For your own data, keep the same field and mapping, and supply matching labels, finite numbers and
+valid colours. A URL that returns the same payload works through the connection's **URL** source:
+enter it, choose **Editor preview** and click **Refresh now** before turning on a periodic refresh.
+On air, an exported graphic receives its data from the playout controller instead; see
+[Connect graphics to operator data](/guides/bind-data).
+
+## Check before you ship
+
+- Bars are grouped with deliberate width and gaps, not stretched to fill the frame.
+- Values, category labels and legends are readable and not hidden behind marks.
+- Circular plots stay circular, and it is clear whether values are raw or percentages.
+- In, on-air updates and Out are tested separately: bars grow in order, lines trace in order, and
+  sweeps start at 12 o'clock.
+- Zero, maximum, equal and long-label values are checked.
+- The editable `.ogs` is saved and reopened, alongside any exported package.
+
+The [charts reference](/docs/user-guide/layers/charts) lists every chart setting.

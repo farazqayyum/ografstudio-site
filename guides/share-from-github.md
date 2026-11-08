@@ -1,7 +1,7 @@
 ---
 title: Share projects from GitHub
 sidebar_label: Share from GitHub
-sidebar_position: 9
+sidebar_position: 10
 description: Open editable .ogs projects straight from a public URL.
 ---
 

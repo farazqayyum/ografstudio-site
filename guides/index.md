@@ -24,6 +24,8 @@ Each guide takes one task from start to finish. They follow the same version as 
   colours to them.
 - [Add images, SVG and Lottie](/guides/images-svg-lottie): bring artwork in and keep it editable.
 - [Create a shader background](/guides/shader-background): GLSL fills with operator controls.
+- [Make your first chart](/guides/first-chart): an editable bar chart from a blank template, the
+  other chart types, and a chart fed from a data file.
 
 ## Delivering graphics
 
